@@ -9,6 +9,12 @@ import {
   ProcedureTariff,
   MedicationVademecum,
 } from "@/types/medical";
+import {
+  syncPatientToSupabase,
+  deletePatientFromSupabase,
+  syncBackgroundToSupabase,
+  syncColposcopyToSupabase,
+} from "@/lib/supabaseSync";
 
 // Datos Iniciales del Dr. Patrick José Jacinto Gomero
 export const INITIAL_DOCTOR: DoctorProfile = {
@@ -440,14 +446,24 @@ export const useMedicalStore = create<MedicalStoreState>()(
         set((state) => ({
           patients: [newPatient, ...state.patients],
         }));
+        // Sincronización transparente en segundo plano con Supabase Cloud
+        syncPatientToSupabase(newPatient);
         return newPatient;
       },
       updatePatient: (id, updates) => {
+        let updatedPatient: Patient | null = null;
         set((state) => ({
-          patients: state.patients.map((p) =>
-            p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
-          ),
+          patients: state.patients.map((p) => {
+            if (p.id === id) {
+              updatedPatient = { ...p, ...updates, updatedAt: new Date().toISOString() };
+              return updatedPatient;
+            }
+            return p;
+          }),
         }));
+        if (updatedPatient) {
+          syncPatientToSupabase(updatedPatient);
+        }
       },
       deletePatient: (id) => {
         set((state) => {
@@ -460,6 +476,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
             clinicalCheckups: state.clinicalCheckups.filter((c) => c.patientId !== id),
           };
         });
+        deletePatientFromSupabase(id);
       },
       getPatientById: (id) => get().patients.find((p) => p.id === id),
       getPatientByDni: (dni) => get().patients.find((p) => p.dni === dni),
@@ -467,6 +484,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
       // ANTECEDENTES
       backgrounds: INITIAL_BACKGROUNDS,
       updateBackground: (patientId, data) => {
+        let updatedBg: PatientBackground | null = null;
         set((state) => {
           const current = state.backgrounds[patientId] || {
             id: `bg-${patientId}`,
@@ -481,17 +499,21 @@ export const useMedicalStore = create<MedicalStoreState>()(
             familyHistory: "No refiere",
             updatedAt: new Date().toISOString(),
           };
+          updatedBg = {
+            ...current,
+            ...data,
+            updatedAt: new Date().toISOString(),
+          };
           return {
             backgrounds: {
               ...state.backgrounds,
-              [patientId]: {
-                ...current,
-                ...data,
-                updatedAt: new Date().toISOString(),
-              },
+              [patientId]: updatedBg,
             },
           };
         });
+        if (updatedBg) {
+          syncBackgroundToSupabase(updatedBg);
+        }
       },
       getBackground: (patientId) => get().backgrounds[patientId],
 
@@ -507,6 +529,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
         set((state) => ({
           colposcopyReports: [newReport, ...state.colposcopyReports],
         }));
+        syncColposcopyToSupabase(newReport);
         return newReport;
       },
       updateColposcopyReport: (id, updates) => {

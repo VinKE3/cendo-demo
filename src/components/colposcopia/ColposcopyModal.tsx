@@ -32,6 +32,7 @@ import { ColposcopyReport, ColposcopyImage, Patient } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { CervicalClock } from "./CervicalClock";
 import { compressImageFile } from "@/lib/imageCompressor";
+import { uploadClinicalImageToSupabase } from "@/lib/supabaseStorage";
 
 const colposcopySchema = z.object({
   patientId: z.string().min(1, "Debe seleccionar una paciente"),
@@ -162,10 +163,10 @@ export function ColposcopyModal({
   // Horas del reloj de biopsia
   const [biopsyHours, setBiopsyHours] = useState<string[]>([]);
 
-  // Imágenes colposcópicas con información de compresión
+  // Imágenes colposcópicas con información de compresión y almacenamiento
   const [images, setImages] = useState<ColposcopyImage[]>(DEFAULT_IMAGES);
   const [compressionInfo, setCompressionInfo] = useState<
-    Record<number, { originalKb: number; compressedKb: number; ratio: number }>
+    Record<number, { originalKb: number; compressedKb: number; ratio: number; isRemote?: boolean }>
   >({});
 
   // Drawer de antecedentes clínicos de la paciente
@@ -578,7 +579,7 @@ export function ColposcopyModal({
     });
   };
 
-  // Subida de fotos con compresión automática en Canvas
+  // Subida de fotos con compresión automática en Canvas y almacenamiento en Supabase
   const handleImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -594,18 +595,26 @@ export function ColposcopyModal({
     }
 
     try {
-      // Compresión inteligente en canvas cliente (reduce de ~5 MB a ~180 KB)
+      // 1. Compresión inteligente en canvas cliente (reduce de ~5 MB a ~180 KB)
       const compressed = await compressImageFile(file, {
         maxWidth: 1280,
         maxHeight: 960,
         quality: 0.82,
       });
 
+      // 2. Subida automática al bucket 'clinical-images' de Supabase
+      const storageResult = await uploadClinicalImageToSupabase(compressed.dataUrl, {
+        folder: "colposcopia",
+        prefix: `colpo_${watchPatientId || "paciente"}`,
+      });
+
+      const finalUrl = storageResult.isRemote ? storageResult.url : compressed.dataUrl;
+
       setImages((prev) => {
         const updated = [...prev];
         updated[index] = {
           ...updated[index],
-          url: compressed.dataUrl,
+          url: finalUrl,
         };
         return updated;
       });
@@ -616,6 +625,7 @@ export function ColposcopyModal({
           originalKb: compressed.originalSizeKb,
           compressedKb: compressed.compressedSizeKb,
           ratio: compressed.compressionRatio,
+          isRemote: storageResult.isRemote,
         },
       }));
     } catch {
@@ -1580,8 +1590,8 @@ export function ColposcopyModal({
                         </span>
 
                         {compressionInfo[idx] && (
-                          <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-emerald-900/80 text-emerald-200 font-mono text-[8px] font-bold">
-                            -{compressionInfo[idx].ratio}%
+                          <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-emerald-950/85 text-emerald-300 font-mono text-[8px] font-bold flex items-center gap-1 backdrop-blur-xs">
+                            {compressionInfo[idx].isRemote ? "☁️ Supabase" : "⚡ Local"} -{compressionInfo[idx].ratio}%
                           </span>
                         )}
 
