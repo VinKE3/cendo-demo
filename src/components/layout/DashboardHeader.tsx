@@ -24,6 +24,13 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   const doctorProfile = useMedicalStore((state) => state.doctorProfile);
 
+  const doctorInitials = doctorProfile.fullName
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("");
+
   return (
     <header className="h-16 bg-surface border-b border-border px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs backdrop-blur-md">
       {/* Botón Menú Móvil + Buscador Rápido Trigger */}
@@ -81,7 +88,7 @@ export function DashboardHeader({
           </div>
 
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-[#0E6386] text-white font-bold text-xs flex items-center justify-center shadow-xs">
-            PJ
+            {doctorInitials}
           </div>
         </div>
       </div>

@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Building,
   Sparkles,
+  RotateCcw,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { BrandLogo } from "@/components/layout/BrandLogo";
@@ -39,7 +40,39 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { doctorProfile, logout } = useMedicalStore();
+  const { doctorProfile, logout, resetToSeedData } = useMedicalStore();
+
+  const doctorInitials = doctorProfile.fullName
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("");
+
+  const handleResetDemo = () => {
+    Swal.fire({
+      title: "¿Restablecer Datos Demo?",
+      text: "Esto volverá a cargar la paciente María Stephany Herrera Rojas, el tarifario y el vademécum originales de CENDO.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#0A4D68",
+      cancelButtonColor: "#64748B",
+      confirmButtonText: "Sí, restablecer",
+      cancelButtonText: "Cancelar",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        resetToSeedData();
+        Swal.fire({
+          icon: "success",
+          title: "Datos Restablecidos",
+          text: "Se han restaurado los datos iniciales del Dr. Patrick Jacinto.",
+          confirmButtonColor: "#0A4D68",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
 
   const navigationItems = [
     {
@@ -212,7 +245,7 @@ export function DashboardSidebar({
             <div className="p-2.5 rounded-xl bg-surface border border-border/80 shadow-2xs space-y-2">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 text-primary font-bold text-xs flex items-center justify-center shrink-0">
-                  PJ
+                  {doctorInitials}
                 </div>
                 <div className="overflow-hidden leading-tight">
                   <p className="text-xs font-heading font-bold text-heading truncate">
@@ -225,10 +258,15 @@ export function DashboardSidebar({
               </div>
 
               <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[10px]">
-                <span className="flex items-center gap-1 text-status-normal font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-status-normal animate-pulse" />
-                  Sede Miraflores
-                </span>
+                <button
+                  type="button"
+                  onClick={handleResetDemo}
+                  className="text-muted hover:text-primary transition-colors flex items-center gap-1"
+                  title="Restablecer base demostrativa original"
+                >
+                  <RotateCcw className="w-3 h-3 text-secondary" />
+                  <span>Reset Demo</span>
+                </button>
                 <button
                   onClick={handleLogout}
                   className="text-muted hover:text-status-alert font-medium flex items-center gap-1 transition-colors"
@@ -244,8 +282,16 @@ export function DashboardSidebar({
                 title={`${doctorProfile.fullName} (CMP ${doctorProfile.cmp})`}
                 className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary font-bold text-xs flex items-center justify-center cursor-pointer"
               >
-                PJ
+                {doctorInitials}
               </div>
+              <button
+                type="button"
+                onClick={handleResetDemo}
+                title="Restablecer base demo"
+                className="p-2 rounded-lg text-muted hover:text-primary hover:bg-slate-100 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4 text-secondary" />
+              </button>
               <button
                 onClick={handleLogout}
                 title="Cerrar sesión"

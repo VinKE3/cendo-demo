@@ -228,7 +228,11 @@ export function CommandSearchModal({
                 {filteredTariff.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3 rounded-xl border border-border hover:border-amber-400/60 bg-white hover:bg-amber-50/20 transition-all flex items-start justify-between gap-3 group"
+                    onClick={() => {
+                      onClose();
+                      router.push("/tarifario");
+                    }}
+                    className="p-3 rounded-xl border border-border hover:border-amber-400/60 bg-white hover:bg-amber-50/20 transition-all flex items-start justify-between gap-3 group cursor-pointer"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -267,7 +271,7 @@ export function CommandSearchModal({
               <div className="flex items-center justify-between text-xs font-bold text-muted uppercase tracking-wider">
                 <span className="flex items-center gap-1.5 text-indigo-700">
                   <Pill className="w-3.5 h-3.5" />
-                  Vademécum Ginecológico: Principio Activo &rarr; Marcas ({filteredVademecum.length})
+                  Vademécum Ginecológico: Principio Activo → Marcas ({filteredVademecum.length})
                 </span>
                 <span className="text-[11px] font-normal text-muted">Costos Farmacias Perú</span>
               </div>
@@ -276,7 +280,11 @@ export function CommandSearchModal({
                 {filteredVademecum.map((med) => (
                   <div
                     key={med.id}
-                    className="p-3.5 rounded-xl border border-border bg-white hover:border-indigo-300 transition-all space-y-2.5"
+                    onClick={() => {
+                      onClose();
+                      router.push("/vademecum");
+                    }}
+                    className="p-3.5 rounded-xl border border-border bg-white hover:border-indigo-300 transition-all space-y-2.5 cursor-pointer"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>

@@ -268,93 +268,139 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {/* Ficha Principal de la Paciente María Stephany */}
-            {patientSeed ? (
+            {/* Listado de Últimas Pacientes Evaluadas */}
+            {patients.length > 0 ? (
               <div className="space-y-3">
-                <div className="p-4 rounded-xl border border-border bg-slate-50/50 hover:bg-slate-50 transition-all space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-primary text-white font-heading font-bold text-base flex items-center justify-center shadow-xs">
-                        MS
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-heading font-bold text-heading text-sm sm:text-base">
-                            {patientSeed.lastName}, {patientSeed.firstName}
-                          </h4>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-200 text-slate-800">
-                            DNI {patientSeed.dni}
-                          </span>
+                {patients.slice(0, 3).map((p) => {
+                  const pColpo = colposcopyReports.find((c) => c.patientId === p.id);
+                  const pCheckup = clinicalCheckups.find((c) => c.patientId === p.id);
+                  const pInitials = `${p.firstName?.[0] || ""}${p.lastName?.[0] || ""}`;
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="p-4 rounded-xl border border-border bg-slate-50/50 hover:bg-slate-50 transition-all space-y-3"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-primary text-white font-heading font-extrabold text-base flex items-center justify-center shadow-xs">
+                            {pInitials}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-heading font-bold text-heading text-sm sm:text-base">
+                                {p.lastName}, {p.firstName}
+                              </h4>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-200 text-slate-800">
+                                DNI {p.dni}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted">
+                              {p.age} años • {p.phone} • Sede Miraflores
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-xs text-muted">
-                          {patientSeed.age} años &bull; {patientSeed.phone} &bull; Sede Miraflores
-                        </p>
+
+                        <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-status-normal flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-status-normal" />
+                          {pColpo && pCheckup
+                            ? "Chequeo Completo"
+                            : pColpo
+                            ? "Colposcopía Lista"
+                            : pCheckup
+                            ? "Ecografía Lista"
+                            : "Historia Abierta"}
+                        </span>
+                      </div>
+
+                      {/* Diagnósticos Resumidos de la Atención */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2 border-t border-border/80">
+                        <div className="p-2.5 rounded-lg bg-white border border-border space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-primary tracking-wide">
+                            Informe de Colposcopía IFCPC
+                          </span>
+                          {pColpo ? (
+                            <>
+                              <p className="text-heading font-medium leading-snug">
+                                {pColpo.diagnosis}
+                              </p>
+                              <p className="text-[11px] text-muted">
+                                Test Schiller: {pColpo.schillerTest} • CIE-10: {pColpo.cie10Code}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-muted italic text-[11px]">
+                              Sin colposcopía registrada para esta paciente.
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="p-2.5 rounded-lg bg-white border border-border space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-indigo-700 tracking-wide">
+                            Chequeo Ginecológico & Ecografías
+                          </span>
+                          {pCheckup ? (
+                            <>
+                              <p className="text-heading font-medium leading-snug">
+                                {pCheckup.breastLesionMeasurements || pCheckup.breastUltrasoundFindings}
+                              </p>
+                              <p className="text-[11px] text-muted">
+                                Mama: {pCheckup.breastUltrasoundBirads} • Útero: {pCheckup.uterusMeasurements}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-muted italic text-[11px]">
+                              Sin ecografías ni chequeo registrado.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Botones de Acción Rápida para esta Paciente */}
+                      <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+                        <Link
+                          href={`/pacientes/${p.id}`}
+                          className="px-3 py-1.5 rounded-lg bg-white border border-border text-xs font-semibold text-heading hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-muted" />
+                          <span>Ver Ficha Completa</span>
+                        </Link>
+
+                        <Link
+                          href="/colposcopia"
+                          className="px-3 py-1.5 rounded-lg bg-accent-soft text-primary hover:bg-sky-100 text-xs font-semibold transition-colors flex items-center gap-1.5"
+                        >
+                          <FileCheck2 className="w-3.5 h-3.5" />
+                          <span>Ver Colposcopía</span>
+                        </Link>
+
+                        <Link
+                          href="/chequeos"
+                          className="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-hover text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
+                        >
+                          <Printer className="w-3.5 h-3.5 text-secondary" />
+                          <span>Exportar / Ver PDF</span>
+                        </Link>
                       </div>
                     </div>
-
-                    <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-status-normal flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-status-normal" />
-                      Informe Listo para PDF
-                    </span>
-                  </div>
-
-                  {/* Diagnósticos Resumidos de la Atención */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2 border-t border-border/80">
-                    <div className="p-2.5 rounded-lg bg-white border border-border space-y-1">
-                      <span className="text-[10px] font-bold uppercase text-primary tracking-wide">
-                        Informe de Colposcopía IFCPC
-                      </span>
-                      <p className="text-heading font-medium leading-snug">
-                        {colpoSeed?.diagnosis || "Colposcopía Adecuada &bull; ZT Tipo 1"}
-                      </p>
-                      <p className="text-[11px] text-muted">
-                        Test Schiller: {colpoSeed?.schillerTest} &bull; CIE-10: {colpoSeed?.cie10Code}
-                      </p>
-                    </div>
-
-                    <div className="p-2.5 rounded-lg bg-white border border-border space-y-1">
-                      <span className="text-[10px] font-bold uppercase text-indigo-700 tracking-wide">
-                        Chequeo Ginecológico & Ecografías
-                      </span>
-                      <p className="text-heading font-medium leading-snug">
-                        {checkupSeed?.breastLesionMeasurements || "Quiste simple mama izquierda (BI-RADS 2)"}
-                      </p>
-                      <p className="text-[11px] text-muted">
-                        Útero: {checkupSeed?.uterusMeasurements} &bull; Endometrio: {checkupSeed?.endometriumThicknessMm} mm
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Botones de Acción Rápida para esta Paciente */}
-                  <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
-                    <Link
-                      href={`/pacientes/${patientSeed.id}`}
-                      className="px-3 py-1.5 rounded-lg bg-white border border-border text-xs font-semibold text-heading hover:bg-slate-100 transition-colors flex items-center gap-1.5"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-muted" />
-                      <span>Ver Ficha Completa</span>
-                    </Link>
-
-                    <Link
-                      href="/colposcopia"
-                      className="px-3 py-1.5 rounded-lg bg-accent-soft text-primary hover:bg-sky-100 text-xs font-semibold transition-colors flex items-center gap-1.5"
-                    >
-                      <FileCheck2 className="w-3.5 h-3.5" />
-                      <span>Ver Colposcopía</span>
-                    </Link>
-
-                    <Link
-                      href="/chequeos"
-                      className="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-hover text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
-                    >
-                      <Printer className="w-3.5 h-3.5 text-secondary" />
-                      <span>Exportar / Ver PDF</span>
-                    </Link>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             ) : (
-              <p className="text-xs text-muted py-6 text-center">No hay atenciones registradas.</p>
+              <div className="py-12 text-center space-y-3">
+                <Users className="w-10 h-10 text-muted mx-auto" />
+                <p className="text-sm font-semibold text-heading">No hay pacientes registradas</p>
+                <p className="text-xs text-muted max-w-sm mx-auto">
+                  Comience ingresando una paciente al directorio para abrir historias clínicas.
+                </p>
+                <Link
+                  href="/pacientes"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary-hover transition-colors"
+                >
+                  <PlusCircle className="w-4 h-4 text-secondary" />
+                  <span>Registrar Paciente</span>
+                </Link>
+              </div>
             )}
           </div>
         </div>
