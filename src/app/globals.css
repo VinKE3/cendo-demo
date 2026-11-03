@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   === CENDO DESIGN TOKENS (CAMBIAR COLORES AQUÍ) ===
+   Sistema Semántico de Tokens Clínicos - Dr. Patrick Jacinto (CENDO)
+   ========================================================================== */
+:root {
+  /* Identidad Primaria (Azul Petróleo Quirúrgico CENDO) */
+  --color-primary: #0A4D68;
+  --color-primary-hover: #083D53;
+
+  /* Identidad Secundaria (Ámbar Médico / Acento) */
+  --color-secondary: #F59E0B;
+  --color-secondary-hover: #D97706;
+
+  /* Superficies y Fondos */
+  --color-accent-soft: #F0F9FF;
+  --color-bg-main: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+
+  /* Tipografía y Contraste */
+  --color-text-heading: #0F172A;
+  --color-text-body: #334155;
+  --color-text-muted: #64748B;
+
+  /* Estados Clínicos Semánticos */
+  --color-status-normal: #10B981;
+  --color-status-alert: #EF4444;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-bg-main);
+    color: var(--color-text-body);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-heading);
+    font-family: var(--font-heading), sans-serif;
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
