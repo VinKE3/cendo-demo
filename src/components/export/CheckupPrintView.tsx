@@ -3,6 +3,7 @@
 import React from "react";
 import { ClinicalCheckup, Patient, DoctorProfile } from "@/types/medical";
 import { BrandLogo } from "@/components/layout/BrandLogo";
+import { CendoFooterWave } from "./CendoFooterWave";
 
 interface CheckupPrintViewProps {
   checkup: ClinicalCheckup;
@@ -228,6 +229,13 @@ export function CheckupPrintView({
           </p>
         </div>
       </div>
+
+      {/* 8. Cenefa Oficial Ondulada CENDO */}
+      <CendoFooterWave
+        address={doctor.clinicAddress}
+        email={doctor.contactEmail}
+        phone={doctor.phone}
+      />
     </div>
   );
 }

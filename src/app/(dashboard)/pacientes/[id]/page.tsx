@@ -20,6 +20,7 @@ import {
   FileText,
   Stethoscope,
   ShieldCheck,
+  MessageCircle,
 } from "lucide-react";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { PatientModal } from "@/components/pacientes/PatientModal";
@@ -27,6 +28,7 @@ import { PatientBackgroundModal } from "@/components/pacientes/PatientBackground
 import { ColposcopyModal } from "@/components/colposcopia/ColposcopyModal";
 import { CheckupModal } from "@/components/chequeos/CheckupModal";
 import { Patient, ColposcopyReport, ClinicalCheckup } from "@/types/medical";
+import { generateColposcopyWhatsAppUrl, generateCheckupWhatsAppUrl } from "@/lib/whatsappShare";
 
 export default function FichaPacientePage() {
   const params = useParams();
@@ -45,6 +47,7 @@ export default function FichaPacientePage() {
     getBackground,
     getColposcopyByPatientId,
     getCheckupsByPatientId,
+    doctorProfile,
   } = useMedicalStore();
 
   const patient = getPatientById(patientId);
@@ -421,6 +424,19 @@ export default function FichaPacientePage() {
                   </div>
 
                   <div className="pt-2 flex items-center justify-end gap-3">
+                    {patient && (
+                      <button
+                        onClick={() => {
+                          const url = generateColposcopyWhatsAppUrl(patient, c, doctorProfile);
+                          window.open(url, "_blank");
+                        }}
+                        className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
+                        title="Enviar resumen por WhatsApp"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>WhatsApp</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setEditingColpo(c);
@@ -501,6 +517,19 @@ export default function FichaPacientePage() {
                   </div>
 
                   <div className="pt-2 flex items-center justify-end gap-3">
+                    {patient && (
+                      <button
+                        onClick={() => {
+                          const url = generateCheckupWhatsAppUrl(patient, chk, doctorProfile);
+                          window.open(url, "_blank");
+                        }}
+                        className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
+                        title="Enviar conclusiones por WhatsApp"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>WhatsApp</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setEditingCheckup(chk);

@@ -19,14 +19,16 @@ import {
   ZoomIn,
   X,
   Printer,
+  MessageCircle,
 } from "lucide-react";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { ColposcopyReport } from "@/types/medical";
 import { CervicalClock } from "@/components/colposcopia/CervicalClock";
 import { ColposcopyModal } from "@/components/colposcopia/ColposcopyModal";
+import { generateColposcopyWhatsAppUrl } from "@/lib/whatsappShare";
 
 export default function ColposcopiaPage() {
-  const { colposcopyReports, patients, deleteColposcopyReport } = useMedicalStore();
+  const { colposcopyReports, patients, doctorProfile, deleteColposcopyReport } = useMedicalStore();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
@@ -293,6 +295,20 @@ export default function ColposcopiaPage() {
 
                   {/* Acciones del Informe */}
                   <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                    {activePatient && (
+                      <button
+                        onClick={() => {
+                          const url = generateColposcopyWhatsAppUrl(activePatient, activeReport, doctorProfile);
+                          window.open(url, "_blank");
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-2xs cursor-pointer"
+                        title={`Enviar informe a ${activePatient.firstName} por WhatsApp`}
+                      >
+                        <MessageCircle className="w-3.5 h-3.5 text-emerald-600 fill-emerald-100" />
+                        <span>Enviar WhatsApp</span>
+                      </button>
+                    )}
+
                     <Link
                       href="/reportes"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-primary/30 bg-primary/5 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors shadow-2xs"

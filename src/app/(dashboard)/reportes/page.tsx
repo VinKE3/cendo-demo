@@ -16,16 +16,22 @@ import {
   Search,
   Eye,
   ExternalLink,
+  MessageCircle,
 } from "lucide-react";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { ColposcopyPrintView } from "@/components/export/ColposcopyPrintView";
 import { CheckupPrintView } from "@/components/export/CheckupPrintView";
+import { CendoCoverPage } from "@/components/export/CendoCoverPage";
 import { PdfMergerModal } from "@/components/export/PdfMergerModal";
 import {
   exportClinicalMatrixToExcel,
-  buildClinicalExportRows,
+  buildDrPatrickExportRows,
 } from "@/lib/exportExcel";
 import { printHtmlElement } from "@/lib/pdfGenerator";
+import {
+  generateColposcopyWhatsAppUrl,
+  generateCheckupWhatsAppUrl,
+} from "@/lib/whatsappShare";
 
 export default function ReportesPage() {
   const {
@@ -43,6 +49,7 @@ export default function ReportesPage() {
     patients[0]?.id || ""
   );
   const [reportType, setReportType] = useState<"colpo" | "checkup">("colpo");
+  const [includeCover, setIncludeCover] = useState(true);
   const [isMergerModalOpen, setIsMergerModalOpen] = useState(false);
 
   // Estado para Pestaña Excel
@@ -70,17 +77,12 @@ export default function ReportesPage() {
 
   // Manejo de Impresión / Guardado PDF
   const handlePrintPdf = () => {
-    if (reportType === "colpo") {
-      printHtmlElement(
-        "colposcopy-print-sheet",
-        `Informe_Colposcopia_${currentPatient.lastName}_${currentPatient.firstName}`
-      );
-    } else {
-      printHtmlElement(
-        "checkup-print-sheet",
-        `Informe_Chequeo_${currentPatient.lastName}_${currentPatient.firstName}`
-      );
-    }
+    const docTitle =
+      reportType === "colpo"
+        ? `Informe_Colposcopia_${currentPatient.lastName}_${currentPatient.firstName}`
+        : `Informe_Chequeo_${currentPatient.lastName}_${currentPatient.firstName}`;
+
+    printHtmlElement("print-document-container", docTitle);
   };
 
   // Manejo de Descarga Excel
@@ -128,7 +130,7 @@ export default function ReportesPage() {
 
   // Conteo de filas estimadas para Excel
   const previewRows = useMemo(() => {
-    return buildClinicalExportRows(
+    return buildDrPatrickExportRows(
       patients,
       backgrounds,
       colposcopyReports,
@@ -232,6 +234,34 @@ export default function ReportesPage() {
 
               {/* Botones de Acción de Impresión / Fusión */}
               <div className="flex items-center gap-2 self-start md:self-end flex-wrap">
+                {currentPatient && (
+                  <button
+                    onClick={() => {
+                      let url = "";
+                      if (reportType === "colpo" && currentColpo) {
+                        url = generateColposcopyWhatsAppUrl(currentPatient, currentColpo, doctorProfile);
+                      } else if (reportType === "checkup" && currentCheckup) {
+                        url = generateCheckupWhatsAppUrl(currentPatient, currentCheckup, doctorProfile);
+                      }
+                      if (url) {
+                        window.open(url, "_blank");
+                      } else {
+                        Swal.fire({
+                          icon: "info",
+                          title: "Sin informe emitido",
+                          text: "No hay informe registrado para compartir con la paciente.",
+                          confirmButtonColor: "#0A4D68",
+                        });
+                      }
+                    }}
+                    className="px-4 py-2.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-bold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-2xs"
+                    title={`Enviar informe a ${currentPatient.firstName} por WhatsApp`}
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-600 fill-emerald-100" />
+                    <span>Enviar a Paciente por WhatsApp</span>
+                  </button>
+                )}
+
                 {reportType === "checkup" && currentCheckup && (
                   <button
                     onClick={() => setIsMergerModalOpen(true)}
@@ -251,37 +281,72 @@ export default function ReportesPage() {
                 </button>
               </div>
             </div>
+
+            {/* Selector de Carátula Institucional */}
+            <div className="pt-3 border-t border-border flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-heading font-medium">
+                <input
+                  type="checkbox"
+                  checked={includeCover}
+                  onChange={(e) => setIncludeCover(e.target.checked)}
+                  className="w-4 h-4 rounded text-primary accent-primary"
+                />
+                <span className="font-semibold text-slate-800">
+                  Incluir Carátula Oficial CENDO con cenefa ondulada (Página 1)
+                </span>
+              </label>
+
+              <span className="text-[11px] text-muted hidden sm:inline">
+                Formato A4 idéntico al dossier del consultorio
+              </span>
+            </div>
           </div>
 
           {/* Previsualizador en Pantalla de la Hoja A4 */}
           <div className="p-4 sm:p-8 rounded-2xl bg-slate-100 border border-border overflow-x-auto flex justify-center">
-            {reportType === "colpo" && currentColpo && currentPatient && (
-              <ColposcopyPrintView
-                report={currentColpo}
-                patient={currentPatient}
-                doctor={doctorProfile}
-              />
-            )}
+            <div id="print-document-container" className="space-y-8 w-full max-w-[210mm]">
+              {/* Página 1: Carátula Oficial Si está habilitada */}
+              {includeCover && currentPatient && (
+                <CendoCoverPage
+                  patient={currentPatient}
+                  doctor={doctorProfile}
+                  documentTitle={
+                    reportType === "colpo"
+                      ? "COLPOSCOPÍA ESPECIALIZADA"
+                      : "CHEQUEO GINECOLÓGICO"
+                  }
+                />
+              )}
 
-            {reportType === "colpo" && !currentColpo && (
-              <div className="py-16 text-center text-xs text-muted">
-                No hay informe colposcópico registrado para esta paciente.
-              </div>
-            )}
+              {/* Página 2: Contenido Clínico */}
+              {reportType === "colpo" && currentColpo && currentPatient && (
+                <ColposcopyPrintView
+                  report={currentColpo}
+                  patient={currentPatient}
+                  doctor={doctorProfile}
+                />
+              )}
 
-            {reportType === "checkup" && currentCheckup && currentPatient && (
-              <CheckupPrintView
-                checkup={currentCheckup}
-                patient={currentPatient}
-                doctor={doctorProfile}
-              />
-            )}
+              {reportType === "colpo" && !currentColpo && (
+                <div className="py-16 text-center text-xs text-muted bg-white rounded-xl border border-slate-200">
+                  No hay informe colposcópico registrado para esta paciente.
+                </div>
+              )}
 
-            {reportType === "checkup" && !currentCheckup && (
-              <div className="py-16 text-center text-xs text-muted">
-                No hay chequeo ginecológico registrado para esta paciente.
-              </div>
-            )}
+              {reportType === "checkup" && currentCheckup && currentPatient && (
+                <CheckupPrintView
+                  checkup={currentCheckup}
+                  patient={currentPatient}
+                  doctor={doctorProfile}
+                />
+              )}
+
+              {reportType === "checkup" && !currentCheckup && (
+                <div className="py-16 text-center text-xs text-muted bg-white rounded-xl border border-slate-200">
+                  No hay chequeo ginecológico registrado para esta paciente.
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Modal de Fusión de Laboratorio */}
@@ -429,33 +494,39 @@ export default function ReportesPage() {
               <table className="w-full text-left text-xs divide-y divide-border">
                 <thead className="bg-slate-50 text-[10px] uppercase font-bold text-slate-600">
                   <tr>
+                    <th className="px-3 py-2.5">CONCATENA</th>
+                    <th className="px-3 py-2.5">Fecha</th>
                     <th className="px-3 py-2.5">DNI</th>
-                    <th className="px-3 py-2.5">Paciente</th>
+                    <th className="px-3 py-2.5">Apellidos y Nombres</th>
                     <th className="px-3 py-2.5">Edad</th>
                     <th className="px-3 py-2.5">Fórmula</th>
                     <th className="px-3 py-2.5">FUR</th>
-                    <th className="px-3 py-2.5">Mama BI-RADS</th>
-                    <th className="px-3 py-2.5">Endometrio</th>
-                    <th className="px-3 py-2.5">Colposcopía</th>
-                    <th className="px-3 py-2.5">Biopsia Horas</th>
-                    <th className="px-3 py-2.5">CIE-10</th>
+                    <th className="px-3 py-2.5">PAP</th>
+                    <th className="px-3 py-2.5">VPH</th>
+                    <th className="px-3 py-2.5">Colposcopia</th>
+                    <th className="px-3 py-2.5">Schiller</th>
+                    <th className="px-3 py-2.5">Biopsia</th>
+                    <th className="px-3 py-2.5">Diagnóstico</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border bg-white font-mono text-[11px]">
                   {previewRows.slice(0, 5).map((row, idx) => (
                     <tr key={idx} className="hover:bg-slate-50">
-                      <td className="px-3 py-2 font-bold text-primary">{row.DNI}</td>
+                      <td className="px-3 py-2 font-bold text-primary">{row.CONCATENA}</td>
+                      <td className="px-3 py-2">{row["Fecha de cita"]}</td>
+                      <td className="px-3 py-2 font-bold">{row["DNI:"]}</td>
                       <td className="px-3 py-2 font-sans font-medium text-heading">
-                        {row.Apellidos}, {row.Nombres}
+                        {row["APELLIDOS Y NOMBRES:"]}
                       </td>
-                      <td className="px-3 py-2">{row.Edad} a</td>
-                      <td className="px-3 py-2 font-bold text-primary">{row["Fórmula Obstétrica"]}</td>
-                      <td className="px-3 py-2">{row.FUR}</td>
-                      <td className="px-3 py-2 text-emerald-700">{row["Mama BI-RADS"]}</td>
-                      <td className="px-3 py-2">{row["Grosor Endometrial (mm)"]} mm</td>
-                      <td className="px-3 py-2 font-sans">{row["Colposcopía Adecuada"]}</td>
-                      <td className="px-3 py-2 text-rose-700">{row["Horas de Biopsia (Reloj)"]}</td>
-                      <td className="px-3 py-2 font-bold text-amber-800">{row["Código CIE-10"]}</td>
+                      <td className="px-3 py-2">{row["EDAD:"]} a</td>
+                      <td className="px-3 py-2 font-bold text-primary">{row["FORMULA OBSTETRICA:"]}</td>
+                      <td className="px-3 py-2">{row["FUR:"]}</td>
+                      <td className="px-3 py-2 text-indigo-700">{row["RESULTADO DE PAP:"]}</td>
+                      <td className="px-3 py-2">{row["RESULTADO DE TEST DE VPH:"]}</td>
+                      <td className="px-3 py-2 font-sans">{row["Colposcopia"]}</td>
+                      <td className="px-3 py-2">{row["Solución de Lugol (test de Schiller)"]}</td>
+                      <td className="px-3 py-2 text-rose-700 font-bold">{row["BIOPSIA"]}</td>
+                      <td className="px-3 py-2 font-sans text-slate-800">{row["DIAGNÓSTICO"]}</td>
                     </tr>
                   ))}
                 </tbody>
