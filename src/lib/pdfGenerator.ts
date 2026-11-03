@@ -75,14 +75,15 @@ export function printHtmlElement(elementId: string, documentTitle: string) {
         <style>
           @page {
             size: A4 portrait;
-            margin: 12mm 15mm 15mm 15mm;
+            margin: 0;
           }
-          body {
+          html, body {
             background: white !important;
             color: #0F172A !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 210mm;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -90,13 +91,27 @@ export function printHtmlElement(elementId: string, documentTitle: string) {
             display: none !important;
           }
           .print-sheet {
-            width: 100% !important;
-            max-width: 100% !important;
+            width: 210mm !important;
+            max-width: 210mm !important;
             box-shadow: none !important;
             border: none !important;
             padding: 0 !important;
             margin: 0 !important;
-            page-break-after: avoid;
+          }
+          .page-sheet {
+            width: 210mm !important;
+            height: 297mm !important;
+            max-height: 297mm !important;
+            box-sizing: border-box !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            overflow: hidden !important;
+          }
+          .page-sheet:last-child {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
           }
           img {
             max-width: 100%;

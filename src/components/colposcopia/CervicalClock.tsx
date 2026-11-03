@@ -9,6 +9,7 @@ interface CervicalClockProps {
   interactive?: boolean;
   className?: string;
   size?: "sm" | "md" | "lg";
+  showLegend?: boolean;
 }
 
 export function CervicalClock({
@@ -17,12 +18,13 @@ export function CervicalClock({
   interactive = true,
   className,
   size = "md",
+  showLegend = true,
 }: CervicalClockProps) {
   const hours = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 
   // Dimensiones según tamaño
   const dimensions = {
-    sm: "w-44 h-44",
+    sm: "w-32 h-32",
     md: "w-64 h-64",
     lg: "w-80 h-80",
   }[size];
@@ -171,32 +173,34 @@ export function CervicalClock({
       </div>
 
       {/* Leyenda y Horas Seleccionadas */}
-      <div className="mt-3 text-center space-y-1">
-        <div className="flex items-center justify-center gap-1.5 flex-wrap">
-          {selectedHours.length > 0 ? (
-            selectedHours.map((h) => (
-              <span
-                key={h}
-                className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-red-100 text-status-alert border border-red-200"
-              >
-                Hora {h}:00
+      {showLegend && (
+        <div className="mt-2 text-center space-y-1">
+          <div className="flex items-center justify-center gap-1.5 flex-wrap">
+            {selectedHours.length > 0 ? (
+              selectedHours.map((h) => (
+                <span
+                  key={h}
+                  className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-red-100 text-status-alert border border-red-200"
+                >
+                  Hora {h}:00
+                </span>
+              ))
+            ) : (
+              <span className="text-[11px] text-muted italic">
+                {interactive
+                  ? "Haga clic en las horas para marcar sitios de biopsia"
+                  : "No se tomaron biopsias dirigidas"}
               </span>
-            ))
-          ) : (
-            <span className="text-[11px] text-muted italic">
-              {interactive
-                ? "Haga clic en las horas para marcar sitios de biopsia"
-                : "No se tomaron biopsias dirigidas"}
-            </span>
+            )}
+          </div>
+
+          {interactive && selectedHours.length > 0 && (
+            <p className="text-[10px] text-red-600 font-semibold">
+              {selectedHours.length} muestra(s) de biopsia cervical seleccionada(s)
+            </p>
           )}
         </div>
-
-        {interactive && selectedHours.length > 0 && (
-          <p className="text-[10px] text-red-600 font-semibold">
-            {selectedHours.length} muestra(s) de biopsia cervical seleccionada(s)
-          </p>
-        )}
-      </div>
+      )}
     </div>
   );
 }
