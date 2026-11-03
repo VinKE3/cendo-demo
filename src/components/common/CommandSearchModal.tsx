@@ -104,9 +104,12 @@ export function CommandSearchModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 px-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 px-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+    >
       <div
-        className="bg-surface w-full max-w-3xl rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh] transition-all transform scale-100"
+        className="bg-surface w-full max-w-3xl rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh] transition-all transform scale-100 cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera del Buscador */}

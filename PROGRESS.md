@@ -2,8 +2,8 @@
 **Stack:** Next.js (App Router) + TypeScript + Tailwind CSS + Supabase + Zustand + React Hook Form + Zod + TanStack Table + SweetAlert2 + @react-pdf/renderer + SheetJS (xlsx).
 
 ## 📊 Estado Global del Proyecto
-- **Fase Actual:** Fase 3 - CRUD de Tarifario Médico y CRUD de Vademécum (Genérico -> Marcas/Precios)
-- **Última actualización:** 2026-11-02 - Fase 2 completada al 100% con compilación limpia (12 rutas estáticas y dinámicas) y verificación QA.
+- **Fase Actual:** Fase 5 - Módulo Clínico (Evaluación estilo SANNA + Informe de Colposcopía + Ecografías)
+- **Última actualización:** 2026-11-03 - Fase 4 completada al 100% (Directorio de Pacientes, PatientModal con cálculo reactivo de edad, bloqueo de DNI duplicado, PatientBackgroundModal con calculadora FUR y atenciones dinámicas). Compilación limpia verificada (exit code 0).
 - **Control de Proyecto:** [x] `PROGRESS.md` y `docs/ARCHITECTURE_NOTES.md` creados y actualizados.
 
 ---
@@ -45,20 +45,31 @@
 > - Vista `/dashboard` enriquecida con 4 KPIs en tiempo real, barra de acciones rápidas, panel de atenciones de la paciente María Stephany Herrera Rojas y widgets de consulta inmediata de tarifas y vademécum.
 > - Creadas rutas conectadas `/pacientes`, `/pacientes/[id]`, `/colposcopia`, `/chequeos`, `/tarifario`, `/vademecum` y `/reportes`. Compilación verificada con 12 rutas (`exit code 0`).
 
-### [ ] FASE 3: CRUD de Tarifario Médico y CRUD de Vademécum (Genérico -> Marcas/Precios)
-- [ ] **3.1.** Módulo `/tarifario`: Tabla con filtros por categoría (Procedimiento, Ecografía, Laboratorio, Paquete), buscador instantáneo y CRUD completo (Crear, Editar, Eliminar con confirmación en SweetAlert2).
-- [ ] **3.2.** Módulo `/vademecum`: Tabla inteligente donde el doctor busca por **Nombre Genérico** y visualiza todas las **Marcas Comerciales**, laboratorio y **Precios Referenciales en Farmacias (S/)**.
-- [ ] **3.3.** Formulario dinámico con `useFieldArray` para agregar o editar múltiples marcas comerciales dentro de un mismo medicamento genérico.
-- [ ] **🧪 QA Fase 3:**
-  - [ ] Crear un examen nuevo con validación Zod (impedir precios negativos).
-  - [ ] Buscar "Mupirocina" o "Dienogest" y verificar el despliegue de marcas y costos referenciales.
+### [x] FASE 3: CRUD de Tarifario Médico y CRUD de Vademécum (Genérico -> Marcas/Precios)
+- [x] **3.1.** Módulo `/tarifario`: Tabla con filtros por categoría (Procedimiento, Ecografía, Laboratorio, Paquete), buscador instantáneo y CRUD completo (Crear, Editar, Eliminar y cambio de estado Activo/Inactivo con confirmación en SweetAlert2).
+- [x] **3.2.** Módulo `/vademecum`: Catálogo y tabla inteligente donde el doctor busca por **Nombre Genérico** o marca y visualiza todas las **Marcas Comerciales**, laboratorio y **Precios Referenciales en Farmacias (S/)**.
+- [x] **3.3.** Formulario dinámico con `useFieldArray` (`VademecumModal.tsx`) para agregar, editar o retirar múltiples marcas comerciales dentro de un mismo medicamento genérico.
+- [x] **🧪 QA Fase 3:**
+  - [x] Crear un examen nuevo con validación Zod (impedir precios negativos o nulos).
+  - [x] Buscar "Mupirocina" o "Dienogest" y verificar el despliegue de marcas y costos referenciales.
+> **Notas Técnicas Fase 3:**
+> - Componente `TariffModal.tsx` con validación Zod, selectores de categorías clínicas y precios monetarios en S/.
+> - Componente `VademecumModal.tsx` con `useFieldArray` para gestionar un número arbitrario de marcas comerciales por fármaco.
+> - Alertas de confirmación asíncronas con SweetAlert2 para altas, modificaciones y bajas.
+> - Persistencia inmediata en Zustand (`localStorage`) con reactividad instantánea en el buscador `Ctrl + K`.
+> - Tipado TypeScript verificado (`npx tsc --noEmit` exit code 0).
 
-### [ ] FASE 4: CRUD Maestro de Pacientes e Historial Gineco-Obstétrico
-- [ ] **4.1.** Módulo `/pacientes`: Directorio con búsqueda instantánea por DNI o Apellidos, registro de nuevas pacientes con **cálculo automático de edad** según Fecha de Nacimiento.
-- [ ] **4.2.** Ficha clínica `/pacientes/[id]`: Antecedentes gineco-obstétricos persistentes (Menarquia, IRS, N° parejas sexuales, Fórmula Obstétrica `G_ P____`, MAC, calculadora automática de semanas por FUR) e historial de informes previos.
-- [ ] **🧪 QA Fase 4:**
-  - [ ] Validar bloqueo de DNI duplicado (`72961954`) con alerta SweetAlert2.
-  - [ ] Comprobar cálculo exacto de edad (ej. `28/02/1998` -> `28 años`).
+### [x] FASE 4: CRUD Maestro de Pacientes e Historial Gineco-Obstétrico
+- [x] **4.1.** Módulo `/pacientes`: Directorio con búsqueda instantánea por DNI o Apellidos, registro de nuevas pacientes con **cálculo automático de edad** según Fecha de Nacimiento.
+- [x] **4.2.** Ficha clínica `/pacientes/[id]`: Antecedentes gineco-obstétricos persistentes (Menarquia, IRS, N° parejas sexuales, Fórmula Obstétrica `G_ P____`, MAC, calculadora automática de semanas por FUR) e historial de informes previos.
+- [x] **🧪 QA Fase 4:**
+  - [x] Validar bloqueo de DNI duplicado (`72961954`) con alerta SweetAlert2.
+  - [x] Comprobar cálculo exacto de edad (ej. `28/02/1998` -> `28 años`).
+> **Notas Técnicas Fase 4:**
+> - Componente `PatientModal.tsx` con validación Zod, formateo automático a mayúsculas, cálculo reactivo de edad e impedimento de DNIs duplicados.
+> - Componente `PatientBackgroundModal.tsx` para antecedentes gineco-obstétricos persistentes con calculadora de amenorrea en tiempo real por FUR (semanas + días).
+> - Vistas `/pacientes` y `/pacientes/[id]` optimizadas con borrado en cascada y atenciones dinámicas.
+> - Tipado TypeScript verificado (`npx tsc --noEmit` exit code 0).
 
 ### [ ] FASE 5: Módulo Clínico (Evaluación estilo SANNA + Informe de Colposcopía + Ecografías)
 - [ ] **5.1.** Interfaz por bloques plegables tipo acordeón (inspirada en clínica SANNA y ficha morada de Colposcopía).

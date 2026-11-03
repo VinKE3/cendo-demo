@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/navigation";
+import React from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -27,15 +27,18 @@ import { cn } from "@/lib/utils";
 interface DashboardSidebarProps {
   isMobileOpen: boolean;
   onCloseMobile: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export function DashboardSidebar({
   isMobileOpen,
   onCloseMobile,
+  isCollapsed = false,
+  onToggleCollapse,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const { doctorProfile, logout } = useMedicalStore();
 
   const navigationItems = [
@@ -123,11 +126,13 @@ export function DashboardSidebar({
         {/* Cabecera del Sidebar */}
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="overflow-hidden">
-            <BrandLogo size={isCollapsed ? "sm" : "md"} showText={!isCollapsed} />
+            <Link href="/dashboard" className="block focus:outline-none">
+              <BrandLogo size={isCollapsed ? "sm" : "md"} showText={!isCollapsed} />
+            </Link>
           </div>
 
           <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={onToggleCollapse}
             className="hidden lg:flex w-7 h-7 rounded-lg text-muted hover:text-heading hover:bg-slate-100 items-center justify-center transition-colors"
             title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
           >
@@ -154,7 +159,7 @@ export function DashboardSidebar({
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
             return (
-              <a
+              <Link
                 key={item.name}
                 href={item.href}
                 onClick={onCloseMobile}
@@ -196,7 +201,7 @@ export function DashboardSidebar({
                     {item.name}
                   </div>
                 )}
-              </a>
+              </Link>
             );
           })}
         </div>

@@ -7,7 +7,7 @@ import { useMedicalStore } from "@/store/useMedicalStore";
 export default function ChequeosPage() {
   const { clinicalCheckups, patients } = useMedicalStore();
   const checkup = clinicalCheckups[0];
-  const patient = patients[0];
+  const patient = patients.find((p) => p.id === checkup?.patientId) || patients[0];
 
   return (
     <div className="space-y-6">
@@ -59,6 +59,13 @@ export default function ChequeosPage() {
             <p><strong className="text-indigo-950">Conclusiones:</strong> {checkup.conclusions}</p>
             <p><strong className="text-indigo-950">Prescripción Médica:</strong> {checkup.medicalPrescription}</p>
           </div>
+        </div>
+      )}
+
+      {!checkup && (
+        <div className="p-12 text-center rounded-2xl bg-surface border border-border space-y-2">
+          <p className="text-sm font-semibold text-heading">No hay chequeos ni ecografías registradas</p>
+          <p className="text-xs text-muted">Inicie una nueva evaluación ginecológica para registrar ecografías.</p>
         </div>
       )}
     </div>

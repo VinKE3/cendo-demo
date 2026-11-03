@@ -45,6 +45,13 @@ const config: Config = {
         heading: ["var(--font-heading)", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
+      boxShadow: {
+        "2xs": "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+        xs: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      },
+      backdropBlur: {
+        xs: "2px",
+      },
     },
   },
   plugins: [],

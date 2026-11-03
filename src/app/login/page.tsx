@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,9 +38,16 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { loginDemo, loginCustom, doctorProfile } = useMedicalStore();
+  const { loginDemo, loginCustom, doctorProfile, isAuthenticated } = useMedicalStore();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Si ya tiene sesión activa, redirigir al Dashboard
+  useEffect(() => {
+    if (useMedicalStore.persist.hasHydrated() && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, router]);
 
   const {
     register,

@@ -1,103 +1,515 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ArrowLeft, User, Calendar, Phone, Mail, MapPin, Activity, FileCheck2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  User,
+  Calendar,
+  Phone,
+  Mail,
+  MapPin,
+  Activity,
+  FileCheck2,
+  Edit2,
+  Plus,
+  Clock,
+  Sparkles,
+  AlertTriangle,
+  FileText,
+  Stethoscope,
+  ShieldCheck,
+} from "lucide-react";
 import { useMedicalStore } from "@/store/useMedicalStore";
+import { PatientModal } from "@/components/pacientes/PatientModal";
+import { PatientBackgroundModal } from "@/components/pacientes/PatientBackgroundModal";
+import { Patient } from "@/types/medical";
 
 export default function FichaPacientePage() {
   const params = useParams();
+  const router = useRouter();
   const patientId = params.id as string;
-  const { getPatientById, getBackground, getColposcopyByPatientId, getCheckupsByPatientId } =
-    useMedicalStore();
 
-  const patient = getPatientById(patientId) || useMedicalStore((s) => s.patients[0]);
-  const bg = getBackground(patient?.id || "");
-  const colpos = getColposcopyByPatientId(patient?.id || "");
-  const checkups = getCheckupsByPatientId(patient?.id || "");
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+  const [isBgModalOpen, setIsBgModalOpen] = useState(false);
+
+  const {
+    getPatientById,
+    getBackground,
+    getColposcopyByPatientId,
+    getCheckupsByPatientId,
+  } = useMedicalStore();
+
+  const patient = getPatientById(patientId);
+  const bg = getBackground(patientId);
+  const colpos = getColposcopyByPatientId(patientId);
+  const checkups = getCheckupsByPatientId(patientId);
+
+  // Calculadora Automática de Semanas / Días de Amenorrea por FUR
+  const furCalculation = useMemo(() => {
+    if (!bg?.lastMenstrualPeriod) return null;
+    const furDate = new Date(bg.lastMenstrualPeriod + "T00:00:00");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = today.getTime() - furDate.getTime();
+    if (diffTime < 0) return null;
+
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const weeks = Math.floor(diffDays / 7);
+    const remainingDays = diffDays % 7;
+
+    return {
+      days: diffDays,
+      weeks,
+      remainingDays,
+      text: `${weeks} sem ${remainingDays} d (${diffDays} días de amenorrea)`,
+    };
+  }, [bg?.lastMenstrualPeriod]);
 
   if (!patient) {
     return (
-      <div className="py-12 text-center space-y-3">
-        <p className="text-sm font-semibold text-heading">Paciente no encontrada</p>
-        <Link href="/pacientes" className="text-xs text-primary underline">
-          Volver al directorio
+      <div className="py-16 text-center space-y-4">
+        <User className="w-12 h-12 mx-auto text-muted" />
+        <h2 className="text-lg font-heading font-bold text-heading">
+          Paciente no encontrada
+        </h2>
+        <p className="text-xs text-muted max-w-sm mx-auto">
+          La historia clínica solicitada no existe o fue eliminada del sistema.
+        </p>
+        <Link
+          href="/pacientes"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary-hover transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Volver al Directorio de Pacientes</span>
         </Link>
       </div>
     );
   }
 
+  const patientFullName = `${patient.lastName}, ${patient.firstName}`;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/pacientes"
-          className="p-2 rounded-xl bg-surface border border-border text-muted hover:text-heading hover:bg-slate-100 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-heading font-extrabold text-heading">
-            {patient.lastName}, {patient.firstName}
-          </h1>
-          <p className="text-xs text-muted font-mono">
-            DNI: {patient.dni} &bull; {patient.age} años &bull; {patient.civilStatus} &bull; {patient.occupation}
-          </p>
+      {/* 1. Barra Superior de Navegación y Acciones Rápidas */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/pacientes"
+            className="p-2.5 rounded-xl bg-surface border border-border text-muted hover:text-heading hover:bg-slate-100 transition-colors shadow-2xs"
+            title="Volver a la lista de pacientes"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-heading font-extrabold text-heading">
+                {patient.lastName}, {patient.firstName}
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-accent-soft text-primary border border-primary/20">
+                DNI {patient.dni}
+              </span>
+            </div>
+            <p className="text-xs text-muted font-mono mt-0.5">
+              Historia Clínica CENDO &bull; {patient.age} años &bull; {patient.civilStatus} &bull; {patient.occupation || "Sin ocupación registrada"}
+            </p>
+          </div>
+        </div>
+
+        {/* Botones de Acción */}
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setIsPatientModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-heading hover:bg-slate-100 transition-colors flex items-center gap-1.5 shadow-2xs"
+          >
+            <Edit2 className="w-3.5 h-3.5 text-muted" />
+            <span>Editar Datos</span>
+          </button>
+
+          <Link
+            href="/colposcopia"
+            className="px-3.5 py-2 rounded-xl bg-primary text-white hover:bg-primary-hover text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
+          >
+            <FileCheck2 className="w-3.5 h-3.5 text-secondary" />
+            <span>Nueva Colposcopía</span>
+          </Link>
+
+          <Link
+            href="/chequeos"
+            className="px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold transition-colors flex items-center gap-1.5"
+          >
+            <Activity className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Nuevo Chequeo / Eco</span>
+          </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Datos Personales */}
-        <div className="p-5 rounded-2xl bg-surface border border-border shadow-xs space-y-3">
-          <h3 className="font-heading font-bold text-xs uppercase tracking-wider text-muted">
-            Datos de Filiación
-          </h3>
-          <div className="space-y-2 text-xs">
-            <p><strong className="text-heading">Teléfono:</strong> {patient.phone}</p>
-            <p><strong className="text-heading">Email:</strong> {patient.email}</p>
-            <p><strong className="text-heading">Dirección:</strong> {patient.address}</p>
-            <p><strong className="text-heading">Fecha Nac:</strong> {patient.birthDate}</p>
+      {/* 2. Cuadrícula Principal: Datos Personales + Antecedentes Gineco-Obstétricos */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Columna 1: Datos de Filiación y Contacto */}
+        <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <h3 className="font-heading font-extrabold text-xs uppercase tracking-wider text-muted flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" />
+              Datos de Filiación
+            </h3>
+            <button
+              onClick={() => setIsPatientModalOpen(true)}
+              className="text-[11px] text-primary font-semibold hover:underline"
+            >
+              Editar
+            </button>
+          </div>
+
+          <div className="space-y-3 text-xs">
+            <div>
+              <span className="text-muted block text-[10px] uppercase font-bold">Fecha de Nacimiento</span>
+              <p className="font-mono font-bold text-heading mt-0.5">
+                {patient.birthDate} ({patient.age} años cumplidos)
+              </p>
+            </div>
+
+            <div>
+              <span className="text-muted block text-[10px] uppercase font-bold">Teléfono / WhatsApp</span>
+              <p className="font-mono font-bold text-heading mt-0.5 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-muted" />
+                {patient.phone}
+              </p>
+            </div>
+
+            {patient.email && (
+              <div>
+                <span className="text-muted block text-[10px] uppercase font-bold">Correo Electrónico</span>
+                <p className="text-heading font-medium mt-0.5 flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-muted" />
+                  {patient.email}
+                </p>
+              </div>
+            )}
+
+            <div>
+              <span className="text-muted block text-[10px] uppercase font-bold">Dirección</span>
+              <p className="text-heading font-medium mt-0.5 flex items-start gap-1.5 leading-relaxed">
+                <MapPin className="w-3.5 h-3.5 text-muted shrink-0 mt-0.5" />
+                <span>{patient.address || "No especificada"}</span>
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/80">
+              <div>
+                <span className="text-muted block text-[10px] uppercase font-bold">Estado Civil</span>
+                <p className="font-semibold text-heading mt-0.5">{patient.civilStatus}</p>
+              </div>
+              <div>
+                <span className="text-muted block text-[10px] uppercase font-bold">Ocupación</span>
+                <p className="font-semibold text-heading mt-0.5 truncate">{patient.occupation || "No refiere"}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Antecedentes Gineco-Obstétricos */}
-        <div className="p-5 rounded-2xl bg-surface border border-border shadow-xs space-y-3">
-          <h3 className="font-heading font-bold text-xs uppercase tracking-wider text-muted">
-            Antecedentes Gineco-Obstétricos
-          </h3>
-          <div className="space-y-1.5 text-xs">
-            <p><strong className="text-heading">Fórmula Obstétrica:</strong> <span className="font-mono font-bold text-primary">{bg?.obstetricFormula}</span></p>
-            <p><strong className="text-heading">MAC Actual:</strong> {bg?.contraceptiveMethod}</p>
-            <p><strong className="text-heading">FUR:</strong> {bg?.lastMenstrualPeriod}</p>
-            <p><strong className="text-heading">Menarquia:</strong> {bg?.menarche} años &bull; <strong className="text-heading">IRS:</strong> {bg?.sexualDebutAge} años</p>
-            <p><strong className="text-heading">Historial PAP:</strong> {bg?.papHistory}</p>
-            <p><strong className="text-heading">Test VPH:</strong> {bg?.vphTestHistory}</p>
+        {/* Columna 2 y 3: Antecedentes Gineco-Obstétricos Persistentes */}
+        <div className="lg:col-span-2 p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div>
+              <h3 className="font-heading font-extrabold text-xs uppercase tracking-wider text-muted flex items-center gap-2">
+                <Activity className="w-4 h-4 text-secondary" />
+                Antecedentes Gineco-Obstétricos Persistentes
+              </h3>
+              <p className="text-[11px] text-muted">
+                Historial obstétrico, método anticonceptivo, FUR y antecedentes patológicos
+              </p>
+            </div>
+
+            <button
+              onClick={() => setIsBgModalOpen(true)}
+              className="px-3 py-1.5 rounded-lg bg-accent-soft text-primary font-semibold text-xs hover:bg-sky-100 transition-colors flex items-center gap-1"
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+              <span>Actualizar</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            {/* Fórmula Obstétrica */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] text-muted uppercase font-bold block">
+                Fórmula Obstétrica
+              </span>
+              <p className="font-mono font-extrabold text-lg text-primary">
+                {bg?.obstetricFormula || "G0 P0000"}
+              </p>
+              <p className="text-[10px] text-muted">Gestas &bull; Término/Prem/Aborto/Vivos</p>
+            </div>
+
+            {/* MAC Actual */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] text-muted uppercase font-bold block">
+                MAC Actual
+              </span>
+              <p className="font-bold text-heading text-sm">
+                {bg?.contraceptiveMethod || "Ninguno"}
+              </p>
+              <p className="text-[10px] text-muted">Método Anticonceptivo</p>
+            </div>
+
+            {/* FUR y Amenorrea Calculada */}
+            <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200 space-y-1">
+              <span className="text-[10px] text-amber-900 uppercase font-bold block flex items-center gap-1">
+                <Calendar className="w-3 h-3 text-amber-700" />
+                FUR (Última Regla)
+              </span>
+              <p className="font-mono font-bold text-sm text-heading">
+                {bg?.lastMenstrualPeriod || "No especificada"}
+              </p>
+              {furCalculation && (
+                <p className="text-[10px] font-bold text-amber-800 bg-white/80 px-1.5 py-0.5 rounded">
+                  {furCalculation.text}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Menarquia, IRS y Parejas */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+              <span className="text-muted block text-[10px] uppercase font-bold">Menarquia</span>
+              <p className="font-mono font-bold text-heading mt-0.5">
+                {bg?.menarche ? `${bg.menarche} años` : "No precisa"}
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+              <span className="text-muted block text-[10px] uppercase font-bold">IRS (Inicio Sex.)</span>
+              <p className="font-mono font-bold text-heading mt-0.5">
+                {bg?.sexualDebutAge ? `${bg.sexualDebutAge} años` : "No precisa"}
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+              <span className="text-muted block text-[10px] uppercase font-bold">N° Parejas Sex.</span>
+              <p className="font-mono font-bold text-heading mt-0.5">
+                {bg?.sexualPartnersCount ?? "No precisa"}
+              </p>
+            </div>
+          </div>
+
+          {/* Historial Citológico PAP y VPH */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] text-muted uppercase font-bold block">
+                Historial Papanicolaou (PAP)
+              </span>
+              <p className="font-medium text-heading leading-snug">
+                {bg?.papHistory || "Sin antecedentes citológicos registrados"}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] text-muted uppercase font-bold block">
+                Historial Test Molecular VPH
+              </span>
+              <p className="font-medium text-heading leading-snug">
+                {bg?.vphTestHistory || "No realizado previamente"}
+              </p>
+            </div>
+          </div>
+
+          {/* Alergias, Cirugías y Familiares */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] text-muted uppercase font-bold block flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3 text-amber-600" />
+                Alergias Medicamentosas
+              </span>
+              <p className="font-semibold text-heading">
+                {bg?.medicalAllergies || "Niega alergias"}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] text-muted uppercase font-bold block">
+                Cirugías Previas
+              </span>
+              <p className="text-heading font-medium leading-snug">
+                {bg?.surgeriesHistory || "Niega intervenciones"}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] text-muted uppercase font-bold block">
+                Antecedentes Familiares
+              </span>
+              <p className="text-heading font-medium leading-snug">
+                {bg?.familyHistory || "Sin antecedentes oncológicos o miomatosos"}
+              </p>
+            </div>
+          </div>
+
+          {bg?.notes && (
+            <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-200 text-xs">
+              <span className="text-[10px] text-muted uppercase font-bold block">Notas Adicionales:</span>
+              <p className="text-slate-700 italic mt-0.5">{bg.notes}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Atenciones y Exámenes Realizados de esta Paciente */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Colposcopías de la Paciente */}
+        <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <FileCheck2 className="w-5 h-5 text-emerald-600" />
+              <h3 className="font-heading font-bold text-sm text-heading">
+                Informes de Colposcopía ({colpos.length})
+              </h3>
+            </div>
+            <Link
+              href="/colposcopia"
+              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nueva Evaluación</span>
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {colpos.length > 0 ? (
+              colpos.map((c) => (
+                <div
+                  key={c.id}
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-emerald-300 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800">
+                      ID: {c.id}
+                    </span>
+                    <span className="text-xs font-mono font-semibold text-muted">
+                      {c.reportDate}
+                    </span>
+                  </div>
+
+                  <p className="text-xs font-semibold text-heading leading-snug">
+                    {c.diagnosis}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted pt-1 border-t border-slate-200">
+                    <span>ZT: <strong>{c.transformationZoneType}</strong></span>
+                    <span>&bull;</span>
+                    <span>Schiller: <strong>{c.schillerTest}</strong></span>
+                    <span>&bull;</span>
+                    <span>Biopsia: <strong>{c.cervicalBiopsyTaken ? "Sí" : "No"}</strong></span>
+                  </div>
+
+                  <div className="pt-2 flex justify-end">
+                    <Link
+                      href="/colposcopia"
+                      className="text-xs font-semibold text-primary hover:underline"
+                    >
+                      Ver informe completo &rarr;
+                    </Link>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center space-y-1">
+                <FileCheck2 className="w-8 h-8 text-muted mx-auto" />
+                <p className="text-xs font-semibold text-heading">Sin evaluaciones colposcópicas</p>
+                <p className="text-[11px] text-muted">
+                  Inicie una nueva evaluación para esta paciente cuando corresponda.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Informes Realizados */}
-        <div className="p-5 rounded-2xl bg-surface border border-border shadow-xs space-y-3">
-          <h3 className="font-heading font-bold text-xs uppercase tracking-wider text-muted">
-            Atenciones Registradas
-          </h3>
-          <div className="space-y-2 text-xs">
-            <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200">
-              <p className="font-bold text-emerald-900">Colposcopía Digital</p>
-              <p className="text-[11px] text-emerald-800">
-                {colpos[0]?.reportDate} - {colpos[0]?.diagnosis}
-              </p>
+        {/* Chequeos y Ecografías de la Paciente */}
+        <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-600" />
+              <h3 className="font-heading font-bold text-sm text-heading">
+                Chequeos y Ecografías ({checkups.length})
+              </h3>
             </div>
-            <div className="p-2.5 rounded-lg bg-sky-50 border border-sky-200">
-              <p className="font-bold text-sky-900">Chequeo Ginecológico</p>
-              <p className="text-[11px] text-sky-800">
-                {checkups[0]?.checkupDate} - Mama BI-RADS 2 / TV Normal
-              </p>
-            </div>
+            <Link
+              href="/chequeos"
+              className="text-xs text-indigo-700 font-semibold hover:underline flex items-center gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nuevo Chequeo</span>
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {checkups.length > 0 ? (
+              checkups.map((chk) => (
+                <div
+                  key={chk.id}
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-indigo-300 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-100 text-indigo-800">
+                      ID: {chk.id}
+                    </span>
+                    <span className="text-xs font-mono font-semibold text-muted">
+                      {chk.checkupDate}
+                    </span>
+                  </div>
+
+                  <p className="text-xs font-semibold text-heading leading-snug">
+                    {chk.conclusions || chk.reasonForConsultation}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted pt-1 border-t border-slate-200">
+                    <span>Mama: <strong>{chk.breastUltrasoundBirads}</strong></span>
+                    <span>&bull;</span>
+                    <span>Útero: <strong>{chk.uterusMeasurements}</strong></span>
+                    <span>&bull;</span>
+                    <span>Endometrio: <strong>{chk.endometriumThicknessMm} mm</strong></span>
+                  </div>
+
+                  <div className="pt-2 flex justify-end">
+                    <Link
+                      href="/chequeos"
+                      className="text-xs font-semibold text-indigo-700 hover:underline"
+                    >
+                      Ver chequeo completo &rarr;
+                    </Link>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center space-y-1">
+                <Activity className="w-8 h-8 text-muted mx-auto" />
+                <p className="text-xs font-semibold text-heading">Sin chequeos registrados</p>
+                <p className="text-[11px] text-muted">
+                  Registre ecografías de mama o transvaginales para la paciente.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Modales de Edición */}
+      <PatientModal
+        isOpen={isPatientModalOpen}
+        onClose={() => setIsPatientModalOpen(false)}
+        initialData={patient}
+      />
+
+      <PatientBackgroundModal
+        isOpen={isBgModalOpen}
+        onClose={() => setIsBgModalOpen(false)}
+        patientId={patient.id}
+        patientName={patientFullName}
+        initialData={bg}
+      />
     </div>
   );
 }
-

@@ -1,20 +1,34 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMedicalStore } from "@/store/useMedicalStore";
 
 export default function HomePage() {
   const router = useRouter();
   const isAuthenticated = useMedicalStore((state) => state.isAuthenticated);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    if (useMedicalStore.persist.hasHydrated()) {
+      setIsHydrated(true);
+    } else {
+      const unsub = useMedicalStore.persist.onFinishHydration(() => {
+        setIsHydrated(true);
+      });
+      return () => unsub();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
     if (isAuthenticated) {
       router.replace("/dashboard");
     } else {
       router.replace("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isHydrated, isAuthenticated, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-main">

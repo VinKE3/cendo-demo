@@ -382,13 +382,13 @@ interface MedicalStoreState {
 
   // Tarifario
   tariffItems: ProcedureTariff[];
-  addTariffItem: (item: Omit<ProcedureTariff, "id" | "createdAt">) => void;
+  addTariffItem: (item: Omit<ProcedureTariff, "id" | "createdAt">) => ProcedureTariff;
   updateTariffItem: (id: string, updates: Partial<ProcedureTariff>) => void;
   deleteTariffItem: (id: string) => void;
 
   // Vademécum
   vademecumItems: MedicationVademecum[];
-  addVademecumItem: (item: Omit<MedicationVademecum, "id" | "createdAt">) => void;
+  addVademecumItem: (item: Omit<MedicationVademecum, "id" | "createdAt">) => MedicationVademecum;
   updateVademecumItem: (id: string, updates: Partial<MedicationVademecum>) => void;
   deleteVademecumItem: (id: string) => void;
 
@@ -447,9 +447,16 @@ export const useMedicalStore = create<MedicalStoreState>()(
         }));
       },
       deletePatient: (id) => {
-        set((state) => ({
-          patients: state.patients.filter((p) => p.id !== id),
-        }));
+        set((state) => {
+          const nextBackgrounds = { ...state.backgrounds };
+          delete nextBackgrounds[id];
+          return {
+            patients: state.patients.filter((p) => p.id !== id),
+            backgrounds: nextBackgrounds,
+            colposcopyReports: state.colposcopyReports.filter((r) => r.patientId !== id),
+            clinicalCheckups: state.clinicalCheckups.filter((c) => c.patientId !== id),
+          };
+        });
       },
       getPatientById: (id) => get().patients.find((p) => p.id === id),
       getPatientByDni: (dni) => get().patients.find((p) => p.dni === dni),
@@ -535,8 +542,9 @@ export const useMedicalStore = create<MedicalStoreState>()(
           createdAt: new Date().toISOString(),
         };
         set((state) => ({
-          tariffItems: [...state.tariffItems, newItem],
+          tariffItems: [newItem, ...state.tariffItems],
         }));
+        return newItem;
       },
       updateTariffItem: (id, updates) => {
         set((state) => ({
@@ -558,8 +566,9 @@ export const useMedicalStore = create<MedicalStoreState>()(
           createdAt: new Date().toISOString(),
         };
         set((state) => ({
-          vademecumItems: [...state.vademecumItems, newItem],
+          vademecumItems: [newItem, ...state.vademecumItems],
         }));
+        return newItem;
       },
       updateVademecumItem: (id, updates) => {
         set((state) => ({

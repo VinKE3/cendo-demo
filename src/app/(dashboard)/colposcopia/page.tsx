@@ -8,7 +8,7 @@ import { useMedicalStore } from "@/store/useMedicalStore";
 export default function ColposcopiaPage() {
   const { colposcopyReports, patients } = useMedicalStore();
   const report = colposcopyReports[0];
-  const patient = patients[0];
+  const patient = patients.find((p) => p.id === report?.patientId) || patients[0];
 
   return (
     <div className="space-y-6">
@@ -90,6 +90,13 @@ export default function ColposcopiaPage() {
             <p><strong className="text-amber-900">Diagnóstico Colposcópico:</strong> {report.diagnosis}</p>
             <p><strong className="text-amber-900">Conducta / Recomendaciones:</strong> {report.planRecommendations}</p>
           </div>
+        </div>
+      )}
+
+      {!report && (
+        <div className="p-12 text-center rounded-2xl bg-surface border border-border space-y-2">
+          <p className="text-sm font-semibold text-heading">No hay informes colposcópicos registrados</p>
+          <p className="text-xs text-muted">Inicie una nueva evaluación para generar el primer informe.</p>
         </div>
       )}
     </div>

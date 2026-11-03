@@ -6,6 +6,7 @@ import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { CommandSearchModal } from "@/components/common/CommandSearchModal";
 import { useMedicalStore } from "@/store/useMedicalStore";
+import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({
   children,
@@ -15,11 +16,33 @@ export default function DashboardLayout({
   const router = useRouter();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const isAuthenticated = useMedicalStore((state) => state.isAuthenticated);
 
-  // Escucha global de atajo de teclado: Ctrl + K o Cmd + K
+  // 1. Esperar a que Zustand rehidrate la sesión desde localStorage
+  useEffect(() => {
+    if (useMedicalStore.persist.hasHydrated()) {
+      setIsHydrated(true);
+    } else {
+      const unsub = useMedicalStore.persist.onFinishHydration(() => {
+        setIsHydrated(true);
+      });
+      return () => unsub();
+    }
+  }, []);
+
+  // 2. Control de autenticación únicamente cuando el estado ya fue hidratado
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    if (!isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isHydrated, isAuthenticated, router]);
+
+  // 3. Escucha global de atajo de teclado: Ctrl + K o Cmd + K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -32,15 +55,8 @@ export default function DashboardLayout({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Control de autenticación y montado en cliente
-  useEffect(() => {
-    setMounted(true);
-    if (!isAuthenticated) {
-      router.replace("/login");
-    }
-  }, [isAuthenticated, router]);
-
-  if (!mounted || !isAuthenticated) {
+  // Pantalla de carga mientras se verifica el estado de sesión
+  if (!isHydrated || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-main">
         <div className="flex flex-col items-center gap-3">
@@ -57,10 +73,17 @@ export default function DashboardLayout({
       <DashboardSidebar
         isMobileOpen={isMobileOpen}
         onCloseMobile={() => setIsMobileOpen(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
       />
 
-      {/* Contenedor Principal (con compensación de margen para el sidebar) */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-68 transition-all duration-300">
+      {/* Contenedor Principal (con compensación dinámica según colapso) */}
+      <div
+        className={cn(
+          "flex-1 flex flex-col min-w-0 transition-all duration-300",
+          isSidebarCollapsed ? "lg:pl-20" : "lg:pl-68"
+        )}
+      >
         {/* Barra Superior con Buscador Global y Estado */}
         <DashboardHeader
           onOpenSearch={() => setIsSearchOpen(true)}
