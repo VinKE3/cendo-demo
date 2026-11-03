@@ -375,7 +375,7 @@ export default function DashboardPage() {
                         </Link>
 
                         <Link
-                          href="/chequeos"
+                          href="/reportes"
                           className="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-hover text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
                         >
                           <Printer className="w-3.5 h-3.5 text-secondary" />

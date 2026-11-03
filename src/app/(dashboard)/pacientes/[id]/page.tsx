@@ -24,7 +24,9 @@ import {
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { PatientModal } from "@/components/pacientes/PatientModal";
 import { PatientBackgroundModal } from "@/components/pacientes/PatientBackgroundModal";
-import { Patient } from "@/types/medical";
+import { ColposcopyModal } from "@/components/colposcopia/ColposcopyModal";
+import { CheckupModal } from "@/components/chequeos/CheckupModal";
+import { Patient, ColposcopyReport, ClinicalCheckup } from "@/types/medical";
 
 export default function FichaPacientePage() {
   const params = useParams();
@@ -33,6 +35,10 @@ export default function FichaPacientePage() {
 
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [isBgModalOpen, setIsBgModalOpen] = useState(false);
+  const [isColpoModalOpen, setIsColpoModalOpen] = useState(false);
+  const [editingColpo, setEditingColpo] = useState<ColposcopyReport | null>(null);
+  const [isCheckupModalOpen, setIsCheckupModalOpen] = useState(false);
+  const [editingCheckup, setEditingCheckup] = useState<ClinicalCheckup | null>(null);
 
   const {
     getPatientById,
@@ -122,27 +128,33 @@ export default function FichaPacientePage() {
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <button
             onClick={() => setIsPatientModalOpen(true)}
-            className="px-3.5 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-heading hover:bg-slate-100 transition-colors flex items-center gap-1.5 shadow-2xs"
+            className="px-3.5 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-heading hover:bg-slate-100 transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer"
           >
             <Edit2 className="w-3.5 h-3.5 text-muted" />
             <span>Editar Datos</span>
           </button>
 
-          <Link
-            href="/colposcopia"
-            className="px-3.5 py-2 rounded-xl bg-primary text-white hover:bg-primary-hover text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
+          <button
+            onClick={() => {
+              setEditingColpo(null);
+              setIsColpoModalOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-primary text-white hover:bg-primary-hover text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
             <FileCheck2 className="w-3.5 h-3.5 text-secondary" />
-            <span>Nueva Colposcopía</span>
-          </Link>
+            <span>+ Nueva Colposcopía</span>
+          </button>
 
-          <Link
-            href="/chequeos"
-            className="px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold transition-colors flex items-center gap-1.5"
+          <button
+            onClick={() => {
+              setEditingCheckup(null);
+              setIsCheckupModalOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Activity className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Nuevo Chequeo / Eco</span>
-          </Link>
+            <span>+ Nuevo Chequeo / Eco</span>
+          </button>
         </div>
       </div>
 
@@ -368,13 +380,16 @@ export default function FichaPacientePage() {
                 Informes de Colposcopía ({colpos.length})
               </h3>
             </div>
-            <Link
-              href="/colposcopia"
-              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+            <button
+              onClick={() => {
+                setEditingColpo(null);
+                setIsColpoModalOpen(true);
+              }}
+              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Nueva Evaluación</span>
-            </Link>
+            </button>
           </div>
 
           <div className="space-y-3">
@@ -405,12 +420,21 @@ export default function FichaPacientePage() {
                     <span>Biopsia: <strong>{c.cervicalBiopsyTaken ? "Sí" : "No"}</strong></span>
                   </div>
 
-                  <div className="pt-2 flex justify-end">
+                  <div className="pt-2 flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => {
+                        setEditingColpo(c);
+                        setIsColpoModalOpen(true);
+                      }}
+                      className="text-xs font-semibold text-slate-700 hover:text-primary transition-colors cursor-pointer"
+                    >
+                      Editar
+                    </button>
                     <Link
                       href="/colposcopia"
                       className="text-xs font-semibold text-primary hover:underline"
                     >
-                      Ver informe completo &rarr;
+                      Ver en Colposcopía &rarr;
                     </Link>
                   </div>
                 </div>
@@ -436,13 +460,16 @@ export default function FichaPacientePage() {
                 Chequeos y Ecografías ({checkups.length})
               </h3>
             </div>
-            <Link
-              href="/chequeos"
-              className="text-xs text-indigo-700 font-semibold hover:underline flex items-center gap-1"
+            <button
+              onClick={() => {
+                setEditingCheckup(null);
+                setIsCheckupModalOpen(true);
+              }}
+              className="text-xs text-indigo-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Nuevo Chequeo</span>
-            </Link>
+            </button>
           </div>
 
           <div className="space-y-3">
@@ -473,12 +500,21 @@ export default function FichaPacientePage() {
                     <span>Endometrio: <strong>{chk.endometriumThicknessMm} mm</strong></span>
                   </div>
 
-                  <div className="pt-2 flex justify-end">
+                  <div className="pt-2 flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => {
+                        setEditingCheckup(chk);
+                        setIsCheckupModalOpen(true);
+                      }}
+                      className="text-xs font-semibold text-slate-700 hover:text-indigo-700 transition-colors cursor-pointer"
+                    >
+                      Editar
+                    </button>
                     <Link
                       href="/chequeos"
                       className="text-xs font-semibold text-indigo-700 hover:underline"
                     >
-                      Ver chequeo completo &rarr;
+                      Ver en Chequeos &rarr;
                     </Link>
                   </div>
                 </div>
@@ -509,6 +545,21 @@ export default function FichaPacientePage() {
         patientId={patient.id}
         patientName={patientFullName}
         initialData={bg}
+      />
+
+      {/* Modales de Colposcopía y Chequeo integrados */}
+      <ColposcopyModal
+        isOpen={isColpoModalOpen}
+        onClose={() => setIsColpoModalOpen(false)}
+        initialData={editingColpo}
+        defaultPatientId={patient.id}
+      />
+
+      <CheckupModal
+        isOpen={isCheckupModalOpen}
+        onClose={() => setIsCheckupModalOpen(false)}
+        initialData={editingCheckup}
+        defaultPatientId={patient.id}
       />
     </div>
   );

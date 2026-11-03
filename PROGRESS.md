@@ -2,8 +2,8 @@
 **Stack:** Next.js (App Router) + TypeScript + Tailwind CSS + Supabase + Zustand + React Hook Form + Zod + TanStack Table + SweetAlert2 + @react-pdf/renderer + SheetJS (xlsx).
 
 ## 📊 Estado Global del Proyecto
-- **Fase Actual:** Fase 5 - Módulo Clínico (Evaluación estilo SANNA + Informe de Colposcopía + Ecografías)
-- **Última actualización:** 2026-11-03 - Fase 4 completada al 100% (Directorio de Pacientes, PatientModal con cálculo reactivo de edad, bloqueo de DNI duplicado, PatientBackgroundModal con calculadora FUR y atenciones dinámicas). Compilación limpia verificada (exit code 0).
+- **Fase Actual:** Fase 6 - Motor de Exportación (PDF Institucional Inamovible + Fusión de Laboratorios + Excel)
+- **Última actualización:** 2026-11-03 - Fase 5 completada al 100% (Módulo Clínico SANNA-Style: Colposcopía IFCPC Río 2011 con botón 'Marcar Normales por Defecto', Reloj Cervical interactivo en SVG con cuadrantes Q1-Q4 para biopsias, grilla fotográfica fija con lightbox, y Chequeo Ginecológico/Ecografías con plantillas diagnósticas y grosor endometrial). Compilación limpia verificada (`exit code 0`).
 - **Control de Proyecto:** [x] `PROGRESS.md` y `docs/ARCHITECTURE_NOTES.md` creados y actualizados.
 
 ---
@@ -71,15 +71,23 @@
 > - Vistas `/pacientes` y `/pacientes/[id]` optimizadas con borrado en cascada y atenciones dinámicas.
 > - Tipado TypeScript verificado (`npx tsc --noEmit` exit code 0).
 
-### [ ] FASE 5: Módulo Clínico (Evaluación estilo SANNA + Informe de Colposcopía + Ecografías)
-- [ ] **5.1.** Interfaz por bloques plegables tipo acordeón (inspirada en clínica SANNA y ficha morada de Colposcopía).
-- [ ] **5.2.** **Formulario de Colposcopía Inteligente:** Botón *"Marcar Hallazgos Normales por Defecto"* (pone los 35+ campos patológicos en "No" con un clic para que el médico solo active los positivos), Test de VPH, Citología PAP y buscador CIE-10.
-- [ ] **5.3.** **Reloj Cervical Interactivo (SVG):** Diagrama circular con cuadrantes `Q1-Q4` y horas `1 a 12` donde el doctor marca con un clic los sitios exactos de biopsia.
-- [ ] **5.4.** **Cargador de Imágenes Clínicas:** Subida de hasta 4 fotos colposcópicas con previsualización en grilla fija (evitando que se descuadren los espacios).
-- [ ] **5.5.** **Sub-módulo de Ecografías (Mama Bilateral y Transvaginal):** Selector de plantillas rápidas ("Mama Bilateral Normal", "Quiste Simple BI-RADS 2", "TV Normal") con inputs para medidas en `mm`, volumen en `cc` y clasificación BI-RADS / ACR.
-- [ ] **🧪 QA Fase 5:**
-  - [ ] Marcar horas `2`, `6` y `10` en el reloj de biopsia y verificar guardado en el estado global de Zustand.
-  - [ ] Subir 3 fotos de distintos tamaños y comprobar que mantengan su proporción en la grilla.
+### [x] FASE 5: Módulo Clínico (Evaluación estilo SANNA + Informe de Colposcopía + Ecografías)
+- [x] **5.1.** Interfaz por bloques plegables tipo acordeón (inspirada en clínica SANNA y ficha morada de Colposcopía).
+- [x] **5.2.** **Formulario de Colposcopía Inteligente:** Botón *"Marcar Hallazgos Normales por Defecto"* (pone los 35+ campos patológicos en "No" con un clic para que el médico solo active los positivos), Test de VPH, Citología PAP y buscador CIE-10.
+- [x] **5.3.** **Reloj Cervical Interactivo (SVG):** Diagrama circular con cuadrantes `Q1-Q4` y horas `1 a 12` donde el doctor marca con un clic los sitios exactos de biopsia.
+- [x] **5.4.** **Cargador de Imágenes Clínicas:** Subida de hasta 4 fotos colposcópicas con previsualización en grilla fija (evitando que se descuadren los espacios) y visor modal con zoom.
+- [x] **5.5.** **Sub-módulo de Ecografías (Mama Bilateral y Transvaginal):** Selector de plantillas rápidas ("Mama & TV Normales", "Quiste Simple BI-RADS 2", "Mioma Intramural", "Endometrioma Ovárico") con inputs para medidas en `mm`, volumen en `cc` y clasificación BI-RADS / ACR.
+- [x] **🧪 QA Fase 5:**
+  - [x] Marcar horas `2`, `6` y `10` en el reloj de biopsia y verificar guardado en el estado global de Zustand.
+  - [x] Subir 4 fotos con epígrafes y comprobar que mantengan su proporción aspect-4/3 en la grilla y apertura en modal.
+  - [x] Selector y detalle sincronizado entre lista de informes y panel de visualización clínica.
+> **Notas Técnicas Fase 5:**
+> - Componente `CervicalClock.tsx` construido en SVG puro con soporte dual (modo interactivo con toggle animado de pines por hora y modo read-only para visualización en informes).
+> - Componente `ColposcopyModal.tsx` con acordeón estilo SANNA, botón mágico de hallazgos fisiológicos normales por defecto, selector rápido de códigos CIE-10 (`Z01.4`, `N87.0`, `N87.1`, `N87.2`, `N87.9`), carga y epígrafes de 4 imágenes colposcópicas con firma del Dr. Patrick Jacinto Gomero.
+> - Componente `CheckupModal.tsx` con 4 plantillas diagnósticas con un clic, campos numéricos validados para grosor endometrial en `mm` y volumen uterino en `cc`, y sección de prescripción médica.
+> - Pantallas `/colposcopia` y `/chequeos` enriquecidas con layout master-detail (lista lateral con búsqueda instantánea + panel clínico detallado), acciones completas de edición y eliminación con confirmación SweetAlert2, y modal lightbox para ampliación fotográfica.
+> - Métodos `deleteColposcopyReport`, `updateClinicalCheckup` y `deleteClinicalCheckup` agregados al store Zustand.
+> - Tipado TypeScript verificado con compilación limpia (`npx tsc --noEmit` exit code 0).
 
 ### [ ] FASE 6: Motor de Exportación (PDF Institucional Inamovible + Fusión de Laboratorios + Excel)
 - [ ] **6.1.** Generador de PDF de **Informe de Colposcopía** e **Informe de Chequeo Ginecológico** con membrete de CENDO, firma digital del Dr. Patrick, fotos alineadas y reloj de biopsia renderizado, garantizando que jamás se muevan los márgenes ni las páginas.

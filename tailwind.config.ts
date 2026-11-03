@@ -52,6 +52,13 @@ const config: Config = {
       backdropBlur: {
         xs: "2px",
       },
+      spacing: {
+        "68": "17rem",
+      },
+      aspectRatio: {
+        "4/3": "4 / 3",
+        "16/10": "16 / 10",
+      },
     },
   },
   plugins: [],

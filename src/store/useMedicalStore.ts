@@ -373,11 +373,14 @@ interface MedicalStoreState {
   colposcopyReports: ColposcopyReport[];
   addColposcopyReport: (report: Omit<ColposcopyReport, "id" | "createdAt">) => ColposcopyReport;
   updateColposcopyReport: (id: string, updates: Partial<ColposcopyReport>) => void;
+  deleteColposcopyReport: (id: string) => void;
   getColposcopyByPatientId: (patientId: string) => ColposcopyReport[];
 
   // Chequeos y Ecografías
   clinicalCheckups: ClinicalCheckup[];
   addClinicalCheckup: (checkup: Omit<ClinicalCheckup, "id" | "createdAt">) => ClinicalCheckup;
+  updateClinicalCheckup: (id: string, updates: Partial<ClinicalCheckup>) => void;
+  deleteClinicalCheckup: (id: string) => void;
   getCheckupsByPatientId: (patientId: string) => ClinicalCheckup[];
 
   // Tarifario
@@ -513,6 +516,11 @@ export const useMedicalStore = create<MedicalStoreState>()(
           ),
         }));
       },
+      deleteColposcopyReport: (id) => {
+        set((state) => ({
+          colposcopyReports: state.colposcopyReports.filter((r) => r.id !== id),
+        }));
+      },
       getColposcopyByPatientId: (patientId) =>
         get().colposcopyReports.filter((r) => r.patientId === patientId),
 
@@ -529,6 +537,18 @@ export const useMedicalStore = create<MedicalStoreState>()(
           clinicalCheckups: [newCheckup, ...state.clinicalCheckups],
         }));
         return newCheckup;
+      },
+      updateClinicalCheckup: (id, updates) => {
+        set((state) => ({
+          clinicalCheckups: state.clinicalCheckups.map((c) =>
+            c.id === id ? { ...c, ...updates } : c
+          ),
+        }));
+      },
+      deleteClinicalCheckup: (id) => {
+        set((state) => ({
+          clinicalCheckups: state.clinicalCheckups.filter((c) => c.id !== id),
+        }));
       },
       getCheckupsByPatientId: (patientId) =>
         get().clinicalCheckups.filter((c) => c.patientId === patientId),
