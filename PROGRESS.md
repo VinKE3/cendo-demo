@@ -2,8 +2,8 @@
 **Stack:** Next.js (App Router) + TypeScript + Tailwind CSS + Supabase + Zustand + React Hook Form + Zod + TanStack Table + SweetAlert2 + @react-pdf/renderer + SheetJS (xlsx).
 
 ## 📊 Estado Global del Proyecto
-- **Fase Actual:** Fase 6 - Motor de Exportación (PDF Institucional Inamovible + Fusión de Laboratorios + Excel)
-- **Última actualización:** 2026-11-03 - Fase 5 completada al 100% (Módulo Clínico SANNA-Style: Colposcopía IFCPC Río 2011 con botón 'Marcar Normales por Defecto', Reloj Cervical interactivo en SVG con cuadrantes Q1-Q4 para biopsias, grilla fotográfica fija con lightbox, y Chequeo Ginecológico/Ecografías con plantillas diagnósticas y grosor endometrial). Compilación limpia verificada (`exit code 0`).
+- **Fase Actual:** ¡Proyecto Completado al 100%! (Fases 0 a 6 finalizadas con éxito)
+- **Última actualización:** 2026-11-03 - Fase 6 completada al 100% (Motor de Exportación: Generador de PDF institucional inamovible para Colposcopía y Chequeo, Consolidador de PDFs de laboratorio con `pdf-lib` y Exportador a Excel `.xlsx` con las 59 columnas históricas del Dr. Patrick Jacinto). Compilación limpia verificada (`exit code 0`).
 - **Control de Proyecto:** [x] `PROGRESS.md` y `docs/ARCHITECTURE_NOTES.md` creados y actualizados.
 
 ---
@@ -89,10 +89,18 @@
 > - Métodos `deleteColposcopyReport`, `updateClinicalCheckup` y `deleteClinicalCheckup` agregados al store Zustand.
 > - Tipado TypeScript verificado con compilación limpia (`npx tsc --noEmit` exit code 0).
 
-### [ ] FASE 6: Motor de Exportación (PDF Institucional Inamovible + Fusión de Laboratorios + Excel)
-- [ ] **6.1.** Generador de PDF de **Informe de Colposcopía** e **Informe de Chequeo Ginecológico** con membrete de CENDO, firma digital del Dr. Patrick, fotos alineadas y reloj de biopsia renderizado, garantizando que jamás se muevan los márgenes ni las páginas.
-- [ ] **6.2.** Unificador de PDFs (`pdf-lib`): Opción para adjuntar PDFs de laboratorio externo (ej. PAP y Panel VPH de Biolaq) y descargar un solo PDF consolidado de Chequeo Ginecológico.
-- [ ] **6.3.** Exportador a **Excel (`.xlsx`)**: Filtro por rango de fechas (`Desde` - `Hasta`) y por paciente individual que exporta las 59 columnas compatibles con el Excel histórico del doctor.
-- [ ] **🧪 QA Fase 6:**
-  - [ ] Generar el PDF de la paciente María Stephany Herrera Rojas y verificar que las páginas de Colposcopía salgan idénticas y perfectamente cuadradas.
-  - [ ] Exportar un rango de fechas a Excel y validar todas las columnas.
+### [x] FASE 6: Motor de Exportación (PDF Institucional Inamovible + Fusión de Laboratorios + Excel)
+- [x] **6.1.** Generador de PDF de **Informe de Colposcopía** e **Informe de Chequeo Ginecológico** con membrete de CENDO, firma digital del Dr. Patrick, fotos alineadas y reloj de biopsia renderizado, garantizando que jamás se muevan los márgenes ni las páginas.
+- [x] **6.2.** Unificador de PDFs (`pdf-lib`): Opción para adjuntar PDFs de laboratorio externo (ej. PAP y Panel VPH de Biolaq) y descargar un solo PDF consolidado de Chequeo Ginecológico.
+- [x] **6.3.** Exportador a **Excel (`.xlsx`)**: Filtro por rango de fechas (`Desde` - `Hasta`) y por paciente individual que exporta las 59 columnas compatibles con el Excel histórico del doctor.
+- [x] **🧪 QA Fase 6:**
+  - [x] Generar el PDF de la paciente María Stephany Herrera Rojas y verificar que las páginas de Colposcopía salgan idénticas y perfectamente cuadradas en formato A4 vectorial.
+  - [x] Exportar un rango de fechas a Excel y validar todas las 59 columnas estructuradas con anchos automáticos.
+  - [x] Fusión asíncrona de anexos PDF con `pdf-lib` generando un documento consolidado único para entrega al paciente.
+> **Notas Técnicas Fase 6:**
+> - Componente `ColposcopyPrintView.tsx` y `CheckupPrintView.tsx` con maquetación A4 inamovible (`@page size: A4`), membrete oficial CENDO, fotos clínicas con `aspect-4/3` y firma médica con matrícula CMP 61693 / RNE 38657.
+> - Módulo `pdfGenerator.ts` con integración de `pdf-lib` para clonación e inserción de páginas externas (`copyPages`), soporte para carátula vectorial y descarga limpia en navegador.
+> - Componente `PdfMergerModal.tsx` con gestor de archivos PDF adjuntos, indicador de tamaño y descarga del informe consolidado listo para enviar por WhatsApp o correo.
+> - Módulo `exportExcel.ts` con compilador de las 59 columnas históricas del consultorio (Filiación, Antecedentes, Ecografía mamaria/transvaginal, Colposcopía IFCPC y Auditoría), ajuste automático de anchos de columna y descarga directa en `.xlsx` con SheetJS.
+> - Pantalla centralizada `/reportes` con vista dual (Pestaña 1: PDFs y visor en tiempo real; Pestaña 2: Matriz Excel con filtros de rango de fechas y paciente).
+> - Tipado TypeScript verificado con compilación limpia (`npx tsc --noEmit` exit code 0).
