@@ -1,7 +1,7 @@
 -- ============================================================================
 -- CENDO: Centro de Endometriosis & Ginecología Especializada
 -- Director Médico: Dr. Patrick José Jacinto Gomero (CMP 61693 | RNE 38657)
--- MIGRACIÓN MAESTRA UNIFICADA (TODAS LAS ETAPAS A, B Y C)
+-- MIGRACIÓN MAESTRA UNIFICADA (TODAS LAS ETAPAS A, B Y C) - REVISIÓN ULTRA-SEGURA
 -- ============================================================================
 -- Instrucciones:
 -- Copia y pega TODO este archivo en el 'SQL Editor' de tu panel de Supabase
@@ -33,14 +33,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- 3. TABLA: patients (Directorio Maestro de Pacientes CENDO)
 CREATE TABLE IF NOT EXISTS public.patients (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    dni VARCHAR(20) UNIQUE NOT NULL,
     document_number VARCHAR(20),
     document_type TEXT DEFAULT 'DNI',
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
+    dni VARCHAR(20),
+    first_name TEXT,
+    last_name TEXT,
     full_name TEXT,
-    birth_date DATE NOT NULL,
-    age INTEGER NOT NULL,
+    birth_date DATE,
+    age INTEGER,
     phone TEXT,
     email TEXT,
     address TEXT,
@@ -55,10 +55,18 @@ CREATE TABLE IF NOT EXISTS public.patients (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Columnas añadidas para compatibilidad total:
+-- Garantizar la existencia de TODAS las columnas posibles en patients (incluso si la tabla ya existía):
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS dni VARCHAR(20);
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS document_number VARCHAR(20);
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS document_type TEXT DEFAULT 'DNI';
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS first_name TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS last_name TEXT;
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS birth_date DATE;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS age INTEGER;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS address TEXT;
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS district TEXT DEFAULT 'Miraflores';
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS civil_status TEXT DEFAULT 'Soltera';
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS occupation TEXT;
@@ -66,6 +74,10 @@ ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS education_level TEXT;
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS birth_place TEXT;
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS religion TEXT;
 ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS insurance_info TEXT DEFAULT 'Particular';
+
+-- Sincronizar dni <-> document_number si alguno estaba nulo:
+UPDATE public.patients SET dni = document_number WHERE dni IS NULL AND document_number IS NOT NULL;
+UPDATE public.patients SET document_number = dni WHERE document_number IS NULL AND dni IS NOT NULL;
 
 -- 4. TABLA: patient_backgrounds (Antecedentes Gineco-Obstétricos & Patológicos)
 CREATE TABLE IF NOT EXISTS public.patient_backgrounds (
@@ -92,12 +104,24 @@ CREATE TABLE IF NOT EXISTS public.patient_backgrounds (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS menarche INTEGER;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS sexual_debut_age INTEGER;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS sexual_partners_count INTEGER;
 ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS catamenial_regimen TEXT;
 ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS sti_history TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS obstetric_formula VARCHAR(30) DEFAULT 'G0 P0000';
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS contraceptive_method TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS last_menstrual_period DATE;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS pap_history TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS vph_test_history TEXT;
 ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS has_diabetes TEXT DEFAULT 'Niega';
 ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS has_hypertension TEXT DEFAULT 'Niega';
 ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS has_asthma TEXT DEFAULT 'Niega';
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS medical_allergies TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS surgeries_history TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS family_history TEXT;
 ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS other_pathologies TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS notes TEXT;
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_patient_backgrounds_patient_id ON public.patient_backgrounds(patient_id);
 
@@ -130,6 +154,17 @@ CREATE TABLE IF NOT EXISTS public.colposcopy_reports (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS squamocolumnar_junction_visible TEXT DEFAULT 'Visible';
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS transformation_zone_type TEXT DEFAULT 'Tipo 1';
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS schiller_test TEXT DEFAULT 'Negativo';
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS cervical_biopsy_taken BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS biopsy_clock_hours JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS diagnosis TEXT;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS plan_recommendations TEXT;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS cie10_code VARCHAR(15) DEFAULT 'Z01.4';
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+
 -- 6. TABLA: clinical_checkups (Chequeos Ginecológicos Integrales)
 CREATE TABLE IF NOT EXISTS public.clinical_checkups (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -149,6 +184,18 @@ CREATE TABLE IF NOT EXISTS public.clinical_checkups (
     medical_prescription TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS breast_ultrasound_findings TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS breast_ultrasound_birads TEXT DEFAULT 'BI-RADS 1';
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS breast_lesion_measurements TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS transvaginal_ultrasound_findings TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS uterus_measurements TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS endometrium_thickness_mm NUMERIC(5,2);
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS ovaries_findings TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS pap_result TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS vph_result TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS conclusions TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS medical_prescription TEXT;
 
 -- 7. TABLA: medical_prescriptions (Etapa A - Recetario Inteligente)
 CREATE TABLE IF NOT EXISTS public.medical_prescriptions (
@@ -391,16 +438,16 @@ USING (bucket_id = 'clinical-images')
 WITH CHECK (bucket_id = 'clinical-images');
 
 -- ============================================================================
--- INSERT DE LOS 5 CASOS CLÍNICOS REALES CON UUIDs DETERMINÍSTICOS
+-- INSERT / UPSERT DE LOS 5 CASOS CLÍNICOS REALES CON ON CONFLICT (id)
 -- ============================================================================
 INSERT INTO public.patients (
-    id, dni, document_number, document_type, first_name, last_name, full_name, birth_date, age, phone, email, address, district, civil_status, occupation, education_level, birth_place, religion, insurance_info
+    id, document_number, document_type, dni, first_name, last_name, full_name, birth_date, age, phone, email, address, district, civil_status, occupation, education_level, birth_place, religion, insurance_info
 ) VALUES
 (
     '10000000-0000-0000-0000-000000000001',
     '73819204',
-    '73819204',
     'DNI',
+    '73819204',
     'LUCIANA MARÍA',
     'RAMOS FIGUEROA',
     'RAMOS FIGUEROA, LUCIANA MARÍA',
@@ -420,8 +467,8 @@ INSERT INTO public.patients (
 (
     '10000000-0000-0000-0000-000000000002',
     '75294816',
-    '75294816',
     'DNI',
+    '75294816',
     'FIORELLA BEATRÍZ',
     'MENDOZA CHÁVEZ',
     'MENDOZA CHÁVEZ, FIORELLA BEATRÍZ',
@@ -441,8 +488,8 @@ INSERT INTO public.patients (
 (
     '10000000-0000-0000-0000-000000000003',
     '71628493',
-    '71628493',
     'DNI',
+    '71628493',
     'GABRIELA ALEJANDRA',
     'PAREDES VÍLCHEZ',
     'PAREDES VÍLCHEZ, GABRIELA ALEJANDRA',
@@ -462,8 +509,8 @@ INSERT INTO public.patients (
 (
     '10000000-0000-0000-0000-000000000004',
     '74195820',
-    '74195820',
     'DNI',
+    '74195820',
     'DANIELA FERNANDA',
     'CASTRO MORALES',
     'CASTRO MORALES, DANIELA FERNANDA',
@@ -483,8 +530,8 @@ INSERT INTO public.patients (
 (
     '10000000-0000-0000-0000-000000000005',
     '09482715',
-    '09482715',
     'DNI',
+    '09482715',
     'CARMEN ROSA',
     'HUAMÁN QUISPE',
     'HUAMÁN QUISPE, CARMEN ROSA',
@@ -501,8 +548,11 @@ INSERT INTO public.patients (
     'Católica',
     'PACIFICO EPS'
 )
-ON CONFLICT (dni) DO UPDATE SET
+ON CONFLICT (id) DO UPDATE SET
     document_number = EXCLUDED.document_number,
+    dni = EXCLUDED.dni,
+    first_name = EXCLUDED.first_name,
+    last_name = EXCLUDED.last_name,
     full_name = EXCLUDED.full_name,
     civil_status = EXCLUDED.civil_status,
     occupation = EXCLUDED.occupation,
@@ -527,4 +577,11 @@ INSERT INTO public.profiles (
     'Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima',
     '985 945 697',
     'cendoperu@gmail.com'
-) ON CONFLICT (email) DO NOTHING;
+) ON CONFLICT (email) DO UPDATE SET
+    full_name = EXCLUDED.full_name,
+    doctor_title = EXCLUDED.doctor_title,
+    cmp = EXCLUDED.cmp,
+    rne = EXCLUDED.rne,
+    clinic_name = EXCLUDED.clinic_name,
+    clinic_address = EXCLUDED.clinic_address,
+    updated_at = NOW();
