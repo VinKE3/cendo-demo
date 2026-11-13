@@ -123,3 +123,61 @@
   - Generación de enlaces `https://wa.me/51...` con formato clínico respetuoso para enviar resúmenes de colposcopía y chequeos preventivos.
   - Botón "Enviar a Paciente por WhatsApp" habilitado en `/colposcopia`, `/pacientes/[id]` y `/reportes`.
 - [x] **Verificación de Tipos:** `npx tsc --noEmit` ejecutado con éxito (código de salida 0, 0 errores).
+
+---
+
+## 🚀 FASE 7: DEMO 2.0 & ETAPA A (Formatos Clínicos Críticos, Prescripción y Control Prenatal)
+**Líder Técnico:** Senior Medical Systems Architect (Gobernanza Clínica & SUSALUD)  
+**Objetivo de Fase:** Implementar los requerimientos clave solicitados por el Dr. Patrick Jacinto con ciclo de vida riguroso: Diseño -> Implementación -> Verificación Unitaria -> Prueba de Integración de Etapa A.
+
+### [x] 7.0 Gobernanza Médica, Multi-Usuario y Blindaje de Acceso (Completado)
+- [x] **7.0.1.** Rediseño y blindaje total de `/login`: Formulario institucional limpio, eliminación de contraseñas públicas expuestas, modal de recuperación conforme a Ley N° 29733 con conexión directa a Dirección Médica por WhatsApp.
+- [x] **7.0.2.** Módulo de Equipo Médico y Gestión de Usuarios (`/usuarios`): Panel exclusivo para el Dr. Patrick como Director Médico, alta de nuevos especialistas con validación de CMP y RNE, generador de contraseñas seguras, reseteo de claves y copia de credenciales de acceso para WhatsApp.
+- [x] **7.0.3.** Dinamismo total en emisión de informes y sellos: Inyección automática del médico en sesión activa en cabeceras, colposcopías y chequeos, con selector de médico evaluador en `/reportes` y respeto de género (`Dr.` / `Dra.`).
+- [x] **🧪 QA 7.0:** Verificación limpia con `npx tsc --noEmit` (exit code 0).
+
+---
+
+### [ ] 7.1 WP-A.1: Recetario Médico Inteligente Conectado al Vademécum
+- [ ] **7.1.1.** Contratos de datos (`src/types/medical.ts`): Interfaz `MedicalPrescriptionItem` (fármaco, presentación, dosis seleccionada, vía de administración, frecuencia, duración de tratamiento, indicaciones) y `MedicalPrescription` (pacienteId, doctorId, fecha, diagnóstico CIE-10, ítems, indicaciones generales).
+- [ ] **7.1.2.** Estado global en Zustand (`useMedicalStore.ts`): Acciones `addPrescription`, `updatePrescription`, `deletePrescription`, `getPrescriptionsByPatientId`.
+- [ ] **7.1.3.** Selector de Posología y Dosis en 1 Clic (`src/components/recetas/PrescriptionModal.tsx`): Integración con el vademécum (Mupirocina, Ginedazol, Vagitrol, Doxiciclina, Apronax/Flanax, etc.) con sugerencias automáticas de dosificación según la vía (vaginal, oral, tópica).
+- [ ] **7.1.4.** Plantilla de Impresión de Receta Médica Oficial (`src/components/export/PrescriptionPrintView.tsx`): Formato institucional A5/A4 con membrete CENDO Miraflores, datos de paciente, símbolo **RP/**, detalle posológico claro, firma/sello digital del médico y botón de envío directo por WhatsApp.
+- [ ] **🧪 QA 7.1 (Prueba Unitaria):**
+  - Emitir receta para María Stephany Herrera con Ginedazol (1 óvulo cada 24h x 7 días) y Flanax 550mg (1 tab c/8h condicional al dolor).
+  - Validar renderizado de impresión y despacho WhatsApp.
+
+---
+
+### [ ] 7.2 WP-A.2: Grilla Colposcópica IFCPC 2011 Exhaustiva (Zero-Whitespace)
+- [ ] **7.2.1.** Mapeo estricto de criterios IFCPC en tipos y formulario: Hallazgos normales, Grado 1 (menor), Grado 2 (mayor), Sospecha de invasión y Hallazgos misceláneos.
+- [ ] **7.2.2.** Rediseño de la sección IFCPC en `ColposcopyPrintView.tsx`: Tabla médica estandarizada de 2 columnas donde cada criterio aparece explícitamente con casillas `[✓] Presente` o `[ ] Ausente / Negativo`, eliminando cualquier vacío en el informe legal.
+- [ ] **🧪 QA 7.2 (Prueba Unitaria):**
+  - Generar informe colposcópico y verificar que todas las categorías muestren su estado explícito sin espacios en blanco.
+
+---
+
+### [ ] 7.3 WP-A.3: Motor de Órdenes de Laboratorio Clínico Especializado
+- [ ] **7.3.1.** Contratos de datos (`src/types/medical.ts`): Interfaz `LabOrder` (categorías, análisis seleccionados, diagnóstico presuntivo CIE-10, notas para el laboratorio, doctor solicitante).
+- [ ] **7.3.2.** Estado global en Zustand: Métodos para emitir, guardar y listar órdenes de laboratorio por paciente.
+- [ ] **7.3.3.** Modal de Selección Rápida (`src/components/laboratorio/LabOrderModal.tsx`): Checkboxes de exámenes ginecológicos frecuentes (Hematología, Perfil ovárico/tiroideo, CA-125, PAP Base Líquida, Panel VPH PCR, Urocultivo, Perfil prenatal) + campo libre.
+- [ ] **7.3.4.** Formato de Impresión Oficial (`src/components/export/LabOrderPrintView.tsx`): Hoja membretada CENDO A5/A4 con análisis marcados, firma del especialista y envío por WhatsApp.
+- [ ] **🧪 QA 7.3 (Prueba Unitaria):**
+  - Emitir orden para panel VPH + CA-125 y validar PDF y WhatsApp.
+
+---
+
+### [ ] 7.4 WP-A.4: Carnet de Control Prenatal Oficial (MINSA / CLAP)
+- [ ] **7.4.1.** Contratos de datos (`src/types/medical.ts`): Modelado de la ficha basal prenatal (filiación, antecedentes obstétricos G_P____, laboratorios de tamizaje) y las 9 atenciones de control prenatal.
+- [ ] **7.4.2.** Calculadora Obstétrica Automática: Algoritmo de Regla de Naegele para FPP ($\text{FUR} + 7\text{ días} - 3\text{ meses} + 1\text{ año}$) y cálculo automático de Edad Gestacional (semanas + días).
+- [ ] **7.4.3.** Vista y Modal de Control Prenatal (`src/components/prenatal/PrenatalCardModal.tsx`): Matriz interactiva de 9 columnas basada fielmente en las fotos enviadas por el Dr. Patrick.
+- [ ] **7.4.4.** Formato de Impresión Oficial A4 de 2 Páginas (`src/components/export/PrenatalPrintView.tsx`): Diagramación exacta del carnet MINSA/CLAP.
+- [ ] **🧪 QA 7.4 (Prueba Unitaria):**
+  - Crear ficha gestante con FUR real, verificar FPP y registrar Atenciones 1 y 2.
+
+---
+
+### [ ] 7.5 Prueba de Integración & Auditoría Final de Etapa A (Stage Gate Review)
+- [ ] **7.5.1.** Compilación general TypeScript sin advertencias (`npx tsc --noEmit` exit code 0).
+- [ ] **7.5.2.** Flujo clínico integrado: Desde una paciente, emitir Consulta -> Receta inteligente -> Orden de Laboratorio -> Colposcopía con grilla completa -> Carnet Prenatal.
+- [ ] **7.5.3.** Verificación de fidelidad visual en generación de PDFs y despacho por WhatsApp.
