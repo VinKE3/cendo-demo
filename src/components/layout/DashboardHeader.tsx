@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   Search,
   Menu,
@@ -77,20 +78,24 @@ export function DashboardHeader({
         </div>
 
         {/* Tarjeta de Sesión Activa del Doctor */}
-        <div className="flex items-center gap-3 pl-2 sm:border-l sm:border-border">
+        <Link
+          href="/usuarios"
+          className="flex items-center gap-3 pl-2 sm:border-l sm:border-border group hover:opacity-90 transition-opacity"
+          title="Ver Equipo Médico y cambiar especialista activo"
+        >
           <div className="hidden sm:block text-right leading-tight">
-            <p className="text-xs font-heading font-bold text-heading">
-              {doctorProfile.fullName}
+            <p className="text-xs font-heading font-bold text-heading group-hover:text-primary transition-colors">
+              {doctorProfile.doctorTitle} {doctorProfile.fullName}
             </p>
             <p className="text-[10px] text-muted font-mono">
               CMP {doctorProfile.cmp} &bull; RNE {doctorProfile.rne}
             </p>
           </div>
 
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-[#0E6386] text-white font-bold text-xs flex items-center justify-center shadow-xs">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-[#0E6386] text-white font-bold text-xs flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
             {doctorInitials}
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );

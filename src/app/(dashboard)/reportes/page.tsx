@@ -40,6 +40,7 @@ export default function ReportesPage() {
     colposcopyReports,
     clinicalCheckups,
     doctorProfile,
+    doctorsList,
   } = useMedicalStore();
 
   const [activeTab, setActiveTab] = useState<"pdf" | "excel">("pdf");
@@ -51,6 +52,12 @@ export default function ReportesPage() {
   const [reportType, setReportType] = useState<"colpo" | "checkup">("colpo");
   const [includeCover, setIncludeCover] = useState(true);
   const [isMergerModalOpen, setIsMergerModalOpen] = useState(false);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>(doctorProfile.id);
+
+  // Médico Firmante Dinámico
+  const signingDoctor = useMemo(() => {
+    return (doctorsList || []).find((d) => d.id === selectedDoctorId) || doctorProfile;
+  }, [doctorsList, selectedDoctorId, doctorProfile]);
 
   // Estado para Pestaña Excel
   const [excelPatientId, setExcelPatientId] = useState<string>("all");
@@ -197,11 +204,11 @@ export default function ReportesPage() {
           {/* Barra de Control y Configuración del PDF */}
           <div className="p-4 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 max-w-2xl text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1 max-w-3xl text-xs">
                 {/* Selector de Paciente */}
                 <div className="space-y-1">
                   <label className="font-bold text-heading uppercase text-[10px] tracking-wider block">
-                    Seleccionar Paciente:
+                    1. Paciente Evaluada:
                   </label>
                   <select
                     value={selectedPatientId}
@@ -219,15 +226,33 @@ export default function ReportesPage() {
                 {/* Selector de Tipo de Informe */}
                 <div className="space-y-1">
                   <label className="font-bold text-heading uppercase text-[10px] tracking-wider block">
-                    Tipo de Informe a Emitir:
+                    2. Formato Clínico:
                   </label>
                   <select
                     value={reportType}
                     onChange={(e) => setReportType(e.target.value as any)}
                     className="w-full px-3 py-2 rounded-xl border border-border bg-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
-                    <option value="colpo">Informe de Colposcopía Especializada (IFCPC)</option>
-                    <option value="checkup">Informe de Chequeo Ginecológico & Ecografías</option>
+                    <option value="colpo">Colposcopía Especializada (IFCPC)</option>
+                    <option value="checkup">Chequeo Ginecológico & Ecografías</option>
+                  </select>
+                </div>
+
+                {/* Selector de Médico Evaluador / Firma y Sello */}
+                <div className="space-y-1">
+                  <label className="font-bold text-heading uppercase text-[10px] tracking-wider block">
+                    3. Médico Evaluador / Sello:
+                  </label>
+                  <select
+                    value={selectedDoctorId}
+                    onChange={(e) => setSelectedDoctorId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    {(doctorsList || []).map((doc) => (
+                      <option key={doc.id} value={doc.id}>
+                        {doc.doctorTitle} {doc.fullName} (CMP {doc.cmp})
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -239,9 +264,9 @@ export default function ReportesPage() {
                     onClick={() => {
                       let url = "";
                       if (reportType === "colpo" && currentColpo) {
-                        url = generateColposcopyWhatsAppUrl(currentPatient, currentColpo, doctorProfile);
+                        url = generateColposcopyWhatsAppUrl(currentPatient, currentColpo, signingDoctor);
                       } else if (reportType === "checkup" && currentCheckup) {
-                        url = generateCheckupWhatsAppUrl(currentPatient, currentCheckup, doctorProfile);
+                        url = generateCheckupWhatsAppUrl(currentPatient, currentCheckup, signingDoctor);
                       }
                       if (url) {
                         window.open(url, "_blank");
@@ -309,7 +334,7 @@ export default function ReportesPage() {
               {includeCover && currentPatient && (
                 <CendoCoverPage
                   patient={currentPatient}
-                  doctor={doctorProfile}
+                  doctor={signingDoctor}
                   documentTitle={
                     reportType === "colpo"
                       ? "COLPOSCOPÍA ESPECIALIZADA"
@@ -323,7 +348,7 @@ export default function ReportesPage() {
                 <ColposcopyPrintView
                   report={currentColpo}
                   patient={currentPatient}
-                  doctor={doctorProfile}
+                  doctor={signingDoctor}
                 />
               )}
 
@@ -337,7 +362,7 @@ export default function ReportesPage() {
                 <CheckupPrintView
                   checkup={currentCheckup}
                   patient={currentPatient}
-                  doctor={doctorProfile}
+                  doctor={signingDoctor}
                 />
               )}
 
@@ -356,7 +381,7 @@ export default function ReportesPage() {
               onClose={() => setIsMergerModalOpen(false)}
               patient={currentPatient}
               checkup={currentCheckup}
-              doctor={doctorProfile}
+              doctor={signingDoctor}
             />
           )}
         </div>

@@ -16,21 +16,88 @@ import {
   syncColposcopyToSupabase,
 } from "@/lib/supabaseSync";
 
-// Datos Iniciales del Dr. Patrick José Jacinto Gomero
-export const INITIAL_DOCTOR: DoctorProfile = {
-  id: "doc-patrick-jacinto",
-  email: "cendoperu@gmail.com",
-  fullName: "Patrick José Jacinto Gomero",
-  doctorTitle: "Dr.",
-  specialty: "Ginecólogo Obstetra",
-  cmp: "61693",
-  rne: "38657",
-  clinicName: "CENDO - Centro de Endometriosis",
-  clinicAddress: "Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima",
-  phone: "985 945 697",
-  contactEmail: "cendoperu@gmail.com",
-  avatarUrl: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=300&auto=format&fit=crop",
-};
+// Lista Inicial de Médicos y Especialistas CENDO
+export const INITIAL_DOCTORS: DoctorProfile[] = [
+  {
+    id: "doc-patrick-jacinto",
+    email: "cendoperu@gmail.com",
+    password: "pjacinto@cendo",
+    fullName: "Patrick José Jacinto Gomero",
+    doctorTitle: "Dr.",
+    specialty: "Ginecología y Obstetricia - Endometriosis y Colposcopía",
+    cmp: "61693",
+    rne: "38657",
+    clinicName: "CENDO - Centro de Endometriosis",
+    clinicAddress: "Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima",
+    phone: "985 945 697",
+    contactEmail: "cendoperu@gmail.com",
+    avatarUrl: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=300&auto=format&fit=crop",
+    signatureUrl: "",
+    role: "director",
+    isActive: true,
+    createdAt: "2026-11-01T00:00:00Z",
+  },
+  {
+    id: "doc-jose-carrasco",
+    email: "jcarrasco@cendo.pe",
+    password: "jcarrasco@cendo",
+    fullName: "José Luis Carrasco Pérez",
+    doctorTitle: "Dr.",
+    specialty: "Ginecología Oncológica y Patología Cervical",
+    cmp: "58412",
+    rne: "34910",
+    clinicName: "CENDO - Centro de Endometriosis",
+    clinicAddress: "Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima",
+    phone: "981 234 567",
+    contactEmail: "jcarrasco@cendo.pe",
+    avatarUrl: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=300&auto=format&fit=crop",
+    signatureUrl: "",
+    role: "doctor",
+    isActive: true,
+    createdAt: "2026-11-01T00:00:00Z",
+  },
+  {
+    id: "doc-scheiler-jacinto",
+    email: "sjacinto@cendo.pe",
+    password: "sjacinto@cendo",
+    fullName: "Scheiler José Jacinto Gomero",
+    doctorTitle: "Dr.",
+    specialty: "Cirugía Ginecológica Mínimamente Invasiva y Fertilidad",
+    cmp: "65219",
+    rne: "40112",
+    clinicName: "CENDO - Centro de Endometriosis",
+    clinicAddress: "Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima",
+    phone: "993 876 543",
+    contactEmail: "sjacinto@cendo.pe",
+    avatarUrl: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=300&auto=format&fit=crop",
+    signatureUrl: "",
+    role: "doctor",
+    isActive: true,
+    createdAt: "2026-11-01T00:00:00Z",
+  },
+  {
+    id: "doc-valeria-mendoza",
+    email: "vmendoza@cendo.pe",
+    password: "vmendoza@cendo",
+    fullName: "Valeria Mendoza Quiroz",
+    doctorTitle: "Dra.",
+    specialty: "Ginecología y Ecografía Doppler Fetal / Ginecológica",
+    cmp: "70432",
+    rne: "42180",
+    clinicName: "CENDO - Centro de Endometriosis",
+    clinicAddress: "Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima",
+    phone: "994 555 123",
+    contactEmail: "vmendoza@cendo.pe",
+    avatarUrl: "https://images.unsplash.com/photo-1594824813583-0599c9c8e1a1?q=80&w=300&auto=format&fit=crop",
+    signatureUrl: "",
+    role: "doctor",
+    isActive: true,
+    createdAt: "2026-11-01T00:00:00Z",
+  },
+];
+
+// Perfil Activo Inicial: Dr. Patrick José Jacinto Gomero (Director Médico)
+export const INITIAL_DOCTOR: DoctorProfile = INITIAL_DOCTORS[0];
 
 // Paciente Semilla Real: María Stephany Herrera Rojas
 export const INITIAL_PATIENTS: Patient[] = [
@@ -354,12 +421,22 @@ export const INITIAL_VADEMECUM: MedicationVademecum[] = [
 
 // Estado Global del Sistema Médico
 interface MedicalStoreState {
-  // Autenticación y Médico
+  // Autenticación, Médicos y Usuarios
+  doctorsList: DoctorProfile[];
   doctorProfile: DoctorProfile;
   isAuthenticated: boolean;
   userRole: "doctor" | "admin" | "assistant";
   loginDemo: () => void;
   loginCustom: (email: string) => void;
+  loginWithCredentials: (
+    email: string,
+    password?: string
+  ) => { success: boolean; doctor?: DoctorProfile; error?: string };
+  switchActiveDoctor: (doctorId: string) => void;
+  addDoctor: (doctor: Omit<DoctorProfile, "id" | "createdAt">) => DoctorProfile;
+  updateDoctor: (id: string, updates: Partial<DoctorProfile>) => void;
+  deleteDoctor: (id: string) => { success: boolean; error?: string };
+  toggleDoctorActive: (id: string) => void;
   logout: () => void;
 
   // Pacientes
@@ -408,23 +485,138 @@ interface MedicalStoreState {
 export const useMedicalStore = create<MedicalStoreState>()(
   persist(
     (set, get) => ({
+      // MÉDICOS Y EQUIPO ASISTENCIAL
+      doctorsList: INITIAL_DOCTORS,
       doctorProfile: INITIAL_DOCTOR,
       isAuthenticated: false,
-      userRole: "doctor",
+      userRole: "admin",
 
       loginDemo: () => {
+        const state = get();
+        const patrick = (state.doctorsList || INITIAL_DOCTORS).find(
+          (d) => d.id === "doc-patrick-jacinto"
+        ) || INITIAL_DOCTOR;
         set({
           isAuthenticated: true,
-          userRole: "doctor",
-          doctorProfile: INITIAL_DOCTOR,
+          userRole: "admin",
+          doctorProfile: patrick,
         });
       },
 
       loginCustom: (email: string) => {
+        const state = get();
+        const list = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+        const found = list.find((d) => d.email.toLowerCase() === email.trim().toLowerCase());
+        const doctor = found || { ...INITIAL_DOCTOR, email };
         set({
           isAuthenticated: true,
-          userRole: "doctor",
-          doctorProfile: { ...INITIAL_DOCTOR, email },
+          userRole: doctor.role === "director" ? "admin" : "doctor",
+          doctorProfile: doctor,
+        });
+      },
+
+      loginWithCredentials: (email: string, password?: string) => {
+        const state = get();
+        const cleanEmail = email.trim().toLowerCase();
+        const list = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+        const found = list.find((d) => d.email.toLowerCase() === cleanEmail);
+
+        if (!found) {
+          return {
+            success: false,
+            error: "El correo electrónico no se encuentra registrado en el sistema CENDO.",
+          };
+        }
+
+        if (!found.isActive) {
+          return {
+            success: false,
+            error: "Esta cuenta médica se encuentra inactiva. Contacte al Director Médico (Dr. Patrick Jacinto).",
+          };
+        }
+
+        if (password && found.password && found.password !== password) {
+          return {
+            success: false,
+            error: "Contraseña incorrecta. Verifique sus credenciales institucionales.",
+          };
+        }
+
+        set({
+          doctorProfile: found,
+          isAuthenticated: true,
+          userRole: found.role === "director" ? "admin" : "doctor",
+        });
+
+        return { success: true, doctor: found };
+      },
+
+      switchActiveDoctor: (doctorId: string) => {
+        const state = get();
+        const list = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+        const found = list.find((d) => d.id === doctorId);
+        if (found) {
+          set({
+            doctorProfile: found,
+            isAuthenticated: true,
+            userRole: found.role === "director" ? "admin" : "doctor",
+          });
+        }
+      },
+
+      addDoctor: (doctorData) => {
+        const id = `doc-${Date.now()}`;
+        const newDoctor: DoctorProfile = {
+          ...doctorData,
+          id,
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => {
+          const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+          return {
+            doctorsList: [...currentList, newDoctor],
+          };
+        });
+        return newDoctor;
+      },
+
+      updateDoctor: (id, updates) => {
+        set((state) => {
+          const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+          const updatedList = currentList.map((d) => (d.id === id ? { ...d, ...updates } : d));
+          const updatedActive = state.doctorProfile.id === id ? { ...state.doctorProfile, ...updates } : state.doctorProfile;
+          return {
+            doctorsList: updatedList,
+            doctorProfile: updatedActive,
+          };
+        });
+      },
+
+      deleteDoctor: (id) => {
+        if (id === "doc-patrick-jacinto") {
+          return {
+            success: false,
+            error: "No se puede eliminar la cuenta del Director Médico Principal (Dr. Patrick Jacinto).",
+          };
+        }
+        set((state) => {
+          const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+          const filtered = currentList.filter((d) => d.id !== id);
+          const newActive = state.doctorProfile.id === id ? (filtered[0] || INITIAL_DOCTOR) : state.doctorProfile;
+          return {
+            doctorsList: filtered,
+            doctorProfile: newActive,
+          };
+        });
+        return { success: true };
+      },
+
+      toggleDoctorActive: (id) => {
+        if (id === "doc-patrick-jacinto") return;
+        set((state) => {
+          const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+          const updated = currentList.map((d) => (d.id === id ? { ...d, isActive: !d.isActive } : d));
+          return { doctorsList: updated };
         });
       },
 
@@ -627,6 +819,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
       // RESET
       resetToSeedData: () => {
         set({
+          doctorsList: INITIAL_DOCTORS,
           doctorProfile: INITIAL_DOCTOR,
           patients: INITIAL_PATIENTS,
           backgrounds: INITIAL_BACKGROUNDS,

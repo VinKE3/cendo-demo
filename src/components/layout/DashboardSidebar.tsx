@@ -19,6 +19,7 @@ import {
   Building,
   Sparkles,
   RotateCcw,
+  UserCheck,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { BrandLogo } from "@/components/layout/BrandLogo";
@@ -116,6 +117,12 @@ export function DashboardSidebar({
       href: "/reportes",
       icon: Download,
       badge: "XLSX",
+    },
+    {
+      name: "Equipo Médico & Usuarios",
+      href: "/usuarios",
+      icon: UserCheck,
+      badge: "Staff",
     },
   ];
 
@@ -243,19 +250,23 @@ export function DashboardSidebar({
         <div className="p-3 border-t border-border bg-slate-50/60 space-y-2">
           {!isCollapsed ? (
             <div className="p-2.5 rounded-xl bg-surface border border-border/80 shadow-2xs space-y-2">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 text-primary font-bold text-xs flex items-center justify-center shrink-0">
+              <Link
+                href="/usuarios"
+                className="flex items-center gap-2.5 p-1 -m-1 rounded-lg hover:bg-slate-100 transition-colors group"
+                title="Administrar Equipo Médico y Credenciales"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 text-primary group-hover:bg-primary group-hover:text-white font-bold text-xs flex items-center justify-center shrink-0 transition-colors">
                   {doctorInitials}
                 </div>
                 <div className="overflow-hidden leading-tight">
-                  <p className="text-xs font-heading font-bold text-heading truncate">
-                    {doctorProfile.fullName}
+                  <p className="text-xs font-heading font-bold text-heading group-hover:text-primary transition-colors truncate">
+                    {doctorProfile.doctorTitle} {doctorProfile.fullName}
                   </p>
                   <p className="text-[10px] text-muted font-mono truncate">
                     CMP {doctorProfile.cmp} &bull; RNE {doctorProfile.rne}
                   </p>
                 </div>
-              </div>
+              </Link>
 
               <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[10px]">
                 <button

@@ -1,8 +1,11 @@
+export type DoctorRole = "director" | "doctor" | "assistant";
+
 export interface DoctorProfile {
   id: string;
   email: string;
+  password?: string;
   fullName: string;
-  doctorTitle: string;
+  doctorTitle: string; // "Dr." | "Dra." | "Lic."
   specialty: string;
   cmp: string;
   rne: string;
@@ -11,6 +14,10 @@ export interface DoctorProfile {
   phone: string;
   contactEmail: string;
   avatarUrl?: string;
+  signatureUrl?: string;
+  role: DoctorRole;
+  isActive: boolean;
+  createdAt?: string;
 }
 
 export interface Patient {

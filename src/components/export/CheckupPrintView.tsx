@@ -230,11 +230,11 @@ export function CheckupPrintView({
           <div className="text-center space-y-0.5 min-w-[230px]">
             <div className="h-8 border-b border-slate-400 flex items-center justify-center">
               <span className="font-serif italic text-primary/70 text-sm select-none">
-                Dr. {doctorDisplayName}
+                {doctor.doctorTitle || "Dr."} {doctorDisplayName}
               </span>
             </div>
             <p className="font-heading font-extrabold text-slate-900 text-xs">
-              DR. {doctorDisplayName.toUpperCase()}
+              {(doctor.doctorTitle || "DR.").toUpperCase()} {doctorDisplayName.toUpperCase()}
             </p>
             <p className="text-[9.5px] text-slate-600 font-mono">
               {doctor.specialty} &bull; CMP {doctor.cmp} &bull; RNE {doctor.rne}
