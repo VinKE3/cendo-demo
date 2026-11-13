@@ -120,3 +120,23 @@ ALTER TABLE procedure_quotes DISABLE ROW LEVEL SECURITY;
 ALTER TABLE medical_appointments DISABLE ROW LEVEL SECURITY;
 ALTER TABLE word_history_documents DISABLE ROW LEVEL SECURITY;
 
+-- 7. Campos Oficiales de Modelo Clínico CENDO (Dr. Patrick Jacinto)
+-- En pacientes:
+ALTER TABLE patients ADD COLUMN IF NOT EXISTS civil_status TEXT;
+ALTER TABLE patients ADD COLUMN IF NOT EXISTS occupation TEXT;
+ALTER TABLE patients ADD COLUMN IF NOT EXISTS education_level TEXT;
+ALTER TABLE patients ADD COLUMN IF NOT EXISTS birth_place TEXT;
+ALTER TABLE patients ADD COLUMN IF NOT EXISTS religion TEXT;
+
+-- En antecedentes:
+ALTER TABLE patient_backgrounds ADD COLUMN IF NOT EXISTS catamenial_regimen TEXT;
+ALTER TABLE patient_backgrounds ADD COLUMN IF NOT EXISTS sti_history TEXT;
+ALTER TABLE patient_backgrounds ADD COLUMN IF NOT EXISTS has_diabetes TEXT;
+ALTER TABLE patient_backgrounds ADD COLUMN IF NOT EXISTS has_hypertension TEXT;
+ALTER TABLE patient_backgrounds ADD COLUMN IF NOT EXISTS has_asthma TEXT;
+ALTER TABLE patient_backgrounds ADD COLUMN IF NOT EXISTS other_pathologies TEXT;
+
+-- En consultas médicas:
+ALTER TABLE medical_consultations ADD COLUMN IF NOT EXISTS auxiliary_exams TEXT;
+ALTER TABLE medical_consultations ADD COLUMN IF NOT EXISTS prescription_notes TEXT;
+

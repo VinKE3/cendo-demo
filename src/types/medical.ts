@@ -32,6 +32,9 @@ export interface Patient {
   address: string;
   civilStatus: string;
   occupation: string;
+  educationLevel?: string; // Grado de instrucción
+  birthPlace?: string; // Lugar de nacimiento
+  religion?: string; // Religión
   insuranceInfo?: string;
   createdAt: string;
   updatedAt: string;
@@ -43,14 +46,20 @@ export interface PatientBackground {
   menarche?: number;
   sexualDebutAge?: number;
   sexualPartnersCount?: number;
+  catamenialRegimen?: string; // R/C (Régimen Catamenial, ej. "28/4")
+  stiHistory?: string; // ITS (Infecciones de transmisión sexual)
   obstetricFormula: string; // G_ P____
   contraceptiveMethod: string;
   lastMenstrualPeriod: string; // FUR (YYYY-MM-DD)
   papHistory: string;
   vphTestHistory: string;
+  hasDiabetes?: string; // "Niega" | "Sí"
+  hasHypertension?: string; // "Niega" | "Sí"
+  hasAsthma?: string; // "Niega" | "Sí"
   medicalAllergies: string;
   surgeriesHistory: string;
   familyHistory: string;
+  otherPathologies?: string; // Otros antecedentes generales
   notes?: string;
   updatedAt: string;
 }
@@ -392,7 +401,9 @@ export interface PatientDocument {
 export interface ConsultationVitalSigns {
   bloodPressure: string; // ej. "110/70"
   heartRate: number; // lpm
+  respiratoryRate?: number; // rpm (Frecuencia respiratoria)
   temperature: number; // °C
+  oxygenSaturation?: number; // % (Saturación de O2)
   weightKg: number; // kg
   heightCm: number; // cm
   bmi: number; // IMC
@@ -422,6 +433,8 @@ export interface MedicalConsultation {
   diagnosis: string;
   cie10Code?: string;
   treatmentPlan: string;
+  auxiliaryExams?: string; // Exámenes auxiliares solicitados
+  prescriptionNotes?: string; // Receta prescrita en consulta
   nextAppointmentDate?: string;
   createdAt: string;
   updatedAt: string;

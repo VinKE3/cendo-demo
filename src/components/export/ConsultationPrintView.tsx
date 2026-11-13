@@ -125,19 +125,27 @@ export function ConsultationPrintView({
               </h2>
               <div className="grid grid-cols-2 gap-1.5 text-[11px]">
                 <div>
-                  <span className="text-slate-500 block text-[9.5px]">P.A.:</span>
+                  <span className="text-slate-500 block text-[9px]">P.A.:</span>
                   <strong className="font-mono text-slate-900">{consultation.vitalSigns.bloodPressure || "110/70"} mmHg</strong>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[9.5px]">F.C.:</span>
+                  <span className="text-slate-500 block text-[9px]">F.C.:</span>
                   <strong className="font-mono text-slate-900">{consultation.vitalSigns.heartRate || 72} lpm</strong>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[9.5px]">Temp.:</span>
+                  <span className="text-slate-500 block text-[9px]">F.R.:</span>
+                  <strong className="font-mono text-slate-900">{consultation.vitalSigns.respiratoryRate || 18} rpm</strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[9px]">SatO2:</span>
+                  <strong className="font-mono text-slate-900">{consultation.vitalSigns.oxygenSaturation || 98}%</strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[9px]">Temp.:</span>
                   <strong className="font-mono text-slate-900">{consultation.vitalSigns.temperature || 36.5} °C</strong>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[9.5px]">Peso / Talla:</span>
+                  <span className="text-slate-500 block text-[9px]">Peso / Talla:</span>
                   <strong className="font-mono text-slate-900">{consultation.vitalSigns.weightKg} kg &bull; {consultation.vitalSigns.heightCm} cm</strong>
                 </div>
                 <div className="col-span-2 pt-1 border-t border-slate-200">
@@ -209,6 +217,20 @@ export function ConsultationPrintView({
             <div className="text-xs text-slate-800 whitespace-pre-line leading-relaxed font-sans">
               {consultation.treatmentPlan}
             </div>
+
+            {consultation.auxiliaryExams && (
+              <div className="pt-2 border-t border-slate-100 text-xs">
+                <strong className="text-primary text-[10.5px]">Exámenes Auxiliares Solicitados: </strong>
+                <span className="text-slate-800">{consultation.auxiliaryExams}</span>
+              </div>
+            )}
+
+            {consultation.prescriptionNotes && (
+              <div className="pt-1.5 border-t border-slate-100 text-xs">
+                <strong className="text-emerald-900 text-[10.5px]">Receta Médica / Prescripción (Rp/): </strong>
+                <span className="text-slate-900 font-medium">{consultation.prescriptionNotes}</span>
+              </div>
+            )}
           </div>
         </div>
 

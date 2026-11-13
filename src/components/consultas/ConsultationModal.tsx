@@ -53,10 +53,12 @@ export function ConsultationModal({
   const [illnessTime, setIllnessTime] = useState("");
   const [symptoms, setSymptoms] = useState("");
 
-  // Signos Vitales
+  // Signos Vitales (Formato Dr. Patrick Jacinto)
   const [bloodPressure, setBloodPressure] = useState("110/70");
   const [heartRate, setHeartRate] = useState(72);
+  const [respiratoryRate, setRespiratoryRate] = useState<number>(18);
   const [temperature, setTemperature] = useState(36.5);
+  const [oxygenSaturation, setOxygenSaturation] = useState<number>(98);
   const [weightKg, setWeightKg] = useState(58);
   const [heightCm, setHeightCm] = useState(162);
 
@@ -67,10 +69,12 @@ export function ConsultationModal({
   const [speculoscopy, setSpeculoscopy] = useState("Vagina elástica. Cuello posterior, epitelio liso sin ectopia sangrante.");
   const [bimanualPalpation, setBimanualPalpation] = useState("Útero en posición normal, móvil, dolor leve a la palpación de fondos de saco. Anexos libres.");
 
-  // Diagnóstico & Plan
+  // Diagnóstico, Plan, Exámenes Auxiliares y Receta
   const [diagnosis, setDiagnosis] = useState("");
   const [cie10Code, setCie10Code] = useState("");
   const [treatmentPlan, setTreatmentPlan] = useState("");
+  const [auxiliaryExams, setAuxiliaryExams] = useState("");
+  const [prescriptionNotes, setPrescriptionNotes] = useState("");
   const [nextAppointmentDate, setNextAppointmentDate] = useState("");
 
   // IMC dinámico
@@ -90,7 +94,9 @@ export function ConsultationModal({
       setSymptoms(consultationToEdit.symptoms || "");
       setBloodPressure(consultationToEdit.vitalSigns.bloodPressure || "110/70");
       setHeartRate(consultationToEdit.vitalSigns.heartRate || 72);
+      setRespiratoryRate(consultationToEdit.vitalSigns.respiratoryRate ?? 18);
       setTemperature(consultationToEdit.vitalSigns.temperature || 36.5);
+      setOxygenSaturation(consultationToEdit.vitalSigns.oxygenSaturation ?? 98);
       setWeightKg(consultationToEdit.vitalSigns.weightKg || 58);
       setHeightCm(consultationToEdit.vitalSigns.heightCm || 162);
       setGeneralExam(consultationToEdit.physicalExam.generalExam || "");
@@ -101,6 +107,8 @@ export function ConsultationModal({
       setDiagnosis(consultationToEdit.diagnosis);
       setCie10Code(consultationToEdit.cie10Code || "");
       setTreatmentPlan(consultationToEdit.treatmentPlan);
+      setAuxiliaryExams(consultationToEdit.auxiliaryExams || "");
+      setPrescriptionNotes(consultationToEdit.prescriptionNotes || "");
       setNextAppointmentDate(consultationToEdit.nextAppointmentDate || "");
     } else {
       setConsultationDate(new Date().toISOString().split("T")[0]);
@@ -109,7 +117,9 @@ export function ConsultationModal({
       setSymptoms("");
       setBloodPressure("110/70");
       setHeartRate(72);
+      setRespiratoryRate(18);
       setTemperature(36.5);
+      setOxygenSaturation(98);
       setWeightKg(58);
       setHeightCm(162);
       setGeneralExam("Paciente en regular estado general, lúcida y hemodinámicamente estable.");
@@ -120,6 +130,8 @@ export function ConsultationModal({
       setDiagnosis("");
       setCie10Code("");
       setTreatmentPlan("1. Indicaciones generales de estilo de vida e higiene ginecológica.\n2. Exámenes auxiliares según necesidad clínica.\n3. Acudir a control según programación.");
+      setAuxiliaryExams("Hemograma, Perfil lipídico, Glucosa, Ecografía pélvica / transvaginal");
+      setPrescriptionNotes("");
       setNextAppointmentDate("");
     }
   }, [consultationToEdit, isOpen]);
@@ -160,7 +172,9 @@ export function ConsultationModal({
       vitalSigns: {
         bloodPressure: bloodPressure || "110/70",
         heartRate: Number(heartRate) || 72,
+        respiratoryRate: Number(respiratoryRate) || 18,
         temperature: Number(temperature) || 36.5,
+        oxygenSaturation: Number(oxygenSaturation) || 98,
         weightKg: Number(weightKg) || 58,
         heightCm: Number(heightCm) || 162,
         bmi,
@@ -175,6 +189,8 @@ export function ConsultationModal({
       diagnosis: diagnosis.trim(),
       cie10Code: cie10Code.trim() || undefined,
       treatmentPlan: treatmentPlan.trim(),
+      auxiliaryExams: auxiliaryExams.trim() || undefined,
+      prescriptionNotes: prescriptionNotes.trim() || undefined,
       nextAppointmentDate: nextAppointmentDate || undefined,
     };
 
@@ -322,62 +338,84 @@ export function ConsultationModal({
               2. Signos Vitales & Antropometría
             </h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2.5">
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-700 block">P.A. (mmHg)</label>
+                <label className="text-[10px] font-bold text-slate-700 block">P.A. (mmHg)</label>
                 <input
                   type="text"
                   value={bloodPressure}
                   onChange={(e) => setBloodPressure(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
+                  className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-700 block">F.C. (lpm)</label>
+                <label className="text-[10px] font-bold text-slate-700 block">F.C. (lpm)</label>
                 <input
                   type="number"
                   value={heartRate}
                   onChange={(e) => setHeartRate(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
+                  className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-700 block">Temp (°C)</label>
+                <label className="text-[10px] font-bold text-slate-700 block">F.R. (rpm)</label>
+                <input
+                  type="number"
+                  value={respiratoryRate}
+                  onChange={(e) => setRespiratoryRate(Number(e.target.value))}
+                  className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
+                  placeholder="18"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-700 block">Temp (°C)</label>
                 <input
                   type="number"
                   step="0.1"
                   value={temperature}
                   onChange={(e) => setTemperature(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
+                  className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-700 block">Peso (kg)</label>
+                <label className="text-[10px] font-bold text-slate-700 block">SatO2 (%)</label>
+                <input
+                  type="number"
+                  value={oxygenSaturation}
+                  onChange={(e) => setOxygenSaturation(Number(e.target.value))}
+                  className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
+                  placeholder="98"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-700 block">Peso (kg)</label>
                 <input
                   type="number"
                   step="0.5"
                   value={weightKg}
                   onChange={(e) => setWeightKg(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
+                  className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-700 block">Talla (cm)</label>
+                <label className="text-[10px] font-bold text-slate-700 block">Talla (cm)</label>
                 <input
                   type="number"
                   value={heightCm}
                   onChange={(e) => setHeightCm(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
+                  className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 font-mono text-xs focus:border-indigo-500"
                 />
               </div>
 
               <div className="space-y-1 bg-white p-2 rounded-lg border border-indigo-200 flex flex-col justify-center">
-                <span className="text-[10px] uppercase font-bold text-indigo-700 block">IMC Calculado</span>
-                <span className="font-mono font-extrabold text-sm text-indigo-950">{bmi} kg/m²</span>
+                <span className="text-[9px] uppercase font-bold text-indigo-700 block">IMC Calculado</span>
+                <span className="font-mono font-extrabold text-xs text-indigo-950">{bmi} kg/m²</span>
               </div>
             </div>
           </div>
@@ -473,13 +511,35 @@ export function ConsultationModal({
               </div>
 
               <div className="md:col-span-12 space-y-1">
-                <label className="font-semibold text-slate-800 block">Plan Terapéutico, Medicación & Exámenes Auxiliares</label>
+                <label className="font-semibold text-slate-800 block">Plan de Trabajo / Indicaciones</label>
                 <textarea
-                  rows={4}
-                  placeholder="1. Tratamiento farmacológico...\n2. Exámenes de imágenes o laboratorio solicitados...\n3. Pautas de estilo de vida..."
+                  rows={3}
+                  placeholder="Pautas de manejo, conducta médica..."
                   value={treatmentPlan}
                   onChange={(e) => setTreatmentPlan(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-emerald-600 focus:outline-none font-mono"
+                />
+              </div>
+
+              <div className="md:col-span-6 space-y-1">
+                <label className="font-semibold text-slate-800 block">Exámenes Auxiliares Solicitados</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Hemograma, Perfil tiroideo, Ecografía transvaginal..."
+                  value={auxiliaryExams}
+                  onChange={(e) => setAuxiliaryExams(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-emerald-600 focus:outline-none"
+                />
+              </div>
+
+              <div className="md:col-span-6 space-y-1">
+                <label className="font-semibold text-slate-800 block">Receta / Tratamiento Farmacológico (Rp/)</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Dienogest 2mg diario continuo, Ketorolaco 10mg condicional..."
+                  value={prescriptionNotes}
+                  onChange={(e) => setPrescriptionNotes(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-emerald-600 focus:outline-none"
                 />
               </div>
 
@@ -514,11 +574,22 @@ export function ConsultationModal({
                     reasonForVisit,
                     illnessTime: illnessTime || undefined,
                     symptoms: symptoms || undefined,
-                    vitalSigns: { bloodPressure, heartRate, temperature, weightKg, heightCm, bmi },
+                    vitalSigns: {
+                      bloodPressure,
+                      heartRate,
+                      respiratoryRate,
+                      temperature,
+                      oxygenSaturation,
+                      weightKg,
+                      heightCm,
+                      bmi,
+                    },
                     physicalExam: { generalExam, breastsExam, externalGenitalia, speculoscopy, bimanualPalpation },
                     diagnosis,
                     cie10Code,
                     treatmentPlan,
+                    auxiliaryExams,
+                    prescriptionNotes,
                     nextAppointmentDate,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),

@@ -21,20 +21,26 @@ import { PatientBackground } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 
 export const STANDARD_CONTRACEPTIVE_OPTIONS = [
+  "Ninguno (Embarazo deseado y planificado)",
+  "Ninguno (Sin vida sexual activa)",
   "Ninguno",
-  "Preservativo",
+  "Preservativo de barrera",
+  "Preservativo / Condón masculino",
   "Anticonceptivos orales combinados",
+  "Anticonceptivos de progestágeno solo (Minipíldora)",
   "Inyectable mensual",
-  "Inyectable trimestral",
-  "Implante subdérmico",
-  "DIU T de Cobre",
-  "DIU Hormonal (Mirena/Kyleena)",
+  "Inyectable trimestral (Depo-Provera)",
+  "Implante subdérmico (Jadelle / Implanon)",
+  "DIU T de Cobre (TCu 380A)",
+  "DIU Hormonal (Mirena / Kyleena)",
   "Parche transdérmico",
   "Anillo vaginal",
   "Ligadura de trompas",
   "Quirúrgico / Salpingoclasia bilateral previa",
   "Vasectomía (pareja)",
   "Método del ritmo / Abstinencia periódica",
+  "Método de lactancia y amenorrea (MELA)",
+  "Anticoncepción oral de emergencia (AOE)",
 ];
 
 const backgroundSchema = z.object({
@@ -45,13 +51,19 @@ const backgroundSchema = z.object({
   menarche: z.coerce.number().min(8, "Mínimo 8 años").max(20, "Máximo 20 años").optional(),
   sexualDebutAge: z.coerce.number().min(10, "Mínimo 10 años").max(40, "Máximo 40 años").optional(),
   sexualPartnersCount: z.coerce.number().min(0, "Mínimo 0").optional(),
+  catamenialRegimen: z.string().default("28/4"),
+  stiHistory: z.string().default("Niega ITS"),
   contraceptiveMethod: z.string().default("Ninguno"),
   lastMenstrualPeriod: z.string().default(""),
   papHistory: z.string().default("No refiere"),
   vphTestHistory: z.string().default("No realizado"),
+  hasDiabetes: z.string().default("Niega"),
+  hasHypertension: z.string().default("Niega"),
+  hasAsthma: z.string().default("Niega"),
   medicalAllergies: z.string().default("Niega"),
   surgeriesHistory: z.string().default("Niega"),
   familyHistory: z.string().default("No refiere"),
+  otherPathologies: z.string().default("Niega"),
   notes: z.string().default(""),
 });
 
@@ -87,13 +99,19 @@ export function PatientBackgroundModal({
       menarche: 12,
       sexualDebutAge: 18,
       sexualPartnersCount: 1,
+      catamenialRegimen: "28/4",
+      stiHistory: "Niega ITS",
       contraceptiveMethod: "Ninguno",
       lastMenstrualPeriod: "",
       papHistory: "No refiere",
       vphTestHistory: "No realizado",
+      hasDiabetes: "Niega",
+      hasHypertension: "Niega",
+      hasAsthma: "Niega",
       medicalAllergies: "Niega",
       surgeriesHistory: "Niega",
       familyHistory: "No refiere",
+      otherPathologies: "Niega",
       notes: "",
     },
   });
@@ -103,8 +121,8 @@ export function PatientBackgroundModal({
 
   // Lista dinámica de opciones que asegura que el valor actual de la paciente nunca quede vacío
   const availableMacOptions = useMemo(() => {
-    const current = initialData?.contraceptiveMethod;
-    if (current && !STANDARD_CONTRACEPTIVE_OPTIONS.includes(current)) {
+    const current = initialData?.contraceptiveMethod?.trim();
+    if (current && !STANDARD_CONTRACEPTIVE_OPTIONS.some((o) => o.toLowerCase() === current.toLowerCase())) {
       return [current, ...STANDARD_CONTRACEPTIVE_OPTIONS];
     }
     return STANDARD_CONTRACEPTIVE_OPTIONS;
@@ -141,13 +159,19 @@ export function PatientBackgroundModal({
           menarche: initialData.menarche || 12,
           sexualDebutAge: initialData.sexualDebutAge || 18,
           sexualPartnersCount: initialData.sexualPartnersCount ?? 1,
+          catamenialRegimen: initialData.catamenialRegimen || "28/4",
+          stiHistory: initialData.stiHistory || "Niega ITS",
           contraceptiveMethod: initialData.contraceptiveMethod || "Ninguno",
           lastMenstrualPeriod: initialData.lastMenstrualPeriod || "",
           papHistory: initialData.papHistory || "No refiere",
           vphTestHistory: initialData.vphTestHistory || "No realizado",
+          hasDiabetes: initialData.hasDiabetes || "Niega",
+          hasHypertension: initialData.hasHypertension || "Niega",
+          hasAsthma: initialData.hasAsthma || "Niega",
           medicalAllergies: initialData.medicalAllergies || "Niega",
           surgeriesHistory: initialData.surgeriesHistory || "Niega",
           familyHistory: initialData.familyHistory || "No refiere",
+          otherPathologies: initialData.otherPathologies || "Niega",
           notes: initialData.notes || "",
         });
         setCustomMacText("");
@@ -180,13 +204,19 @@ export function PatientBackgroundModal({
         menarche: data.menarche,
         sexualDebutAge: data.sexualDebutAge,
         sexualPartnersCount: data.sexualPartnersCount,
+        catamenialRegimen: data.catamenialRegimen.trim(),
+        stiHistory: data.stiHistory.trim(),
         contraceptiveMethod: finalMac,
         lastMenstrualPeriod: data.lastMenstrualPeriod,
         papHistory: data.papHistory.trim(),
         vphTestHistory: data.vphTestHistory.trim(),
+        hasDiabetes: data.hasDiabetes.trim(),
+        hasHypertension: data.hasHypertension.trim(),
+        hasAsthma: data.hasAsthma.trim(),
         medicalAllergies: data.medicalAllergies.trim(),
         surgeriesHistory: data.surgeriesHistory.trim(),
         familyHistory: data.familyHistory.trim(),
+        otherPathologies: data.otherPathologies.trim(),
         notes: data.notes.trim(),
       });
 
@@ -312,8 +342,8 @@ export function PatientBackgroundModal({
             </div>
           </div>
 
-          {/* Fila 2: Menarquia, IRS y Parejas Sexuales */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Fila 2: Menarquia, R/C, IRS y NPS (Según Modelo Clínico Dr. Patrick) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-bold text-heading uppercase tracking-wider block">
                 Menarquia (Edad)
@@ -324,6 +354,18 @@ export function PatientBackgroundModal({
                 max={20}
                 placeholder="Ej. 12"
                 {...register("menarche")}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs font-mono font-bold text-heading focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                R/C (Régimen Cat.)
+              </label>
+              <input
+                type="text"
+                placeholder="Ej. 28/4 o 30/5"
+                {...register("catamenialRegimen")}
                 className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs font-mono font-bold text-heading focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -344,7 +386,7 @@ export function PatientBackgroundModal({
 
             <div className="space-y-1">
               <label className="text-xs font-bold text-heading uppercase tracking-wider block">
-                N° Parejas Sexuales
+                NPS (N° Parejas)
               </label>
               <input
                 type="number"
@@ -356,15 +398,27 @@ export function PatientBackgroundModal({
             </div>
           </div>
 
-          {/* Fila 3: Historial Citológico PAP y Test VPH */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Fila 3: ITS, PAP y Test VPH */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                ITS (Inf. Transm. Sex.)
+              </label>
+              <input
+                type="text"
+                placeholder="Ej. Niega ITS o Tratada por VPH"
+                {...register("stiHistory")}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
             <div className="space-y-1">
               <label className="text-xs font-bold text-heading uppercase tracking-wider block">
                 Historial PAP Previo
               </label>
               <input
                 type="text"
-                placeholder="Ej. ASC-US (2025) o Negativo para lesión intraepitelial"
+                placeholder="Ej. ASC-US (2025) o Negativo"
                 {...register("papHistory")}
                 className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
@@ -376,64 +430,123 @@ export function PatientBackgroundModal({
               </label>
               <input
                 type="text"
-                placeholder="Ej. Negativo 23 Genotipos PCR (2026)"
+                placeholder="Ej. Negativo (2026)"
                 {...register("vphTestHistory")}
                 className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
 
-          {/* Fila 4: Alergias Medicamentosas y Cirugías Previas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
-                Alergias Medicamentosas
-              </label>
-              <input
-                type="text"
-                placeholder="Ej. Niega alergias o Alergia a Penicilina"
-                {...register("medicalAllergies")}
-                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
+          {/* Sección Divisoria: ANTECEDENTES GENERALES (MODELO DR. PATRICK JACINTO) */}
+          <div className="pt-2 border-t border-border">
+            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-primary mb-3 flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-secondary" />
+              <span>Antecedentes Generales y Patológicos</span>
+            </h4>
+
+            {/* Fila 4: Diabetes, Hipertensión y Asma */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                  Diabetes
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Niega o DM Tipo 2"
+                  {...register("hasDiabetes")}
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                  Hipertensión
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Niega o HTA controlada"
+                  {...register("hasHypertension")}
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                  Asma
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Niega o Asma bronquial"
+                  {...register("hasAsthma")}
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
-                Cirugías Previas
-              </label>
-              <input
-                type="text"
-                placeholder="Ej. Apendicectomía laparoscópica (2021)"
-                {...register("surgeriesHistory")}
-                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-          </div>
+            {/* Fila 5: Alergias Medicamentosas, Cirugías Previas y Otros */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                  Alergias Medicamentosas
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Niega alergias o Alergia a Penicilina"
+                  {...register("medicalAllergies")}
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
 
-          {/* Fila 5: Antecedentes Familiares y Notas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
-                Antecedentes Familiares Relevantes
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Ej. Madre con antecedente de miomatosis uterina operada"
-                {...register("familyHistory")}
-                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-              />
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                  Cirugías Previas
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Apendicectomía (2021) o Cesárea"
+                  {...register("surgeriesHistory")}
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                  Otros Antecedentes
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Hipotiroidismo en tto o Niega"
+                  {...register("otherPathologies")}
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
-                Notas Clínicas Adicionales
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Observaciones de la paciente para el Dr. Patrick Jacinto..."
-                {...register("notes")}
-                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-              />
+            {/* Fila 6: Antecedentes Familiares y Notas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                  Antecedentes Familiares Relevantes
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Ej. Madre con antecedente de miomatosis uterina operada"
+                  {...register("familyHistory")}
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                  Notas Clínicas Adicionales
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Observaciones de la paciente para el Dr. Patrick Jacinto..."
+                  {...register("notes")}
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                />
+              </div>
             </div>
           </div>
 

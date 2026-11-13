@@ -17,6 +17,8 @@ import {
   Briefcase,
   Heart,
   Fingerprint,
+  GraduationCap,
+  Globe,
 } from "lucide-react";
 import { Patient } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
@@ -48,6 +50,9 @@ const patientSchema = z.object({
   address: z.string().default(""),
   civilStatus: z.string().default("Soltera"),
   occupation: z.string().default(""),
+  educationLevel: z.string().default("Superior Universitaria"),
+  birthPlace: z.string().default(""),
+  religion: z.string().default("Católica"),
 });
 
 type PatientFormData = z.infer<typeof patientSchema>;
@@ -86,6 +91,9 @@ export function PatientModal({
       address: "",
       civilStatus: "Soltera",
       occupation: "",
+      educationLevel: "Superior Universitaria",
+      birthPlace: "Lima, Perú",
+      religion: "Católica",
     },
   });
 
@@ -109,6 +117,9 @@ export function PatientModal({
           address: initialData.address || "",
           civilStatus: initialData.civilStatus || "Soltera",
           occupation: initialData.occupation || "",
+          educationLevel: initialData.educationLevel || "Superior Universitaria",
+          birthPlace: initialData.birthPlace || "",
+          religion: initialData.religion || "Católica",
         });
       } else {
         reset({
@@ -121,6 +132,9 @@ export function PatientModal({
           address: "",
           civilStatus: "Soltera",
           occupation: "",
+          educationLevel: "Superior Universitaria",
+          birthPlace: "Lima, Perú",
+          religion: "Católica",
         });
       }
     }
@@ -177,6 +191,9 @@ export function PatientModal({
           address: data.address.trim(),
           civilStatus: data.civilStatus,
           occupation: data.occupation.trim(),
+          educationLevel: data.educationLevel.trim(),
+          birthPlace: data.birthPlace.trim(),
+          religion: data.religion.trim(),
         });
 
         const updated: Patient = {
@@ -191,6 +208,9 @@ export function PatientModal({
           address: data.address.trim(),
           civilStatus: data.civilStatus,
           occupation: data.occupation.trim(),
+          educationLevel: data.educationLevel.trim(),
+          birthPlace: data.birthPlace.trim(),
+          religion: data.religion.trim(),
           updatedAt: new Date().toISOString(),
         };
 
@@ -216,6 +236,9 @@ export function PatientModal({
           address: data.address.trim(),
           civilStatus: data.civilStatus,
           occupation: data.occupation.trim(),
+          educationLevel: data.educationLevel.trim(),
+          birthPlace: data.birthPlace.trim(),
+          religion: data.religion.trim(),
         });
 
         await Swal.fire({
@@ -482,7 +505,57 @@ export function PatientModal({
             </div>
           </div>
 
-          {/* Fila 5: Dirección */}
+          {/* Fila 5: Grado de Instrucción, Lugar de Nacimiento y Religión (Modelo Dr. Patrick) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                Grado de Instrucción
+              </label>
+              <div className="relative">
+                <GraduationCap className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <select
+                  {...register("educationLevel")}
+                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-xs font-medium text-heading focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="Superior Universitaria">Superior Universitaria</option>
+                  <option value="Superior Técnica">Superior Técnica</option>
+                  <option value="Posgrado / Maestría">Posgrado / Maestría</option>
+                  <option value="Secundaria Completa">Secundaria Completa</option>
+                  <option value="Secundaria Incompleta">Secundaria Incompleta</option>
+                  <option value="Primaria">Primaria</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                Lugar de Nacimiento
+              </label>
+              <div className="relative">
+                <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="text"
+                  placeholder="Ej. Lima, Perú"
+                  {...register("birthPlace")}
+                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-xs font-medium text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-heading uppercase tracking-wider block">
+                Religión
+              </label>
+              <input
+                type="text"
+                placeholder="Ej. Católica o Cristiana"
+                {...register("religion")}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs font-medium text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </div>
+
+          {/* Fila 6: Dirección */}
           <div className="space-y-1">
             <label className="text-xs font-bold text-heading uppercase tracking-wider block">
               Dirección de Domicilio / Distrito

@@ -20,6 +20,7 @@ import {
   FileText,
   Stethoscope,
   ShieldCheck,
+  Shield,
   MessageCircle,
   Pill,
   Printer,
@@ -58,6 +59,7 @@ import { MinorProcedurePrintView } from "@/components/export/MinorProcedurePrint
 import { QuoteModal } from "@/components/tarifario/QuoteModal";
 import { QuotePrintView } from "@/components/export/QuotePrintView";
 import { WordHistoryModal } from "@/components/documentos/WordHistoryModal";
+import { CompleteHistoryPrintView } from "@/components/export/CompleteHistoryPrintView";
 import { printHtmlElement } from "@/lib/pdfGenerator";
 import {
   Patient,
@@ -135,6 +137,7 @@ export default function FichaPacientePage() {
   const [isQuotePrintOpen, setIsQuotePrintOpen] = useState(false);
 
   const [isWordHistoryModalOpen, setIsWordHistoryModalOpen] = useState(false);
+  const [isCompleteHistoryPrintOpen, setIsCompleteHistoryPrintOpen] = useState(false);
 
 
   const {
@@ -365,6 +368,14 @@ export default function FichaPacientePage() {
             <Upload className="w-3.5 h-3.5 text-purple-600" />
             <span>+ Subir PDF / Doc</span>
           </button>
+
+          <button
+            onClick={() => setIsCompleteHistoryPrintOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-primary text-white hover:bg-primary-hover text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+          >
+            <Printer className="w-3.5 h-3.5 text-secondary" />
+            <span>HC Modelo CENDO</span>
+          </button>
         </div>
       </div>
 
@@ -391,6 +402,22 @@ export default function FichaPacientePage() {
               <p className="font-mono font-bold text-heading mt-0.5">
                 {patient.birthDate} ({patient.age} años cumplidos)
               </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <span className="text-muted block text-[10px] uppercase font-bold">Lugar Nacimiento</span>
+                <p className="font-medium text-heading mt-0.5 truncate">{patient.birthPlace || "Lima, Perú"}</p>
+              </div>
+              <div>
+                <span className="text-muted block text-[10px] uppercase font-bold">Religión</span>
+                <p className="font-medium text-heading mt-0.5 truncate">{patient.religion || "Católica"}</p>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-muted block text-[10px] uppercase font-bold">Grado de Instrucción</span>
+              <p className="font-semibold text-heading mt-0.5">{patient.educationLevel || "Superior Universitaria"}</p>
             </div>
 
             <div>
@@ -441,7 +468,7 @@ export default function FichaPacientePage() {
                 Antecedentes Gineco-Obstétricos Persistentes
               </h3>
               <p className="text-[11px] text-muted">
-                Historial obstétrico, método anticonceptivo, FUR y antecedentes patológicos
+                Historial obstétrico, método anticonceptivo, FUR y antecedentes patológicos (Modelo CENDO)
               </p>
             </div>
 
@@ -494,12 +521,19 @@ export default function FichaPacientePage() {
             </div>
           </div>
 
-          {/* Menarquia, IRS y Parejas */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+          {/* Menarquia, R/C, IRS y NPS (Modelo Dr. Patrick Jacinto) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-1">
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
               <span className="text-muted block text-[10px] uppercase font-bold">Menarquia</span>
               <p className="font-mono font-bold text-heading mt-0.5">
                 {bg?.menarche ? `${bg.menarche} años` : "No precisa"}
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+              <span className="text-muted block text-[10px] uppercase font-bold">R/C (Régimen Cat.)</span>
+              <p className="font-mono font-bold text-heading mt-0.5">
+                {bg?.catamenialRegimen || "28/4"}
               </p>
             </div>
 
@@ -511,27 +545,36 @@ export default function FichaPacientePage() {
             </div>
 
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-muted block text-[10px] uppercase font-bold">N° Parejas Sex.</span>
+              <span className="text-muted block text-[10px] uppercase font-bold">NPS (N° Parejas)</span>
               <p className="font-mono font-bold text-heading mt-0.5">
                 {bg?.sexualPartnersCount ?? "No precisa"}
               </p>
             </div>
           </div>
 
-          {/* Historial Citológico PAP y VPH */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+          {/* Historial Citológico PAP, VPH e ITS */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
               <span className="text-[10px] text-muted uppercase font-bold block">
-                Historial Papanicolaou (PAP)
+                ITS (Inf. Transm. Sexual)
               </span>
               <p className="font-medium text-heading leading-snug">
-                {bg?.papHistory || "Sin antecedentes citológicos registrados"}
+                {bg?.stiHistory || "Niega ITS"}
               </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
               <span className="text-[10px] text-muted uppercase font-bold block">
-                Historial Test Molecular VPH
+                Historial PAP Previo
+              </span>
+              <p className="font-medium text-heading leading-snug">
+                {bg?.papHistory || "Sin citología previa"}
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] text-muted uppercase font-bold block">
+                Historial Test VPH
               </span>
               <p className="font-medium text-heading leading-snug">
                 {bg?.vphTestHistory || "No realizado previamente"}
@@ -539,35 +582,68 @@ export default function FichaPacientePage() {
             </div>
           </div>
 
-          {/* Alergias, Cirugías y Familiares */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-[10px] text-muted uppercase font-bold block flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3 text-amber-600" />
-                Alergias Medicamentosas
+          {/* Antecedentes Generales y Patológicos (Dr. Patrick Jacinto) */}
+          <div className="pt-2 border-t border-border space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-primary" />
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                Antecedentes Generales y Patológicos
               </span>
-              <p className="font-semibold text-heading">
-                {bg?.medicalAllergies || "Niega alergias"}
-              </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-[10px] text-muted uppercase font-bold block">
-                Cirugías Previas
-              </span>
-              <p className="text-heading font-medium leading-snug">
-                {bg?.surgeriesHistory || "Niega intervenciones"}
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-[10px] text-muted uppercase font-bold block">Diabetes</span>
+                <p className="font-medium text-heading mt-0.5">{bg?.hasDiabetes || "Niega"}</p>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-[10px] text-muted uppercase font-bold block">Hipertensión</span>
+                <p className="font-medium text-heading mt-0.5">{bg?.hasHypertension || "Niega"}</p>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-[10px] text-muted uppercase font-bold block">Asma</span>
+                <p className="font-medium text-heading mt-0.5">{bg?.hasAsthma || "Niega"}</p>
+              </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-[10px] text-muted uppercase font-bold block">
-                Antecedentes Familiares
-              </span>
-              <p className="text-heading font-medium leading-snug">
-                {bg?.familyHistory || "Sin antecedentes oncológicos o miomatosos"}
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-2.5 rounded-xl bg-rose-50/60 border border-rose-200 space-y-1">
+                <span className="text-[10px] text-rose-800 uppercase font-bold block flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-rose-600" />
+                  Alergias Medicamentosas
+                </span>
+                <p className="font-semibold text-rose-950">
+                  {bg?.medicalAllergies || "Niega alergias"}
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-[10px] text-muted uppercase font-bold block">
+                  Cirugías Previas
+                </span>
+                <p className="text-heading font-medium leading-snug">
+                  {bg?.surgeriesHistory || "Niega intervenciones"}
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-[10px] text-muted uppercase font-bold block">
+                  Antecedentes Familiares
+                </span>
+                <p className="text-heading font-medium leading-snug">
+                  {bg?.familyHistory || "Sin antecedentes oncológicos o miomatosos"}
+                </p>
+              </div>
             </div>
+
+            {bg?.otherPathologies && bg.otherPathologies !== "Niega" && (
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                <span className="text-[10px] text-muted uppercase font-bold block">Otros Antecedentes Sistémicos:</span>
+                <p className="text-slate-800 font-medium mt-0.5">{bg.otherPathologies}</p>
+              </div>
+            )}
           </div>
 
           {bg?.notes && (
@@ -2296,6 +2372,52 @@ export default function FichaPacientePage() {
             <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
               <QuotePrintView
                 quote={viewingQuote}
+                doctor={doctorProfile}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Impresión Historia Clínica Integral Modelo CENDO (Dr. Patrick Jacinto) */}
+      {isCompleteHistoryPrintOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-4xl my-6 overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="px-6 py-3.5 border-b border-border bg-slate-900 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-accent" />
+                <span className="font-heading font-bold text-sm">
+                  Vista Previa &bull; Historia Clínica Integral CENDO (Modelo Dr. Patrick Jacinto)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    printHtmlElement(
+                      "complete-history-print-sheet",
+                      "Historia_Clinica_" + patient.lastName + "_" + patient.firstName
+                    )
+                  }
+                  className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir / Guardar PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCompleteHistoryPrintOpen(false)}
+                  className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
+              <CompleteHistoryPrintView
+                patient={patient}
+                background={bg}
+                consultations={consultations}
                 doctor={doctorProfile}
               />
             </div>
