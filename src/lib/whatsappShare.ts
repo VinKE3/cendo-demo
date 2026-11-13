@@ -3,7 +3,15 @@
  * Permite al Dr. Patrick enviar informes, resúmenes y citas con 1 solo clic.
  */
 
-import { Patient, ColposcopyReport, ClinicalCheckup, DoctorProfile, MedicalPrescription } from "@/types/medical";
+import {
+  Patient,
+  ColposcopyReport,
+  ClinicalCheckup,
+  DoctorProfile,
+  MedicalPrescription,
+  LabOrder,
+  PrenatalCard,
+} from "@/types/medical";
 
 export function cleanPhoneForWhatsApp(phone: string): string {
   // Quitar espacios, guiones y caracteres no numéricos
@@ -135,3 +143,100 @@ export function generatePrescriptionWhatsAppUrl(
   return `https://wa.me/${targetPhone}?text=${encodedText}`;
 }
 
+export function generateLabOrderWhatsAppUrl(
+  patient: Patient,
+  labOrder: LabOrder,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(patient.phone);
+
+  const itemsFormatted = labOrder.items
+    .map(
+      (item, idx) =>
+        `🔬 *${idx + 1}. ${item.testName}* (${item.sampleType || "Sangre"})${
+          item.notes ? `\n   _Nota: ${item.notes}_` : ""
+        }`
+    )
+    .join("\n");
+
+  const message = [
+    `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
+    ``,
+    `Le saluda el *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    ``,
+    `🧪 Le compartimos su *ORDEN DE ANÁLISIS DE LABORATORIO CLÍNICO* (Fecha: ${labOrder.orderDate}):`,
+    labOrder.diagnosis ? `🩺 *Indicación / Diagnóstico:* ${labOrder.diagnosis}` : null,
+    `⚠️ *Prioridad:* ${labOrder.urgency}`,
+    ``,
+    `*ANÁLISIS SOLICITADOS:*`,
+    itemsFormatted,
+    labOrder.customTests ? `\n*Otros Exámenes:* ${labOrder.customTests}` : null,
+    ``,
+    `📌 *PREPARACIÓN DE LA PACIENTE:*`,
+    labOrder.patientInstructions ||
+      "Ayuno de 8 a 10 horas. Abstinencia sexual y no aplicar óvulos 48 horas previas.",
+    ``,
+    `👨‍⚕️ *Médico Solicitante:* ${doctor.doctorTitle} ${doctor.fullName} (CMP ${doctor.cmp} - RNE ${doctor.rne})`,
+    `🏥 *Sede CENDO:* ${doctor.clinicAddress}`,
+    `📞 *Consultas:* ${doctor.phone}`,
+    ``,
+    `_Puede presentar este mensaje o la orden impresa en el laboratorio de su preferencia (ej. Biolaq, Laboratorios Roe, Suiza Lab)._`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const encodedText = encodeURIComponent(message);
+  return `https://wa.me/${targetPhone}?text=${encodedText}`;
+}
+
+export function generatePrenatalWhatsAppUrl(
+  patient: Patient,
+  card: PrenatalCard,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(patient.phone);
+  const lastVisit =
+    card.visits && card.visits.length > 0
+      ? card.visits[card.visits.length - 1]
+      : null;
+
+  const message = [
+    `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
+    ``,
+    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    ``,
+    `🤰 Le compartimos el resumen de su *Control Prenatal (MINSA / CLAP)*:`,
+    `🗓 *FUM:* ${card.baseline.fum} | *FPP (Fecha Probable de Parto):* ${card.baseline.fpp}`,
+    lastVisit
+      ? `🩺 *Última Atención (N° ${lastVisit.visitNumber} - ${lastVisit.visitDate}):*`
+      : null,
+    lastVisit
+      ? `   • *Edad Gestacional:* ${lastVisit.gestationalAgeWeeks} sem ${lastVisit.gestationalAgeDays} d`
+      : null,
+    lastVisit ? `   • *Presión Arterial:* ${lastVisit.bloodPressure} mmHg` : null,
+    lastVisit ? `   • *Peso Materno:* ${lastVisit.maternalWeightKg} kg` : null,
+    lastVisit && lastVisit.fetalHeartRate > 0
+      ? `   • *FCF Fetal:* ${lastVisit.fetalHeartRate} lat/min (Normal)`
+      : null,
+    lastVisit && lastVisit.uterineHeightCm > 0
+      ? `   • *Altura Uterina:* ${lastVisit.uterineHeightCm} cm`
+      : null,
+    lastVisit ? `   • *Próxima Cita:* ${lastVisit.nextAppointmentDate}` : null,
+    ``,
+    `⚠️ *SIGNOS DE ALARMA (ACUDIR A EMERGENCIA):*`,
+    `• Sangrado o pérdida de líquido por la vagina`,
+    `• Dolor abdominal intenso o contracciones antes de tiempo`,
+    `• Fiebre, dolor de cabeza severo o hinchazón de cara/manos`,
+    `• Disminución de los movimientos del bebé`,
+    ``,
+    `🏥 *Sede de Atención:* ${doctor.clinicAddress}`,
+    `📞 *Central de Emergencias / Citas:* ${doctor.phone}`,
+    ``,
+    `_CENDO - Cuidando la salud de mamá y bebé con los más altos estándares clínicos._`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const encodedText = encodeURIComponent(message);
+  return `https://wa.me/${targetPhone}?text=${encodedText}`;
+}

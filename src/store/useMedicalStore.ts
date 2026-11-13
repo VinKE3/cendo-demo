@@ -9,6 +9,11 @@ import {
   ProcedureTariff,
   MedicationVademecum,
   MedicalPrescription,
+  LabOrder,
+  LabOrderItem,
+  PrenatalCard,
+  PrenatalVisitItem,
+  PrenatalBaselineData,
 } from "@/types/medical";
 import {
   syncPatientToSupabase,
@@ -263,6 +268,197 @@ export const INITIAL_PRESCRIPTIONS: MedicalPrescription[] = [
     nextAppointmentDate: "2026-11-16",
     createdAt: "2026-11-02T12:15:00Z",
     updatedAt: "2026-11-02T12:15:00Z",
+  },
+];
+
+// Órdenes de Laboratorio Clínico Iniciales
+export const INITIAL_LAB_ORDERS: LabOrder[] = [
+  {
+    id: "lab-stephany-01",
+    patientId: "pat-stephany-herrera",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    orderDate: "2026-11-02",
+    diagnosis: "Evaluación por cervicitis y descarte de patología anexial / Endometriosis",
+    cie10Code: "N87.0",
+    urgency: "Rutina",
+    items: [
+      {
+        id: "lab-item-1",
+        category: "Ginecología & Marcadores",
+        testName: "CA-125 (Marcador Ovárico y Endometriosis)",
+        sampleType: "Sangre venosa",
+        notes: "Ayuno de 8 horas",
+      },
+      {
+        id: "lab-item-2",
+        category: "Ginecología & Marcadores",
+        testName: "Papanicolaou en Base Líquida (ThinPrep)",
+        sampleType: "Secreción cervical",
+        notes: "Abstinencia sexual 48 horas previas",
+      },
+      {
+        id: "lab-item-3",
+        category: "Infeccioso & Microbiología",
+        testName: "Panel Tipificación VPH 23 Genotipos (PCR en tiempo real)",
+        sampleType: "Muestra endocervical",
+        notes: "Sin aplicación de óvulos ni cremas 48h antes",
+      },
+      {
+        id: "lab-item-4",
+        category: "Hematología & Bioquímica",
+        testName: "Hemograma Completo Automatizado + Plaquetas + VSG",
+        sampleType: "Sangre con EDTA",
+        notes: "Ayuno de 8 horas",
+      },
+      {
+        id: "lab-item-5",
+        category: "Orina & Función Renal",
+        testName: "Examen Completo de Orina (EGO) + Urocultivo con Antibiograma",
+        sampleType: "Orina chorro medio",
+        notes: "Primera orina matutina con higiene previa estricta",
+      },
+    ],
+    customTests: "Perfil tiroideo completo (TSH, T4 libre, T3 libre)",
+    patientInstructions:
+      "Ayuno de 8 a 10 horas. No tener relaciones sexuales ni colocarse óvulos, cremas ni duchas vaginales 48 horas antes de la toma de muestra. Entregar primera orina de la mañana.",
+    createdAt: "2026-11-02T12:20:00Z",
+    updatedAt: "2026-11-02T12:20:00Z",
+  },
+];
+
+// Carnets de Control Prenatal Iniciales (MINSA / CLAP)
+export const INITIAL_PRENATAL_CARDS: PrenatalCard[] = [
+  {
+    id: "pnc-stephany-01",
+    patientId: "pat-stephany-herrera",
+    clinicEstablishment: "CENDO - Centro de Endometriosis & Ginecología Especializada",
+    attendingDoctorId: "doc-patrick-jacinto",
+    attendingDoctorName: "Dr. Patrick José Jacinto Gomero",
+    baseline: {
+      insuranceType: "PRIVADO",
+      insuranceCode: "PACIFICO-72961954",
+      educationLevel: "Superior Univ",
+      civilStatus: "Soltera",
+      fatherName: "Carlos Eduardo Mendoza Rivas",
+      fatherDni: "45829104",
+      gestas: 1,
+      abortos: 0,
+      partosVaginales: 0,
+      cesareas: 0,
+      nacidosVivos: 0,
+      nacidosMuertos: 0,
+      viven: 0,
+      rnMayorPesoGramos: 0,
+      multipleHistory: false,
+      pretermHistory: false,
+      familyHistory: [
+        "Madre con hipertensión arterial",
+        "Madre con antecedente de miomatosis uterina",
+      ],
+      personalHistory: [
+        "Apendicectomía laparoscópica (2021)",
+        "Niega diabetes mellitus o asma",
+      ],
+      previousVaccines: {
+        rubella: true,
+        hepatitisB: true,
+        hpv: true,
+        yellowFever: true,
+      },
+      usualWeightKg: 56.5,
+      heightCm: 162,
+      bloodGroup: "O",
+      rhFactor: "Rh (+)",
+      smokerCigarettesDay: 0,
+      drugsUse: false,
+      fum: "2026-09-26",
+      fumDoubt: false,
+      ultrasoundGestationalAgeWeeks: 6,
+      ultrasoundDate: "2026-11-12",
+      fpp: "2027-07-03",
+      clinicalExam: "Normal",
+      breastsExam: "Normal",
+      cervixExam: "Patológico",
+      pelvisExam: "Normal",
+      dentalExam: "Normal",
+      hemoglobin1: 12.8,
+      bloodGlucose1: 84,
+      vdrlRpr1: "No reactivo",
+      hivScreening1: "Negativo",
+      hepatitisBScreening: "Negativo",
+      completeUrineExam: "Normal",
+      urineCulture: "Negativo",
+      papTestResult: "Anormal",
+      colposcopyResult: "Anormal",
+    },
+    visits: [
+      {
+        visitNumber: 1,
+        visitDate: "2026-10-24",
+        visitTime: "10:30",
+        gestationalAgeWeeks: 4,
+        gestationalAgeDays: 0,
+        maternalWeightKg: 56.5,
+        temperature: 36.6,
+        bloodPressure: "110/70",
+        maternalPulse: 74,
+        uterineHeightCm: 0,
+        fetusSituation: "NA",
+        fetusPresentation: "NA",
+        fetusPosition: "NA",
+        fetalHeartRate: 0,
+        fetalMovements: "NA",
+        proteinuria: "-",
+        edema: "SE",
+        tendonReflex: "+",
+        ironFolicAcidGiven: false,
+        calciumGiven: false,
+        counselingGiven: "NUT / ITS / PF",
+        nextAppointmentDate: "2026-11-12",
+        attendingDoctorName: "Dr. Patrick José Jacinto Gomero",
+        notes: "Captación precoz. Se indica Ácido Fólico 0.5mg VO c/24h y exámenes basales.",
+      },
+      {
+        visitNumber: 2,
+        visitDate: "2026-11-12",
+        visitTime: "11:15",
+        gestationalAgeWeeks: 6,
+        gestationalAgeDays: 5,
+        maternalWeightKg: 57.0,
+        temperature: 36.5,
+        bloodPressure: "110/65",
+        maternalPulse: 76,
+        uterineHeightCm: 0,
+        fetusSituation: "NA",
+        fetusPresentation: "NA",
+        fetusPosition: "NA",
+        fetalHeartRate: 145,
+        fetalMovements: "NA",
+        proteinuria: "-",
+        edema: "SE",
+        tendonReflex: "+",
+        ironFolicAcidGiven: false,
+        calciumGiven: false,
+        counselingGiven: "NUT",
+        ultrasoundGestationalAge: "6 sem 4 d",
+        nextAppointmentDate: "2026-12-10",
+        attendingDoctorName: "Dr. Patrick José Jacinto Gomero",
+        notes: "Eco transvaginal confirma embrión intrauterino único con vitalidad presente.",
+      },
+    ],
+    maternalPathologies: [
+      {
+        id: "mp-1",
+        name: "Cervicitis y Displasia Cervical Leve (NIC 1)",
+        cie10: "N87.0",
+        diagnosedDate: "2026-11-02",
+      },
+    ],
+    createdAt: "2026-10-24T10:30:00Z",
+    updatedAt: "2026-11-12T11:15:00Z",
   },
 ];
 
@@ -540,6 +736,34 @@ interface MedicalStoreState {
   ) => void;
   deletePrescription: (id: string) => void;
   getPrescriptionsByPatientId: (patientId: string) => MedicalPrescription[];
+
+  // Órdenes de Laboratorio Clínico
+  labOrders: LabOrder[];
+  addLabOrder: (
+    order: Omit<LabOrder, "id" | "createdAt" | "updatedAt">
+  ) => LabOrder;
+  updateLabOrder: (
+    id: string,
+    updates: Partial<LabOrder>
+  ) => void;
+  deleteLabOrder: (id: string) => void;
+  getLabOrdersByPatientId: (patientId: string) => LabOrder[];
+
+  // Carnet de Control Prenatal Oficial (MINSA / CLAP)
+  prenatalCards: PrenatalCard[];
+  addPrenatalCard: (
+    card: Omit<PrenatalCard, "id" | "createdAt" | "updatedAt">
+  ) => PrenatalCard;
+  updatePrenatalCard: (id: string, updates: Partial<PrenatalCard>) => void;
+  deletePrenatalCard: (id: string) => void;
+  getPrenatalCardByPatientId: (patientId: string) => PrenatalCard | undefined;
+  addPrenatalVisit: (cardId: string, visit: PrenatalVisitItem) => void;
+  updatePrenatalVisit: (
+    cardId: string,
+    visitIndex: number,
+    visit: PrenatalVisitItem
+  ) => void;
+  deletePrenatalVisit: (cardId: string, visitIndex: number) => void;
 
   // Reset a datos iniciales
   resetToSeedData: () => void;
@@ -936,6 +1160,122 @@ export const useMedicalStore = create<MedicalStoreState>()(
         return list.filter((p) => p.patientId === patientId);
       },
 
+      // ÓRDENES DE LABORATORIO CLÍNICO
+      labOrders: INITIAL_LAB_ORDERS,
+      addLabOrder: (data) => {
+        const id = `lab-${Date.now()}`;
+        const now = new Date().toISOString();
+        const newLabOrder: LabOrder = {
+          ...data,
+          id,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => {
+          const currentList = state.labOrders || [];
+          return {
+            labOrders: [newLabOrder, ...currentList],
+          };
+        });
+        return newLabOrder;
+      },
+      updateLabOrder: (id, updates) => {
+        set((state) => ({
+          labOrders: (state.labOrders || []).map((ord) =>
+            ord.id === id ? { ...ord, ...updates, updatedAt: new Date().toISOString() } : ord
+          ),
+        }));
+      },
+      deleteLabOrder: (id) => {
+        set((state) => ({
+          labOrders: (state.labOrders || []).filter((ord) => ord.id !== id),
+        }));
+      },
+      getLabOrdersByPatientId: (patientId) => {
+        const list = get().labOrders || [];
+        return list.filter((ord) => ord.patientId === patientId);
+      },
+
+      // CARNET DE CONTROL PRENATAL OFICIAL (MINSA / CLAP)
+      prenatalCards: INITIAL_PRENATAL_CARDS,
+      addPrenatalCard: (data) => {
+        const id = `pnc-${Date.now()}`;
+        const now = new Date().toISOString();
+        const newCard: PrenatalCard = {
+          ...data,
+          id,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => {
+          const currentList = state.prenatalCards || [];
+          return {
+            prenatalCards: [newCard, ...currentList],
+          };
+        });
+        return newCard;
+      },
+      updatePrenatalCard: (id, updates) => {
+        set((state) => ({
+          prenatalCards: (state.prenatalCards || []).map((card) =>
+            card.id === id
+              ? { ...card, ...updates, updatedAt: new Date().toISOString() }
+              : card
+          ),
+        }));
+      },
+      deletePrenatalCard: (id) => {
+        set((state) => ({
+          prenatalCards: (state.prenatalCards || []).filter((c) => c.id !== id),
+        }));
+      },
+      getPrenatalCardByPatientId: (patientId) => {
+        const list = get().prenatalCards || [];
+        return list.find((c) => c.patientId === patientId);
+      },
+      addPrenatalVisit: (cardId, visit) => {
+        set((state) => ({
+          prenatalCards: (state.prenatalCards || []).map((card) => {
+            if (card.id !== cardId) return card;
+            const updatedVisits = [...(card.visits || []), visit].slice(0, 9);
+            return {
+              ...card,
+              visits: updatedVisits,
+              updatedAt: new Date().toISOString(),
+            };
+          }),
+        }));
+      },
+      updatePrenatalVisit: (cardId, visitIndex, visit) => {
+        set((state) => ({
+          prenatalCards: (state.prenatalCards || []).map((card) => {
+            if (card.id !== cardId) return card;
+            const updatedVisits = [...(card.visits || [])];
+            if (visitIndex >= 0 && visitIndex < updatedVisits.length) {
+              updatedVisits[visitIndex] = visit;
+            }
+            return {
+              ...card,
+              visits: updatedVisits,
+              updatedAt: new Date().toISOString(),
+            };
+          }),
+        }));
+      },
+      deletePrenatalVisit: (cardId, visitIndex) => {
+        set((state) => ({
+          prenatalCards: (state.prenatalCards || []).map((card) => {
+            if (card.id !== cardId) return card;
+            const updatedVisits = (card.visits || []).filter((_, idx) => idx !== visitIndex);
+            return {
+              ...card,
+              visits: updatedVisits,
+              updatedAt: new Date().toISOString(),
+            };
+          }),
+        }));
+      },
+
       // RESET
       resetToSeedData: () => {
         set({
@@ -946,6 +1286,8 @@ export const useMedicalStore = create<MedicalStoreState>()(
           colposcopyReports: INITIAL_COLPOSCOPY,
           clinicalCheckups: INITIAL_CHECKUPS,
           prescriptions: INITIAL_PRESCRIPTIONS,
+          labOrders: INITIAL_LAB_ORDERS,
+          prenatalCards: INITIAL_PRENATAL_CARDS,
           tariffItems: INITIAL_TARIFF,
           vademecumItems: INITIAL_VADEMECUM,
         });

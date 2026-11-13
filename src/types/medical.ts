@@ -204,3 +204,156 @@ export interface MedicalPrescription {
   updatedAt: string;
 }
 
+export type LabCategory =
+  | "Hematología & Bioquímica"
+  | "Ginecología & Marcadores"
+  | "Perfil Hormonal & Ovárico"
+  | "Perfil Prenatal / Gestacional"
+  | "Infeccioso & Microbiología"
+  | "Orina & Función Renal"
+  | "Otro";
+
+export interface LabOrderItem {
+  id: string;
+  category: LabCategory | string;
+  testName: string; // ej. "CA-125 (Marcador Ovárico / Endometriosis)"
+  sampleType?: string; // ej. "Sangre venosa", "Orina", "Secreción endocervical"
+  notes?: string;
+}
+
+export interface LabOrder {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  doctorName: string;
+  doctorCmp: string;
+  doctorRne: string;
+  orderDate: string; // YYYY-MM-DD
+  diagnosis: string;
+  cie10Code?: string;
+  items: LabOrderItem[];
+  customTests?: string; // Campo libre para exámenes adicionales
+  urgency: "Rutina" | "Prioritario" | "Urgente";
+  patientInstructions?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PrenatalVisitItem {
+  visitNumber: number; // 1 to 9
+  visitDate: string; // YYYY-MM-DD
+  visitTime?: string; // HH:mm
+  gestationalAgeWeeks: number;
+  gestationalAgeDays: number;
+  maternalWeightKg: number;
+  temperature: number;
+  bloodPressure: string; // ej: "110/70"
+  maternalPulse: number; // lpm
+  uterineHeightCm: number;
+  fetusSituation: "L" | "T" | "NA"; // Longitudinal / Transversa / No Aplica
+  fetusPresentation: "C" | "P" | "NA"; // Cefálica / Pélvica / No Aplica
+  fetusPosition: "D" | "I" | "NA"; // Derecha / Izquierda / No Aplica
+  fetalHeartRate: number; // FCF lpm
+  fetalMovements: "+" | "++" | "+++" | "SM" | "NA";
+  proteinuria: "-" | "+" | "++" | "+++" | "NSH";
+  edema: "-" | "+" | "++" | "+++" | "SE";
+  tendonReflex: "0" | "+" | "++" | "+++";
+  nippleExam?: "Formado" | "No Formado" | "Sin Examen";
+  ironFolicAcidGiven: boolean;
+  calciumGiven: boolean;
+  counselingGiven?: string;
+  ultrasoundGestationalAge?: string;
+  biophysicalProfileScore?: string;
+  nextAppointmentDate: string;
+  homeVisit?: "Si" | "No" | "NA";
+  attendingDoctorName: string;
+  notes?: string;
+}
+
+export interface PrenatalBaselineData {
+  insuranceType: "SIS" | "ESSALUD" | "PRIVADO" | "No Aplica";
+  insuranceCode?: string;
+  educationLevel: "Analfabeta" | "Primaria" | "Secundaria" | "Superior No Univ" | "Superior Univ";
+  civilStatus: "Soltera" | "Casada" | "Conviviente" | "Otro";
+  fatherName?: string;
+  fatherDni?: string;
+  // Antecedentes Obstétricos
+  gestas: number;
+  abortos: number;
+  partosVaginales: number;
+  cesareas: number;
+  nacidosVivos: number;
+  nacidosMuertos: number;
+  viven: number;
+  rnMayorPesoGramos?: number;
+  multipleHistory?: boolean;
+  pretermHistory?: boolean;
+  // Gestación Anterior
+  previousDeliveryDate?: string;
+  previousDeliveryType?: "Parto Vaginal" | "Cesárea" | "Aborto" | "Ectópico" | "Molar";
+  previousAbortionType?: "Incompleto" | "Completo" | "Frustro/Retenido" | "Séptico" | "No Aplica";
+  adequateIntergenesicPeriod?: boolean;
+  breastfeedingMonths?: "< 6 meses" | "6 meses o más" | "No hubo";
+  // Antecedentes Médicos
+  familyHistory: string[];
+  personalHistory: string[];
+  previousVaccines: {
+    rubella: boolean;
+    hepatitisB: boolean;
+    hpv: boolean;
+    yellowFever: boolean;
+  };
+  // Datos Basales
+  usualWeightKg: number;
+  heightCm: number;
+  bloodGroup: "A" | "B" | "AB" | "O";
+  rhFactor: "Rh (+)" | "Rh (-) Sensibilizada" | "Rh (-) No Sensibilizada";
+  smokerCigarettesDay?: number;
+  drugsUse?: boolean;
+  // Fechas y Naegele
+  fum: string; // YYYY-MM-DD
+  fumDoubt: boolean;
+  ultrasoundGestationalAgeWeeks?: number;
+  ultrasoundDate?: string;
+  fpp: string; // Fecha Probable de Parto calculada por Naegele
+  // Examen Físico Basal
+  clinicalExam: "Normal" | "Patológico";
+  breastsExam: "Normal" | "Patológico" | "Sin Examen";
+  cervixExam: "Normal" | "Patológico" | "Sin Examen";
+  pelvisExam: "Normal" | "Anormal" | "Sin Examen";
+  dentalExam: "Normal" | "Patológico" | "Sin Examen";
+  // Laboratorios Basales
+  hemoglobin1?: number; // g/dL
+  hemoglobin2?: number;
+  bloodGlucose1?: number; // mg/dL
+  vdrlRpr1?: "No reactivo" | "Reactivo" | "No se hizo";
+  hivScreening1?: "Negativo" | "Positivo" | "No se hizo";
+  hepatitisBScreening?: "Negativo" | "Positivo" | "No se hizo";
+  completeUrineExam?: "Normal" | "Patológico" | "No se hizo";
+  urineCulture?: "Negativo" | "Positivo" | "Pendiente";
+  papTestResult?: "Normal" | "Anormal" | "No se hizo";
+  colposcopyResult?: "Normal" | "Anormal" | "No se hizo";
+}
+
+export interface MaternalPathologyItem {
+  id: string;
+  name: string;
+  cie10: string;
+  diagnosedDate: string;
+}
+
+export interface PrenatalCard {
+  id: string;
+  patientId: string;
+  clinicEstablishment: string;
+  attendingDoctorId: string;
+  attendingDoctorName: string;
+  baseline: PrenatalBaselineData;
+  visits: PrenatalVisitItem[];
+  maternalPathologies: MaternalPathologyItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+

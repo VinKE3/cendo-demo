@@ -25,6 +25,8 @@ import {
   Printer,
   Trash2,
   X,
+  FlaskConical,
+  Baby,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { useMedicalStore } from "@/store/useMedicalStore";
@@ -34,13 +36,30 @@ import { ColposcopyModal } from "@/components/colposcopia/ColposcopyModal";
 import { CheckupModal } from "@/components/chequeos/CheckupModal";
 import { PrescriptionModal } from "@/components/recetas/PrescriptionModal";
 import { PrescriptionPrintView } from "@/components/export/PrescriptionPrintView";
+import { LabOrderModal } from "@/components/laboratorio/LabOrderModal";
+import { LabOrderPrintView } from "@/components/export/LabOrderPrintView";
+import { PrenatalCardModal } from "@/components/prenatal/PrenatalCardModal";
+import { PrenatalPrintView } from "@/components/export/PrenatalPrintView";
 import { printHtmlElement } from "@/lib/pdfGenerator";
-import { Patient, ColposcopyReport, ClinicalCheckup, MedicalPrescription } from "@/types/medical";
+import {
+  Patient,
+  ColposcopyReport,
+  ClinicalCheckup,
+  MedicalPrescription,
+  LabOrder,
+  PrenatalCard,
+} from "@/types/medical";
 import {
   generateColposcopyWhatsAppUrl,
   generateCheckupWhatsAppUrl,
   generatePrescriptionWhatsAppUrl,
+  generateLabOrderWhatsAppUrl,
+  generatePrenatalWhatsAppUrl,
 } from "@/lib/whatsappShare";
+import {
+  calculateGestationalAge,
+  evaluatePrenatalRisks,
+} from "@/lib/prenatalCalculators";
 
 export default function FichaPacientePage() {
   const params = useParams();
@@ -57,6 +76,13 @@ export default function FichaPacientePage() {
   const [editingPrescription, setEditingPrescription] = useState<MedicalPrescription | null>(null);
   const [viewingPrescription, setViewingPrescription] = useState<MedicalPrescription | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [isLabModalOpen, setIsLabModalOpen] = useState(false);
+  const [editingLabOrder, setEditingLabOrder] = useState<LabOrder | null>(null);
+  const [viewingLabOrder, setViewingLabOrder] = useState<LabOrder | null>(null);
+  const [isLabPrintModalOpen, setIsLabPrintModalOpen] = useState(false);
+  const [isPrenatalModalOpen, setIsPrenatalModalOpen] = useState(false);
+  const [viewingPrenatalCard, setViewingPrenatalCard] = useState<PrenatalCard | null>(null);
+  const [isPrenatalPrintModalOpen, setIsPrenatalPrintModalOpen] = useState(false);
 
   const {
     getPatientById,
@@ -65,6 +91,9 @@ export default function FichaPacientePage() {
     getCheckupsByPatientId,
     getPrescriptionsByPatientId,
     deletePrescription,
+    getLabOrdersByPatientId,
+    deleteLabOrder,
+    getPrenatalCardByPatientId,
     doctorProfile,
   } = useMedicalStore();
 
@@ -73,6 +102,8 @@ export default function FichaPacientePage() {
   const colpos = getColposcopyByPatientId(patientId);
   const checkups = getCheckupsByPatientId(patientId);
   const prescriptions = getPrescriptionsByPatientId(patientId);
+  const labOrders = getLabOrdersByPatientId(patientId);
+  const prenatalCard = getPrenatalCardByPatientId(patientId);
 
   // Calculadora Automática de Semanas / Días de Amenorrea por FUR
   const furCalculation = useMemo(() => {
@@ -187,6 +218,25 @@ export default function FichaPacientePage() {
           >
             <Pill className="w-3.5 h-3.5 text-emerald-600" />
             <span>+ Emitir Receta</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setEditingLabOrder(null);
+              setIsLabModalOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-teal-50 text-teal-800 hover:bg-teal-100 border border-teal-300 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <FlaskConical className="w-3.5 h-3.5 text-teal-600" />
+            <span>+ Orden de Laboratorio</span>
+          </button>
+
+          <button
+            onClick={() => setIsPrenatalModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-300 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <Baby className="w-3.5 h-3.5 text-amber-600" />
+            <span>Control Prenatal (MINSA)</span>
           </button>
         </div>
       </div>
@@ -399,6 +449,72 @@ export default function FichaPacientePage() {
               <p className="text-slate-700 italic mt-0.5">{bg.notes}</p>
             </div>
           )}
+
+          {/* Módulo Integrado de Control Prenatal MINSA / CLAP */}
+          <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 space-y-2 mt-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
+                  <Baby className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-heading font-extrabold text-xs text-amber-950 uppercase tracking-wider">
+                      Carnet de Control Prenatal (MINSA / CLAP)
+                    </span>
+                    {prenatalCard && (
+                      <span className="px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-mono text-[9px] font-bold">
+                        {prenatalCard.visits.length} de 9 atenciones
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10.5px] text-amber-800">
+                    {prenatalCard
+                      ? `FUM: ${prenatalCard.baseline.fum} • FPP Naegele: ${prenatalCard.baseline.fpp}`
+                      : "Esta paciente puede ser evaluada con el carnet perinatal de 9 atenciones oficiales."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                {prenatalCard && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url = generatePrenatalWhatsAppUrl(patient, prenatalCard, doctorProfile);
+                        window.open(url, "_blank");
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                      title="Enviar resumen prenatal por WhatsApp"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setViewingPrenatalCard(prenatalCard);
+                        setIsPrenatalPrintModalOpen(true);
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>Imprimir (2 Págs)</span>
+                    </button>
+                  </>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsPrenatalModalOpen(true)}
+                  className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                >
+                  <Baby className="w-3.5 h-3.5" />
+                  <span>{prenatalCard ? "Abrir Carnet" : "+ Iniciar Carnet Prenatal"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -590,7 +706,7 @@ export default function FichaPacientePage() {
           </div>
         </div>
         {/* Recetas Médicas Emitidas para la Paciente */}
-        <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4 lg:col-span-2">
+        <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Pill className="w-5 h-5 text-emerald-600" />
@@ -712,6 +828,151 @@ export default function FichaPacientePage() {
             )}
           </div>
         </div>
+
+        {/* Órdenes de Laboratorio Clínico */}
+        <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-5 h-5 text-teal-600" />
+              <h3 className="font-heading font-bold text-sm text-heading">
+                Órdenes de Laboratorio ({labOrders.length})
+              </h3>
+            </div>
+            <button
+              onClick={() => {
+                setEditingLabOrder(null);
+                setIsLabModalOpen(true);
+              }}
+              className="text-xs text-teal-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nueva Orden</span>
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {labOrders.length > 0 ? (
+              labOrders.map((ord) => (
+                <div
+                  key={ord.id}
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-teal-300 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-100 text-teal-800">
+                      LAB-{ord.id.replace("lab-", "").slice(0, 8)}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-semibold text-muted">
+                        {ord.orderDate}
+                      </span>
+                      <span
+                        className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase font-mono ${
+                          ord.urgency === "Urgente"
+                            ? "bg-red-100 text-red-800"
+                            : ord.urgency === "Prioritario"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-slate-200 text-slate-700"
+                        }`}
+                      >
+                        {ord.urgency}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-xs font-semibold text-heading leading-snug">
+                    {ord.diagnosis || "Sin diagnóstico especificado"}
+                  </p>
+
+                  {/* Exámenes Solicitados */}
+                  <div className="space-y-1 pt-1 border-t border-slate-200">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                      Análisis Solicitados ({ord.items.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {ord.items.map((item) => (
+                        <span
+                          key={item.id}
+                          className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[10.5px] font-medium text-slate-800"
+                        >
+                          {item.testName}
+                        </span>
+                      ))}
+                      {ord.customTests && (
+                        <span className="px-2 py-0.5 rounded bg-teal-50 border border-teal-200 text-[10.5px] font-medium text-teal-900 italic">
+                          + {ord.customTests}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => {
+                        const url = generateLabOrderWhatsAppUrl(patient, ord, doctorProfile);
+                        window.open(url, "_blank");
+                      }}
+                      className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
+                      title="Enviar orden por WhatsApp"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setViewingLabOrder(ord);
+                        setIsLabPrintModalOpen(true);
+                      }}
+                      className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>Ver / Imprimir</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEditingLabOrder(ord);
+                        setIsLabModalOpen(true);
+                      }}
+                      className="text-xs font-semibold text-slate-700 hover:text-primary transition-colors cursor-pointer"
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        Swal.fire({
+                          title: "¿Eliminar Orden de Laboratorio?",
+                          text: "Esta acción no se puede deshacer.",
+                          icon: "warning",
+                          showCancelButton: true,
+                          confirmButtonColor: "#EF4444",
+                          confirmButtonText: "Sí, eliminar",
+                          cancelButtonText: "Cancelar",
+                        }).then((res) => {
+                          if (res.isConfirmed) {
+                            deleteLabOrder(ord.id);
+                          }
+                        });
+                      }}
+                      className="text-xs font-semibold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center space-y-1">
+                <FlaskConical className="w-8 h-8 text-muted mx-auto" />
+                <p className="text-xs font-semibold text-heading">Sin órdenes de laboratorio</p>
+                <p className="text-[11px] text-muted">
+                  Emita una orden de laboratorio para exámenes ginecológicos, hormonales o prenatales.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Modales de Edición */}
@@ -800,6 +1061,156 @@ export default function FichaPacientePage() {
             <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
               <PrescriptionPrintView
                 prescription={viewingPrescription}
+                patient={patient}
+                doctor={doctorProfile}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Emisión / Edición de Orden de Laboratorio */}
+      <LabOrderModal
+        isOpen={isLabModalOpen}
+        onClose={() => setIsLabModalOpen(false)}
+        initialData={editingLabOrder}
+        defaultPatientId={patient.id}
+        onOrderSaved={(saved) => {
+          setViewingLabOrder(saved);
+          setIsLabPrintModalOpen(true);
+        }}
+      />
+
+      {/* Modal de Previsualización e Impresión de Orden de Laboratorio */}
+      {isLabPrintModalOpen && viewingLabOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-4xl my-6 overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="bg-primary px-6 py-4 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-secondary" />
+                <h3 className="text-base font-heading font-bold">
+                  Previsualización de Orden de Laboratorio Clínico
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = generateLabOrderWhatsAppUrl(
+                      patient,
+                      viewingLabOrder,
+                      doctorProfile
+                    );
+                    window.open(url, "_blank");
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Enviar WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    printHtmlElement(
+                      "lab-order-print-sheet",
+                      `Orden_Laboratorio_${patient.lastName}_${patient.firstName}`
+                    )
+                  }
+                  className="px-4 py-1.5 rounded-lg bg-secondary hover:bg-secondary-hover text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir / Guardar PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsLabPrintModalOpen(false)}
+                  className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
+              <LabOrderPrintView
+                labOrder={viewingLabOrder}
+                patient={patient}
+                doctor={doctorProfile}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Control Prenatal Oficial (MINSA / CLAP) */}
+      <PrenatalCardModal
+        isOpen={isPrenatalModalOpen}
+        onClose={() => setIsPrenatalModalOpen(false)}
+        patient={patient}
+        onPrintRequested={(savedCard) => {
+          setViewingPrenatalCard(savedCard);
+          setIsPrenatalPrintModalOpen(true);
+        }}
+      />
+
+      {/* Modal de Previsualización e Impresión de Carnet Prenatal (2 Páginas) */}
+      {isPrenatalPrintModalOpen && viewingPrenatalCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-4xl my-6 overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="bg-primary px-6 py-4 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-secondary" />
+                <div>
+                  <h3 className="text-base font-heading font-bold">
+                    Carnet de Atención Prenatal Oficial (2 Páginas A4)
+                  </h3>
+                  <p className="text-[11px] text-white/80">
+                    Formato Oficial MINSA / CLAP &bull; Anverso y Reverso
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = generatePrenatalWhatsAppUrl(
+                      patient,
+                      viewingPrenatalCard,
+                      doctorProfile
+                    );
+                    window.open(url, "_blank");
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Enviar WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    printHtmlElement(
+                      "prenatal-print-sheet",
+                      `Carnet_Prenatal_${patient.lastName}_${patient.firstName}`
+                    )
+                  }
+                  className="px-4 py-1.5 rounded-lg bg-secondary hover:bg-secondary-hover text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir / Guardar PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPrenatalPrintModalOpen(false)}
+                  className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
+              <PrenatalPrintView
+                card={viewingPrenatalCard}
                 patient={patient}
                 doctor={doctorProfile}
               />
