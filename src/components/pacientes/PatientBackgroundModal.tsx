@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,6 +19,23 @@ import {
 } from "lucide-react";
 import { PatientBackground } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
+
+export const STANDARD_CONTRACEPTIVE_OPTIONS = [
+  "Ninguno",
+  "Preservativo",
+  "Anticonceptivos orales combinados",
+  "Inyectable mensual",
+  "Inyectable trimestral",
+  "Implante subdérmico",
+  "DIU T de Cobre",
+  "DIU Hormonal (Mirena/Kyleena)",
+  "Parche transdérmico",
+  "Anillo vaginal",
+  "Ligadura de trompas",
+  "Quirúrgico / Salpingoclasia bilateral previa",
+  "Vasectomía (pareja)",
+  "Método del ritmo / Abstinencia periódica",
+];
 
 const backgroundSchema = z.object({
   obstetricFormula: z
@@ -81,6 +98,18 @@ export function PatientBackgroundModal({
     },
   });
 
+  const [customMacText, setCustomMacText] = useState("");
+  const watchedMac = watch("contraceptiveMethod");
+
+  // Lista dinámica de opciones que asegura que el valor actual de la paciente nunca quede vacío
+  const availableMacOptions = useMemo(() => {
+    const current = initialData?.contraceptiveMethod;
+    if (current && !STANDARD_CONTRACEPTIVE_OPTIONS.includes(current)) {
+      return [current, ...STANDARD_CONTRACEPTIVE_OPTIONS];
+    }
+    return STANDARD_CONTRACEPTIVE_OPTIONS;
+  }, [initialData?.contraceptiveMethod]);
+
   // Calculadora Automática de Semanas / Días por FUR
   const watchedFur = watch("lastMenstrualPeriod");
   const furCalculation = useMemo(() => {
@@ -121,6 +150,7 @@ export function PatientBackgroundModal({
           familyHistory: initialData.familyHistory || "No refiere",
           notes: initialData.notes || "",
         });
+        setCustomMacText("");
       }
     }
   }, [isOpen, initialData, reset]);
@@ -140,12 +170,17 @@ export function PatientBackgroundModal({
 
   const onSubmit = async (data: BackgroundFormData) => {
     try {
+      const finalMac =
+        data.contraceptiveMethod === "__OTRO__"
+          ? (customMacText.trim() || "Otro")
+          : data.contraceptiveMethod;
+
       updateBackground(patientId, {
         obstetricFormula: data.obstetricFormula.trim().toUpperCase(),
         menarche: data.menarche,
         sexualDebutAge: data.sexualDebutAge,
         sexualPartnersCount: data.sexualPartnersCount,
-        contraceptiveMethod: data.contraceptiveMethod,
+        contraceptiveMethod: finalMac,
         lastMenstrualPeriod: data.lastMenstrualPeriod,
         papHistory: data.papHistory.trim(),
         vphTestHistory: data.vphTestHistory.trim(),
@@ -221,11 +256,10 @@ export function PatientBackgroundModal({
                 type="text"
                 placeholder="Ej. G0 P0000"
                 {...register("obstetricFormula")}
-                className={`w-full px-3 py-2 rounded-xl border bg-surface text-xs font-mono font-bold text-primary placeholder:text-muted focus:outline-none focus:ring-2 ${
-                  errors.obstetricFormula
-                    ? "border-status-alert focus:ring-status-alert/20"
-                    : "border-border focus:ring-primary/20"
-                }`}
+                className={`w-full px-3 py-2 rounded-xl border bg-surface text-xs font-mono font-bold text-primary placeholder:text-muted focus:outline-none focus:ring-2 ${errors.obstetricFormula
+                  ? "border-status-alert focus:ring-status-alert/20"
+                  : "border-border focus:ring-primary/20"
+                  }`}
               />
               <p className="text-[10px] text-muted">G: Gestas &bull; P: T P A V</p>
             </div>
@@ -239,16 +273,24 @@ export function PatientBackgroundModal({
                 {...register("contraceptiveMethod")}
                 className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs font-medium text-heading focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
-                <option value="Ninguno">Ninguno</option>
-                <option value="Implante subdérmico">Implante subdérmico</option>
-                <option value="DIU T de Cobre">DIU T de Cobre</option>
-                <option value="DIU Hormonal (Mirena/Kyleena)">DIU Hormonal (Mirena/Kyleena)</option>
-                <option value="Anticonceptivos orales combinados">Anticonceptivos orales combinados</option>
-                <option value="Inyectable mensual">Inyectable mensual</option>
-                <option value="Inyectable trimestral">Inyectable trimestral</option>
-                <option value="Preservativo">Preservativo</option>
-                <option value="Ligadura de trompas">Ligadura de trompas</option>
+                {availableMacOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+                <option value="__OTRO__">Otro (especificar libremente)...</option>
               </select>
+
+              {watchedMac === "__OTRO__" && (
+                <input
+                  type="text"
+                  placeholder="Escriba el método anticonceptivo..."
+                  autoFocus
+                  value={customMacText}
+                  onChange={(e) => setCustomMacText(e.target.value)}
+                  className="w-full mt-1.5 px-3 py-2 rounded-xl border border-primary/40 bg-accent-soft/30 text-xs font-medium text-heading placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              )}
             </div>
 
             {/* FUR */}
