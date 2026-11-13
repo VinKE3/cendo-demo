@@ -19,6 +19,8 @@ import {
   EyeOff,
   Stamp,
   User,
+  Sparkles,
+  MessageCircle,
 } from "lucide-react";
 import { DoctorProfile, DoctorRole } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
@@ -181,14 +183,43 @@ export function DoctorModal({ isOpen, onClose, doctorToEdit }: DoctorModalProps)
               : "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=300&auto=format&fit=crop",
         });
 
+        const welcomeText = `🏥 CENDO - Centro de Endometriosis\nEstimado(a) ${data.doctorTitle} ${data.fullName},\n\nSe ha habilitado su cuenta en el Portal Médico Asistencial de CENDO:\n🔗 Enlace: https://app.cendo.pe/login\n📧 Correo: ${data.email}\n🔑 Contraseña de acceso: ${data.password}\n\nSus informes de colposcopía y recetas médicas se emitirán formalmente con su CMP ${data.cmp} y RNE ${data.rne}.\n\nCualquier consulta sobre sus credenciales puede coordinarse con la Dirección Médica (Dr. Patrick Jacinto).`;
+
         await Swal.fire({
           icon: "success",
-          title: "Médico Registrado",
+          title: "Médico Registrado Exitosamente",
           html: `
-            <p>Se ha dado de alta a <strong>${data.doctorTitle} ${data.fullName}</strong> en CENDO.</p>
-            <p class="text-xs text-slate-500 mt-2">Ahora puede iniciar sesión con el correo <code>${data.email}</code> y emitir informes con su CMP ${data.cmp} y RNE ${data.rne}.</p>
+            <div class="text-left text-xs text-slate-700 space-y-2.5 p-3 bg-slate-50 rounded-xl border border-slate-200 mt-2">
+              <p><strong>Médico:</strong> ${data.doctorTitle} ${data.fullName}</p>
+              <p><strong>Credenciales SUSALUD:</strong> <span class="font-mono font-bold text-slate-900">CMP ${data.cmp} &bull; RNE ${data.rne}</span></p>
+              <p><strong>Usuario / Correo:</strong> <code class="font-bold text-primary">${data.email}</code></p>
+              <p><strong>Contraseña Asignada:</strong> <code class="font-bold text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-300">${data.password}</code></p>
+              <div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 text-[11px] leading-snug">
+                El especialista ya puede iniciar sesión individualmente. Presione el botón verde para enviarle sus credenciales por WhatsApp.
+              </div>
+            </div>
           `,
-          confirmButtonColor: "#0A4D68",
+          showCancelButton: true,
+          confirmButtonText: "📲 Enviar Credenciales por WhatsApp",
+          cancelButtonText: "Listo, cerrar",
+          confirmButtonColor: "#059669",
+          cancelButtonColor: "#0A4D68",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigator.clipboard.writeText(welcomeText);
+            const cleanPhone = data.phone.replace(/\D/g, "");
+            if (cleanPhone.length >= 9) {
+              const phoneWithCountry = cleanPhone.startsWith("51") ? cleanPhone : `51${cleanPhone}`;
+              window.open(`https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(welcomeText)}`, "_blank");
+            } else {
+              Swal.fire({
+                icon: "success",
+                title: "Credenciales Copiadas",
+                text: "El mensaje formal ha sido copiado al portapapeles. Péguelo en el chat de WhatsApp del doctor.",
+                confirmButtonColor: "#0A4D68",
+              });
+            }
+          }
         });
       }
 
@@ -367,9 +398,23 @@ export function DoctorModal({ isOpen, onClose, doctorToEdit }: DoctorModalProps)
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-heading uppercase tracking-wider">
-                Contraseña de Acceso *
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-heading uppercase tracking-wider">
+                  Contraseña de Acceso *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const randomPass = "Cendo" + Math.floor(100 + Math.random() * 900) + "!*";
+                    setValue("password", randomPass, { shouldValidate: true });
+                    setShowPassword(true);
+                  }}
+                  className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <Sparkles className="w-3 h-3 text-secondary" />
+                  Generar clave segura
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-muted absolute left-3.5 top-3" />
                 <input

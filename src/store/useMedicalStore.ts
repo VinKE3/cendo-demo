@@ -435,6 +435,10 @@ interface MedicalStoreState {
   switchActiveDoctor: (doctorId: string) => void;
   addDoctor: (doctor: Omit<DoctorProfile, "id" | "createdAt">) => DoctorProfile;
   updateDoctor: (id: string, updates: Partial<DoctorProfile>) => void;
+  resetDoctorPassword: (
+    doctorId: string,
+    newPassword: string
+  ) => { success: boolean; error?: string };
   deleteDoctor: (id: string) => { success: boolean; error?: string };
   toggleDoctorActive: (id: string) => void;
   logout: () => void;
@@ -590,6 +594,27 @@ export const useMedicalStore = create<MedicalStoreState>()(
             doctorProfile: updatedActive,
           };
         });
+      },
+
+      resetDoctorPassword: (doctorId, newPassword) => {
+        const state = get();
+        const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+        const doctor = currentList.find((d) => d.id === doctorId);
+        if (!doctor) {
+          return { success: false, error: "Profesional médico no encontrado en CENDO." };
+        }
+        const updatedList = currentList.map((d) =>
+          d.id === doctorId ? { ...d, password: newPassword } : d
+        );
+        const updatedActive =
+          state.doctorProfile.id === doctorId
+            ? { ...state.doctorProfile, password: newPassword }
+            : state.doctorProfile;
+        set({
+          doctorsList: updatedList,
+          doctorProfile: updatedActive,
+        });
+        return { success: true };
       },
 
       deleteDoctor: (id) => {

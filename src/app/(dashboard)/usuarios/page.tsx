@@ -20,6 +20,8 @@ import {
   FileBadge,
   Stamp,
   Award,
+  Copy,
+  MessageCircle,
 } from "lucide-react";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { DoctorProfile } from "@/types/medical";
@@ -32,6 +34,7 @@ export default function UsuariosPage() {
     switchActiveDoctor,
     deleteDoctor,
     toggleDoctorActive,
+    resetDoctorPassword,
   } = useMedicalStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -128,6 +131,103 @@ export default function UsuariosPage() {
           });
         }
       }
+    });
+  };
+
+  // Restablecer Contraseña desde Dirección Médica
+  const handleResetPassword = async (doc: DoctorProfile) => {
+    const suggestedPassword = `Cendo${Math.floor(100 + Math.random() * 900)}!*`;
+
+    const { value: newPassword } = await Swal.fire({
+      title: `Restablecer Clave: ${doc.doctorTitle} ${doc.fullName}`,
+      html: `
+        <div class="text-left text-xs text-slate-600 space-y-2.5 p-3 bg-slate-50 rounded-xl border border-slate-200 mt-2">
+          <p><strong>Usuario / Correo:</strong> <code>${doc.email}</code></p>
+          <p><strong>CMP:</strong> ${doc.cmp} &bull; <strong>RNE:</strong> ${doc.rne}</p>
+          <p class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">
+            Ingrese la nueva clave o conserve la sugerida generada de forma aleatoria:
+          </p>
+        </div>
+      `,
+      input: "text",
+      inputValue: suggestedPassword,
+      inputLabel: "Nueva Contraseña para el Especialista:",
+      inputAttributes: {
+        autocapitalize: "off",
+        autocorrect: "off",
+      },
+      showCancelButton: true,
+      confirmButtonText: "Guardar Nueva Clave",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#0A4D68",
+      cancelButtonColor: "#64748B",
+      inputValidator: (value) => {
+        if (!value || value.length < 4) {
+          return "La contraseña debe tener al menos 4 caracteres";
+        }
+      },
+    });
+
+    if (newPassword) {
+      const res = resetDoctorPassword(doc.id, newPassword);
+      if (res.success) {
+        const notifyText = `🏥 CENDO - Centro de Endometriosis\nEstimado(a) ${doc.doctorTitle} ${doc.fullName},\n\nSu contraseña de acceso al Portal Médico ha sido restablecida por la Dirección Médica (Dr. Patrick Jacinto):\n🔗 Enlace: https://app.cendo.pe/login\n📧 Usuario: ${doc.email}\n🔑 Nueva Contraseña: ${newPassword}\n\nPor favor, conserve sus credenciales en estricta reserva conforme a la Ley N° 29733.`;
+
+        await Swal.fire({
+          icon: "success",
+          title: "Contraseña Actualizada",
+          html: `
+            <div class="text-left text-xs space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-200 mt-2">
+              <p>Se ha actualizado la contraseña de <strong>${doc.doctorTitle} ${doc.fullName}</strong>.</p>
+              <p><strong>Nueva clave:</strong> <code class="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-300">${newPassword}</code></p>
+            </div>
+          `,
+          showCancelButton: true,
+          confirmButtonText: "📲 Enviar Nueva Clave por WhatsApp",
+          cancelButtonText: "Cerrar",
+          confirmButtonColor: "#059669",
+          cancelButtonColor: "#0A4D68",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigator.clipboard.writeText(notifyText);
+            const cleanPhone = doc.phone.replace(/\D/g, "");
+            if (cleanPhone.length >= 9) {
+              const phoneWithCountry = cleanPhone.startsWith("51") ? cleanPhone : `51${cleanPhone}`;
+              window.open(`https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(notifyText)}`, "_blank");
+            } else {
+              Swal.fire({
+                icon: "success",
+                title: "Mensaje Copiado",
+                text: "El texto con la nueva contraseña ha sido copiado. Péguelo en el chat del doctor.",
+                confirmButtonColor: "#0A4D68",
+              });
+            }
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.error || "No se pudo actualizar la contraseña.",
+          confirmButtonColor: "#0A4D68",
+        });
+      }
+    }
+  };
+
+  // Copiar Credenciales Rápidas para WhatsApp
+  const handleCopyCredentials = (doc: DoctorProfile) => {
+    const credText = `🏥 CENDO - Centro de Endometriosis\nEstimado(a) ${doc.doctorTitle} ${doc.fullName},\n\nCredenciales de acceso a la plataforma asistencial de CENDO:\n🔗 Enlace: https://app.cendo.pe/login\n📧 Usuario: ${doc.email}\n🔑 Contraseña: ${doc.password || "pjacinto@cendo"}\n\nCMP: ${doc.cmp} | RNE: ${doc.rne}\nSede: Av. Alfredo Benavides N° 2975, Of. 405, Miraflores`;
+    navigator.clipboard.writeText(credText);
+    Swal.fire({
+      icon: "success",
+      title: "Credenciales Copiadas",
+      html: `
+        <p class="text-xs text-slate-600">Se han copiado las credenciales de <strong>${doc.doctorTitle} ${doc.fullName}</strong> al portapapeles listas para pegar en WhatsApp.</p>
+      `,
+      confirmButtonColor: "#0A4D68",
+      timer: 2000,
+      timerProgressBar: true,
     });
   };
 
@@ -424,6 +524,24 @@ export default function UsuariosPage() {
                 </div>
 
                 <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyCredentials(doc)}
+                    className="p-2 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
+                    title="Copiar credenciales de acceso para WhatsApp"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleResetPassword(doc)}
+                    className="p-2 rounded-lg text-slate-600 hover:text-amber-700 hover:bg-amber-50 transition-colors cursor-pointer"
+                    title="Restablecer contraseña de acceso"
+                  >
+                    <KeyRound className="w-4 h-4" />
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => handleOpenEditModal(doc)}

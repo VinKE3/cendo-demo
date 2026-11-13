@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   FileText,
-  Search,
   Sparkles,
   MapPin,
   Phone,
@@ -24,10 +23,10 @@ import {
   KeyRound,
   ArrowRight,
   ShieldAlert,
+  MessageCircle,
 } from "lucide-react";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { useMedicalStore } from "@/store/useMedicalStore";
-import { DoctorProfile } from "@/types/medical";
 
 // Esquema de validación estricto
 const loginSchema = z.object({
@@ -45,10 +44,9 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { doctorsList, loginWithCredentials, isAuthenticated } = useMedicalStore();
+  const { loginWithCredentials, isAuthenticated } = useMedicalStore();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string>("doc-patrick-jacinto");
 
   // Si ya tiene sesión activa, redirigir al Dashboard
   useEffect(() => {
@@ -60,25 +58,53 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "cendoperu@gmail.com",
-      password: "pjacinto@cendo",
+      email: "",
+      password: "",
       rememberMe: true,
     },
   });
 
-  const currentEmail = watch("email");
+  // Modal de Recuperación de Clave Seguro (Conexión directa con Dirección Médica)
+  const handleForgotPassword = async () => {
+    const { value: emailInput } = await Swal.fire({
+      title: "Recuperación de Contraseña",
+      html: `
+        <div class="text-left text-xs text-slate-600 space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-200 mt-2">
+          <div class="flex items-center gap-2 text-amber-800 font-bold">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            Protocolo de Seguridad Médica (Ley N° 29733)
+          </div>
+          <p>
+            Por estricta confidencialidad médica y normativa SUSALUD, el restablecimiento de claves
+            es autorizado exclusivamente por la <strong>Dirección Médica de CENDO (Dr. Patrick Jacinto)</strong>.
+          </p>
+          <p class="text-[11px] text-slate-500">
+            Ingrese su correo institucional para generar la solicitud directa por WhatsApp:
+          </p>
+        </div>
+      `,
+      input: "email",
+      inputPlaceholder: "ej. jcarrasco@cendo.pe",
+      inputAttributes: {
+        autocapitalize: "off",
+        autocorrect: "off",
+      },
+      showCancelButton: true,
+      confirmButtonText: "Solicitar por WhatsApp al Dr. Patrick",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#0A4D68",
+      cancelButtonColor: "#64748B",
+    });
 
-  // Selección rápida de credenciales para demostración / prueba médica
-  const handleSelectDoctorPreset = (doctor: DoctorProfile) => {
-    setSelectedDoctorId(doctor.id);
-    setValue("email", doctor.email, { shouldValidate: true });
-    setValue("password", doctor.password || "pjacinto@cendo", { shouldValidate: true });
+    if (emailInput) {
+      const messageText = `Hola Dr. Patrick, he olvidado mi contraseña de acceso al Portal Médico CENDO.\n\nMi correo institucional es: ${emailInput}\n\n¿Podría por favor restablecer mi clave desde su panel de Dirección Médica? Muchas gracias.`;
+      const whatsappUrl = `https://wa.me/51985945697?text=${encodeURIComponent(messageText)}`;
+      window.open(whatsappUrl, "_blank");
+    }
   };
 
   // Manejo de Inicio de Sesión
@@ -234,9 +260,9 @@ export default function LoginPage() {
         </div>
       </section>
 
-      {/* Columna Derecha: Tarjeta de Acceso Profesional */}
+      {/* Columna Derecha: Tarjeta de Acceso Profesional Limpia y Segura */}
       <section className="lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-14">
-        <div className="w-full max-w-lg space-y-6">
+        <div className="w-full max-w-md space-y-6">
           {/* Cabecera del Formulario */}
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent-soft text-primary font-semibold text-xs border border-primary/20">
@@ -247,7 +273,7 @@ export default function LoginPage() {
               Acceso a Profesionales de la Salud
             </h2>
             <p className="text-muted text-sm leading-relaxed">
-              Ingrese con sus credenciales médicas para acceder a las historias clínicas,
+              Ingrese con sus credenciales médicas individuales para acceder a las historias clínicas,
               emisión de recetas y firma de informes diagnósticos.
             </p>
           </div>
@@ -298,15 +324,8 @@ export default function LoginPage() {
                 </label>
                 <button
                   type="button"
-                  onClick={() => {
-                    Swal.fire({
-                      icon: "info",
-                      title: "Recuperación de Contraseña",
-                      text: "Para restablecer o cambiar su contraseña médica, comuníquese con el Director Médico (Dr. Patrick Jacinto) desde el módulo de Gestión de Usuarios.",
-                      confirmButtonColor: "#0A4D68",
-                    });
-                  }}
-                  className="text-xs text-primary hover:underline font-medium"
+                  onClick={handleForgotPassword}
+                  className="text-xs text-primary hover:underline font-semibold cursor-pointer"
                 >
                   ¿Olvidó su clave?
                 </button>
@@ -330,7 +349,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-heading"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-heading cursor-pointer"
                   title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                 >
                   {showPassword ? (
@@ -383,81 +402,21 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Selector Profesional de Cuentas Médicas Registradas (Para Demo 2.0 y Selección Rápida) */}
-          <div className="pt-4 border-t border-slate-200 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
-                <UserCheck className="w-4 h-4 text-primary" />
-                Profesionales Médicos Registrados
-              </span>
-              <span className="text-[11px] text-muted font-medium">
-                Clic para cargar perfil
-              </span>
+          {/* Tarjeta de Seguridad y Ayuda */}
+          <div className="p-3.5 rounded-xl bg-slate-100/90 border border-slate-200 space-y-2 text-xs text-slate-600">
+            <div className="flex items-center gap-2 font-bold text-heading text-[11px] uppercase tracking-wide">
+              <Building2 className="w-3.5 h-3.5 text-primary" />
+              Gestión Centralizada de Accesos
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {doctorsList.map((doc) => {
-                const isSelected =
-                  currentEmail?.toLowerCase() === doc.email.toLowerCase() ||
-                  selectedDoctorId === doc.id;
-                return (
-                  <button
-                    key={doc.id}
-                    type="button"
-                    onClick={() => handleSelectDoctorPreset(doc)}
-                    className={`p-2.5 rounded-xl border text-left transition-all duration-150 flex items-start gap-2.5 group cursor-pointer ${
-                      isSelected
-                        ? "bg-accent-soft/60 border-primary shadow-xs"
-                        : "bg-white border-slate-200 hover:border-primary/40 hover:bg-slate-50"
-                    }`}
-                  >
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
-                        isSelected
-                          ? "bg-primary text-white"
-                          : "bg-slate-100 text-primary group-hover:bg-primary/10"
-                      }`}
-                    >
-                      {doc.fullName
-                        .split(" ")
-                        .filter(Boolean)
-                        .map((w) => w[0])
-                        .slice(0, 2)
-                        .join("")}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-1">
-                        <p className="text-xs font-heading font-bold text-heading truncate">
-                          {doc.doctorTitle} {doc.fullName.split(" ").slice(0, 2).join(" ")}
-                        </p>
-                        {doc.role === "director" ? (
-                          <span className="text-[9px] bg-amber-100 text-amber-900 font-bold px-1.5 py-0.2 rounded shrink-0">
-                            Director
-                          </span>
-                        ) : (
-                          <span className="text-[9px] bg-slate-100 text-slate-700 font-bold px-1.5 py-0.2 rounded shrink-0">
-                            Especialista
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-muted font-mono truncate">
-                        CMP {doc.cmp} &bull; RNE {doc.rne}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <p className="text-[11px] text-muted text-center leading-snug pt-1">
-              ¿Desea dar de alta un nuevo médico o cambiar credenciales? Ingrese como{" "}
-              <strong>Director Médico</strong> y acceda al módulo de <strong>Equipo Médico</strong>.
+            <p className="text-[11px] leading-relaxed text-slate-600">
+              Las cuentas médicas y permisos de atención son creados y administrados por la{" "}
+              <strong>Dirección Médica (Dr. Patrick Jacinto)</strong>. Si requiere un nuevo acceso o
+              cambio de clave, contáctese con la administración de la clínica.
             </p>
           </div>
 
           {/* Sello Normativo al pie de tarjeta */}
-          <div className="p-3 rounded-xl bg-slate-100/80 border border-slate-200/80 flex items-center gap-2.5 text-[11px] text-slate-600">
+          <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 flex items-center gap-2.5 text-[11px] text-emerald-800">
             <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
             <span>
               Cumplimiento estricto de la <strong>Ley N° 29733</strong> (Protección de Datos
