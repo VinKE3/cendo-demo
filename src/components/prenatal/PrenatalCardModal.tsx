@@ -595,12 +595,49 @@ export function PrenatalCardModal({
                         {Array.from({ length: 9 }).map((_, idx) => {
                           const v = visitsList[idx];
                           return (
-                            <td key={idx} className="p-2 text-center border-l border-slate-100">
+                            <td key={idx} className="p-1.5 text-center border-l border-slate-100">
                               {v ? (
-                                <div className="flex items-center justify-center gap-1 text-[11px] font-mono">
-                                  <span>Prot: {v.proteinuria}</span>
-                                  <span>&bull;</span>
-                                  <span>{v.edema}</span>
+                                <div className="flex items-center justify-center gap-1 text-[10px] font-mono">
+                                  <select
+                                    value={v.proteinuria}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].proteinuria = e.target.value as any;
+                                      setVisitsList(updated);
+                                    }}
+                                    className={`px-1 py-0.5 border rounded text-[10px] font-bold ${
+                                      v.proteinuria !== "-" && v.proteinuria !== "NSH"
+                                        ? "bg-red-100 text-red-800 border-red-300"
+                                        : "bg-white text-slate-700 border-slate-200"
+                                    }`}
+                                    title="Proteinuria (Tira reactiva / Examen de Orina)"
+                                  >
+                                    <option value="-">Prot: -</option>
+                                    <option value="+">Prot: +</option>
+                                    <option value="++">Prot: ++</option>
+                                    <option value="+++">Prot: +++</option>
+                                    <option value="NSH">Prot: NSH</option>
+                                  </select>
+
+                                  <select
+                                    value={v.edema}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].edema = e.target.value as any;
+                                      setVisitsList(updated);
+                                    }}
+                                    className={`px-1 py-0.5 border rounded text-[10px] font-bold ${
+                                      v.edema !== "SE" && v.edema !== "-"
+                                        ? "bg-amber-100 text-amber-800 border-amber-300"
+                                        : "bg-white text-slate-700 border-slate-200"
+                                    }`}
+                                    title="Edema (Examen físico)"
+                                  >
+                                    <option value="SE">SE</option>
+                                    <option value="+">Ed: +</option>
+                                    <option value="++">Ed: ++</option>
+                                    <option value="+++">Ed: +++</option>
+                                  </select>
                                 </div>
                               ) : (
                                 <span className="text-slate-300">—</span>
