@@ -34,6 +34,23 @@ export function getPatientUuid(patientId: string, dni?: string): string {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(patientId)) {
     return patientId;
   }
+  // 5 Nuevos Pacientes Oficiales
+  if (dni === "73819204" || patientId === "pat-luciana-ramos") {
+    return "10000000-0000-0000-0000-000000000001";
+  }
+  if (dni === "75294816" || patientId === "pat-fiorella-mendoza") {
+    return "10000000-0000-0000-0000-000000000002";
+  }
+  if (dni === "71628493" || patientId === "pat-gabriela-paredes") {
+    return "10000000-0000-0000-0000-000000000003";
+  }
+  if (dni === "74195820" || patientId === "pat-daniela-castro") {
+    return "10000000-0000-0000-0000-000000000004";
+  }
+  if (dni === "09482715" || patientId === "pat-carmen-huaman") {
+    return "10000000-0000-0000-0000-000000000005";
+  }
+  // Compatibilidad anterior
   if (dni === "72961954" || patientId === "pat-stephany-herrera") {
     return "11111111-1111-1111-1111-111111111111";
   }

@@ -32,6 +32,7 @@ export interface Patient {
   address: string;
   civilStatus: string;
   occupation: string;
+  insuranceInfo?: string;
   createdAt: string;
   updatedAt: string;
 }
