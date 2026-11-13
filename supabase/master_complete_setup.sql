@@ -635,7 +635,7 @@ INSERT INTO public.patient_backgrounds (
 ),
 (
   '20000000-0000-0000-0000-000000000005', '10000000-0000-0000-0000-000000000005', 13, 20, 1, 'Menopausia establecida (FUM hace 14 meses)', 'Niega ITS',
-  'G2 P2002 (2 partos vaginales a término)', 'Quirúrgico (Salpingoclasia bilateral en 2006)', '2025-09-12 (Amenorrea 14 meses)', 'Atrofia celular sin atipia (noviembre 2026)', 'Negativo (noviembre 2026)',
+  'G2 P2002 (2 partos vaginales a término)', 'Quirúrgico (Salpingoclasia bilateral en 2006)', '2025-09-12', 'Atrofia celular sin atipia (noviembre 2026)', 'Negativo (noviembre 2026)',
   'Niega', 'Controlada con Enalapril 10 mg diario', 'Niega', 'Alergia a AINEs tipo Sulfas', 'Salpingoclasia bilateral en 2006; Cesárea no refiere (ambos eutócicos)', 'Madre con osteoporosis severa y fractura de cadera a los 74 años',
   'Síndrome climatérico severo con bochornos vasomotores, insomnio y atrofia urogenital sintomática.', 'Paciente en fase climatérica. Evaluación endometrial y mamaria previa a inicio de terapia de reemplazo hormonal (TRH) y protección ósea.'
 )
