@@ -84,8 +84,11 @@ export async function syncPatientToSupabase(patient: Patient): Promise<boolean> 
     const { error } = await supabase.from("patients").upsert(
       {
         id: uuid,
+        dni: patient.dni,
         document_type: "DNI",
         document_number: patient.dni,
+        first_name: patient.firstName,
+        last_name: patient.lastName,
         full_name: `${(patient.lastName || "").trim().toUpperCase()}, ${(patient.firstName || "").trim().toUpperCase()}`,
         birth_date: patient.birthDate,
         phone: patient.phone || null,
@@ -100,7 +103,7 @@ export async function syncPatientToSupabase(patient: Patient): Promise<boolean> 
         insurance_info: "Particular",
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "document_number" }
+      { onConflict: "dni" }
     );
 
     if (error) {
