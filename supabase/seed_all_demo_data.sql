@@ -5,6 +5,310 @@
 -- todas las tablas con la información de los 5 casos clínicos del Dr. Patrick.
 -- ============================================================================
 
+-- ============================================================================
+-- 1. AUTO-REPARACIÓN DE ESQUEMA (ASEGURA QUE TODAS LAS COLUMNAS EXISTAN)
+-- ============================================================================
+-- ============================================================================
+-- AUTO-REPAIR: ASEGURAR QUE TODAS LAS COLUMNAS EXISTAN EN TABLAS PREEXISTENTES
+-- ============================================================================
+
+-- 0. Liberar restricciones NOT NULL de columnas heredadas/personalizadas sin default (como concentration en vademecum)
+DO $$
+DECLARE
+    col RECORD;
+BEGIN
+    FOR col IN 
+        SELECT table_name, column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+          AND is_nullable = 'NO' 
+          AND column_default IS NULL 
+          AND column_name NOT IN ('id', 'patient_id')
+    LOOP
+        BEGIN
+            EXECUTE format('ALTER TABLE public.%I ALTER COLUMN %I DROP NOT NULL', col.table_name, col.column_name);
+        EXCEPTION WHEN OTHERS THEN
+            NULL;
+        END;
+    END LOOP;
+END $$;
+
+-- Columnas de: profiles
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT UNIQUE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS doctor_title TEXT NOT NULL DEFAULT 'Dr.';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS specialty TEXT NOT NULL DEFAULT 'Ginecología y Obstetricia';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS cmp TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS rne TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS clinic_name TEXT NOT NULL DEFAULT 'CENDO - Centro de Endometriosis y Ginecología';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS clinic_address TEXT NOT NULL DEFAULT 'Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT '985 945 697';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS contact_email TEXT NOT NULL DEFAULT 'cendoperu@gmail.com';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: patients
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS document_number VARCHAR(20);
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS document_type TEXT DEFAULT 'DNI';
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS dni VARCHAR(20);
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS first_name TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS last_name TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS birth_date DATE;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS age INTEGER;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS district TEXT DEFAULT 'Miraflores';
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS civil_status TEXT DEFAULT 'Soltera';
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS occupation TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS education_level TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS birth_place TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS religion TEXT;
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS insurance_info TEXT DEFAULT 'Particular';
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: patient_backgrounds
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS menarche INTEGER;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS sexual_debut_age INTEGER;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS sexual_partners_count INTEGER;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS catamenial_regimen TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS sti_history TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS obstetric_formula VARCHAR(30) DEFAULT 'G0 P0000';
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS contraceptive_method TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS last_menstrual_period DATE;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS pap_history TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS vph_test_history TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS has_diabetes TEXT DEFAULT 'Niega';
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS has_hypertension TEXT DEFAULT 'Niega';
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS has_asthma TEXT DEFAULT 'Niega';
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS medical_allergies TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS surgeries_history TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS family_history TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS other_pathologies TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE public.patient_backgrounds ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: colposcopy_reports
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS report_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS adequate_colposcopy BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS squamocolumnar_junction_visible TEXT NOT NULL DEFAULT 'Visible';
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS transformation_zone_type TEXT NOT NULL DEFAULT 'Tipo 1';
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS mature_squamous_epithelium BOOLEAN DEFAULT true;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS ectopy BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS thin_acetowhite_epithelium BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS dense_acetowhite_epithelium BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS irregular_border BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS fine_mosaic BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS coarse_mosaic BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS fine_punctation BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS coarse_punctation BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS atypical_vessels BOOLEAN DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS schiller_test TEXT NOT NULL DEFAULT 'Negativo';
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS cervical_biopsy_taken BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS biopsy_clock_hours JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS diagnosis TEXT;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS plan_recommendations TEXT;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS cie10_code VARCHAR(15) DEFAULT 'Z01.4';
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+ALTER TABLE public.colposcopy_reports ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: clinical_checkups
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS checkup_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS reason_for_consultation TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS breast_ultrasound_findings TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS breast_ultrasound_birads TEXT DEFAULT 'BI-RADS 1';
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS breast_lesion_measurements TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS transvaginal_ultrasound_findings TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS uterus_measurements TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS endometrium_thickness_mm NUMERIC(5,2);
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS ovaries_findings TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS pap_result TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS vph_result TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS conclusions TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS medical_prescription TEXT;
+ALTER TABLE public.clinical_checkups ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: medical_prescriptions
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS doctor_id TEXT;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS doctor_cmp TEXT;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS doctor_rne TEXT;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS prescription_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS diagnosis TEXT;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS cie10_code VARCHAR(15);
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS items JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS general_indications TEXT;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS next_appointment_date DATE;
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.medical_prescriptions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: lab_orders
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS doctor_id TEXT;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS doctor_cmp TEXT;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS doctor_rne TEXT;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS order_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS diagnosis TEXT;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS cie10_code VARCHAR(15);
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS urgency TEXT NOT NULL DEFAULT 'Rutina';
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS items JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS custom_tests TEXT;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS patient_instructions TEXT;
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.lab_orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: prenatal_cards
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS clinic_establishment TEXT NOT NULL DEFAULT 'CENDO - Centro de Endometriosis & Ginecología Especializada';
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS attending_doctor_id TEXT;
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS attending_doctor_name TEXT;
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS baseline JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS visits JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS maternal_pathologies JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.prenatal_cards ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: patient_documents
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS document_type TEXT NOT NULL DEFAULT 'LABORATORIO';
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS file_url TEXT;
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS file_name TEXT;
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS file_size INT;
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS mime_type TEXT DEFAULT 'application/pdf';
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE public.patient_documents ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: medical_consultations
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS doctor_id TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS doctor_cmp TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS doctor_rne TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS consultation_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS reason_for_visit TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS illness_time TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS symptoms TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS vital_signs JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS physical_exam JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS diagnosis TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS cie10_code VARCHAR(15);
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS treatment_plan TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS auxiliary_exams TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS prescription_notes TEXT;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS next_appointment_date DATE;
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.medical_consultations ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: ultrasound_reports
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS doctor_id TEXT;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS doctor_cmp TEXT;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS doctor_rne TEXT;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS report_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS ultrasound_type TEXT;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS indication TEXT;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS findings JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS conclusion TEXT;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS recommendations TEXT;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS images JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.ultrasound_reports ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: minor_procedures
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS doctor_id TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS doctor_cmp TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS doctor_rne TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS procedure_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS procedure_type TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS pre_op_diagnosis TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS post_op_diagnosis TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS cie10_code VARCHAR(15);
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS anesthesia_type TEXT DEFAULT 'Local (Lidocaína 2%)';
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS procedure_details JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS post_op_indications TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS medications_prescribed TEXT;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS next_control_date DATE;
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.minor_procedures ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: procedure_quotes
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS doctor_id TEXT;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS quote_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS validity_days INT DEFAULT 30;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS items JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS subtotal NUMERIC(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS discount_total NUMERIC(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS total NUMERIC(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS payment_terms TEXT DEFAULT 'Efectivo, Transferencia BCP/BBVA o Tarjeta de Crédito/Débito';
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE public.procedure_quotes ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: medical_appointments
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS doctor_id TEXT;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS doctor_name TEXT;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS appointment_date DATE;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS appointment_time TIME;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS duration_minutes INT DEFAULT 30;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS appointment_type TEXT;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS reason TEXT;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'CONFIRMADA';
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.medical_appointments ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: word_history_documents
+ALTER TABLE public.word_history_documents ADD COLUMN IF NOT EXISTS patient_id UUID  REFERENCES public.patients(id) ON DELETE CASCADE;
+ALTER TABLE public.word_history_documents ADD COLUMN IF NOT EXISTS file_name TEXT;
+ALTER TABLE public.word_history_documents ADD COLUMN IF NOT EXISTS file_size INT;
+ALTER TABLE public.word_history_documents ADD COLUMN IF NOT EXISTS file_url TEXT;
+ALTER TABLE public.word_history_documents ADD COLUMN IF NOT EXISTS extracted_text TEXT;
+ALTER TABLE public.word_history_documents ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE public.word_history_documents ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: procedures_tariff
+ALTER TABLE public.procedures_tariff ADD COLUMN IF NOT EXISTS code VARCHAR(20) UNIQUE;
+ALTER TABLE public.procedures_tariff ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE public.procedures_tariff ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE public.procedures_tariff ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.procedures_tariff ADD COLUMN IF NOT EXISTS price NUMERIC(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE public.procedures_tariff ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE public.procedures_tariff ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+-- Columnas de: medications_vademecum
+ALTER TABLE public.medications_vademecum ADD COLUMN IF NOT EXISTS generic_name TEXT;
+ALTER TABLE public.medications_vademecum ADD COLUMN IF NOT EXISTS atc_code VARCHAR(20);
+ALTER TABLE public.medications_vademecum ADD COLUMN IF NOT EXISTS therapeutic_group TEXT;
+ALTER TABLE public.medications_vademecum ADD COLUMN IF NOT EXISTS commercial_brands JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.medications_vademecum ADD COLUMN IF NOT EXISTS indications TEXT;
+ALTER TABLE public.medications_vademecum ADD COLUMN IF NOT EXISTS contraindications TEXT;
+ALTER TABLE public.medications_vademecum ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
+
+
+-- ============================================================================
+-- 2. INSERCIÓN / ACTUALIZACIÓN DE DATOS CLÍNICOS
+-- ============================================================================
+
+-- Ejecuta este script en el SQL Editor de Supabase para poblar al 100%
+-- todas las tablas con la información de los 5 casos clínicos del Dr. Patrick.
+-- ============================================================================
+
 -- 0. TABLA: patients (5 Pacientes Oficiales CENDO)
 INSERT INTO public.patients (
     id, document_number, document_type, dni, first_name, last_name, full_name, birth_date, age, phone, email, address, district, civil_status, occupation, education_level, birth_place, religion, insurance_info
