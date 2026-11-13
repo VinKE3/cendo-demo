@@ -11,6 +11,7 @@ import {
   MedicalPrescription,
   LabOrder,
   PrenatalCard,
+  PatientDocument,
 } from "@/types/medical";
 
 export function cleanPhoneForWhatsApp(phone: string): string {
@@ -233,6 +234,39 @@ export function generatePrenatalWhatsAppUrl(
     `📞 *Central de Emergencias / Citas:* ${doctor.phone}`,
     ``,
     `_CENDO - Cuidando la salud de mamá y bebé con los más altos estándares clínicos._`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const encodedText = encodeURIComponent(message);
+  return `https://wa.me/${targetPhone}?text=${encodedText}`;
+}
+
+export function generateDocumentWhatsAppUrl(
+  patient: Patient,
+  doc: PatientDocument,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(patient.phone);
+
+  const message = [
+    `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
+    ``,
+    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    ``,
+    `📂 Le compartimos el documento / informe médico registrado en su expediente clínico:`,
+    `📋 *Documento:* ${doc.title}`,
+    `🏷 *Tipo:* ${doc.documentType}`,
+    `🗓 *Fecha:* ${doc.createdAt.split("T")[0]}`,
+    doc.notes ? `📝 *Observación / Resumen:* ${doc.notes}` : null,
+    ``,
+    `🔗 *Puede visualizar o descargar su documento en el siguiente enlace oficial:*`,
+    `${doc.fileUrl}`,
+    ``,
+    `🏥 *Sede de Atención:* ${doctor.clinicAddress}`,
+    `📞 *Central de Consultas:* ${doctor.phone}`,
+    ``,
+    `_CENDO - Archivo Digital Clínico Seguro._`,
   ]
     .filter(Boolean)
     .join("\n");

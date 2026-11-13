@@ -27,6 +27,7 @@ import {
   X,
   FlaskConical,
   Baby,
+  Upload,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { useMedicalStore } from "@/store/useMedicalStore";
@@ -40,6 +41,9 @@ import { LabOrderModal } from "@/components/laboratorio/LabOrderModal";
 import { LabOrderPrintView } from "@/components/export/LabOrderPrintView";
 import { PrenatalCardModal } from "@/components/prenatal/PrenatalCardModal";
 import { PrenatalPrintView } from "@/components/export/PrenatalPrintView";
+import { UploadDocumentModal } from "@/components/documentos/UploadDocumentModal";
+import { DocumentViewerModal } from "@/components/documentos/DocumentViewerModal";
+import { PatientDocumentsSection } from "@/components/documentos/PatientDocumentsSection";
 import { printHtmlElement } from "@/lib/pdfGenerator";
 import {
   Patient,
@@ -48,6 +52,7 @@ import {
   MedicalPrescription,
   LabOrder,
   PrenatalCard,
+  PatientDocument,
 } from "@/types/medical";
 import {
   generateColposcopyWhatsAppUrl,
@@ -83,6 +88,9 @@ export default function FichaPacientePage() {
   const [isPrenatalModalOpen, setIsPrenatalModalOpen] = useState(false);
   const [viewingPrenatalCard, setViewingPrenatalCard] = useState<PrenatalCard | null>(null);
   const [isPrenatalPrintModalOpen, setIsPrenatalPrintModalOpen] = useState(false);
+  const [isUploadDocModalOpen, setIsUploadDocModalOpen] = useState(false);
+  const [selectedDocToView, setSelectedDocToView] = useState<PatientDocument | null>(null);
+  const [isDocViewerOpen, setIsDocViewerOpen] = useState(false);
 
   const {
     getPatientById,
@@ -237,6 +245,14 @@ export default function FichaPacientePage() {
           >
             <Baby className="w-3.5 h-3.5 text-amber-600" />
             <span>Control Prenatal (MINSA)</span>
+          </button>
+
+          <button
+            onClick={() => setIsUploadDocModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-purple-50 text-purple-900 hover:bg-purple-100 border border-purple-300 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <Upload className="w-3.5 h-3.5 text-purple-600" />
+            <span>+ Subir PDF / Doc</span>
           </button>
         </div>
       </div>
@@ -975,6 +991,17 @@ export default function FichaPacientePage() {
         </div>
       </div>
 
+      {/* 4. Repositorio de Documentos y Exámenes Externos en PDF (Etapa B) */}
+      <PatientDocumentsSection
+        patient={patient}
+        doctor={doctorProfile}
+        onOpenUploadModal={() => setIsUploadDocModalOpen(true)}
+        onViewDocument={(doc) => {
+          setSelectedDocToView(doc);
+          setIsDocViewerOpen(true);
+        }}
+      />
+
       {/* Modales de Edición */}
       <PatientModal
         isOpen={isPatientModalOpen}
@@ -1218,6 +1245,25 @@ export default function FichaPacientePage() {
           </div>
         </div>
       )}
+
+      {/* Modales del Repositorio de Documentos (Etapa B) */}
+      <UploadDocumentModal
+        isOpen={isUploadDocModalOpen}
+        onClose={() => setIsUploadDocModalOpen(false)}
+        patientId={patient.id}
+        patientName={`${patient.lastName}, ${patient.firstName}`}
+      />
+
+      <DocumentViewerModal
+        isOpen={isDocViewerOpen}
+        onClose={() => {
+          setIsDocViewerOpen(false);
+          setSelectedDocToView(null);
+        }}
+        document={selectedDocToView}
+        patient={patient}
+        doctor={doctorProfile}
+      />
     </div>
   );
 }

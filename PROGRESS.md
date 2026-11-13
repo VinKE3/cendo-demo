@@ -218,7 +218,23 @@
 
 ---
 
-## 📅 PRÓXIMA ETAPA: ETAPA B (Nuevos Módulos de Informes Clínicos Especializados)
-- **WP-B.1:** Módulo Independiente de Informes de Ecografía Especializada (Mama Bilateral, Transvaginal, Pélvica, Doppler obstétrico) con cálculo de BI-RADS / IOTA y plantillas en 1 clic.
-- **WP-B.2:** Módulo de Informes de Procedimientos Ginecológicos Menores & Quirúrgicos (Biopsia de cérvix/endometrio, Cono LEEP, Polipectomía, Histeroscopía de consultorio).
-- **WP-B.3:** Integración de Vistas Previas de Informes y Adjuntos PDF en la Ficha Única del Paciente.
+## 📅 ETAPA B: HISTORIA CLÍNICA INTEGRAL, DOCUMENTOS Y FORMATOS ESPECIALIZADOS
+
+### [x] 8.0 & 9.0 Repositorio de Documentos y Exámenes Externos en PDF (Puntos 8 y 9 - Completado & Probado)
+- [x] **8.0.1.** Modelo y Tabla de Documentos (`patient_documents` en PostgreSQL): Tipado estricto con `id`, `patient_id`, `document_type`, `title`, `file_url`, `file_name`, `file_size`, `mime_type`, `notes`, `created_at`.
+- [x] **8.0.2.** Integración en Supabase Storage (Bucket `lab-reports`): Políticas RLS habilitadas para lectura y subida (`INSERT / SELECT`) directa desde la app.
+- [x] **8.0.3.** Sincronización en Segundo Plano (`src/lib/supabaseSync.ts`): Funciones `uploadDocumentFileToStorage`, `syncDocumentToSupabase` y `deleteDocumentFromSupabase` con borrado físico del archivo en storage y registro en base de datos.
+- [x] **8.0.4.** Modal de Subida Inteligente (`src/components/documentos/UploadDocumentModal.tsx`): Dropzone para arrastrar o examinar PDFs/imágenes, 8 categorías clínicas con insignias de color (PAP, VPH, Patología, Laboratorio, Ecografía, etc.), 7 sugerencias rápidas de títulos y notas clínicas.
+- [x] **8.0.5.** Visor de Documentos Integrado (`src/components/documentos/DocumentViewerModal.tsx`): Previsualización embebida de PDFs e imágenes dentro del expediente sin salir de la ficha, descarga directa, copia de enlace y envío formal por WhatsApp.
+- [x] **8.0.6.** Sección en Ficha de Paciente (`src/components/documentos/PatientDocumentsSection.tsx`): Botón superior `+ Subir PDF / Doc`, barra de filtros por categoría (Todos, PAP/VPH, Patología, Laboratorio, Ecografías), buscador en tiempo real y cuadrícula de tarjetas con acciones inmediatas.
+- [x] **8.0.7.** Carga Semilla de 6 PDFs Reales en Supabase Storage y Base de Datos: Generados con `pdf-lib` y subidos a la nube para las 5 pacientes demo (Biopsia de Daniela Castro, ThinPrep y PCR VPH de Luciana Ramos, Batería de Fiorella Mendoza, CA-125 de Gabriela Paredes y Densitometría de Carmen Huamán).
+- [x] **🧪 QA Etapa B (Puntos 8 y 9):**
+  - `npx tsc --noEmit` completado con éxito (código de salida 0).
+  - `npm run build` completado exitosamente con las 13 rutas compiladas limpiamente.
+
+---
+
+## 📅 SIGUIENTES HITOS EN ETAPA B:
+- **WP-B.1 (Punto 5):** Módulo Independiente de Informes de Ecografía Especializada (Mama Bilateral BI-RADS, Transvaginal, Pélvica, Doppler obstétrico) con plantillas y carga de fotos.
+- **WP-B.2 (Punto 6):** Módulo de Informes de Procedimientos Ginecológicos Menores & Quirúrgicos (Biopsia cérvix/endometrio, Cono LEEP, Polipectomía, DIU/Implante).
+- **WP-B.3 (Punto 13):** Formato de Nueva Consulta Ginecológica Estructurada (Anamnesis, Especuloscopía, Tacto Bimanual, CIE-10).

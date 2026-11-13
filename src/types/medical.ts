@@ -356,5 +356,35 @@ export interface PrenatalCard {
   updatedAt: string;
 }
 
+// ============================================================================
+// ETAPA B: REPOSITORIO DE DOCUMENTOS Y EXÁMENES EXTERNOS (PDF)
+// ============================================================================
+
+export type DocumentCategory =
+  | "PAP"
+  | "VPH"
+  | "PATOLOGIA"
+  | "LABORATORIO"
+  | "ECOGRAFIA"
+  | "INFORME_MEDICO"
+  | "CONSENTIMIENTO"
+  | "OTRO";
+
+export interface PatientDocument {
+  id: string;
+  patientId: string;
+  documentType: DocumentCategory;
+  title: string;
+  fileName: string;
+  fileUrl: string;
+  filePath?: string; // Path en Supabase storage (ej: 'pat-1/123-doc.pdf')
+  fileSize?: number; // bytes
+  mimeType?: string; // 'application/pdf', 'image/jpeg', etc.
+  notes?: string;
+  createdAt: string;
+  uploadedBy?: string;
+}
+
+
 
 
