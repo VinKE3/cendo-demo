@@ -30,27 +30,35 @@ export default function PacientesPage() {
 
   const handleResetDemo = () => {
     Swal.fire({
-      title: "¿Restablecer casos de prueba?",
+      title: "¿Restablecer casos de prueba CENDO?",
       html: `
-        <div class="text-left text-xs space-y-1">
-          <p>Se restaurarán las <strong>3 historias clínicas de prueba</strong> (Stephany Herrera, Camila Rossi y Valeria Alarcón) con sus colposcopías, ecografías, recetas, órdenes y carnet prenatal.</p>
+        <div class="text-left text-xs space-y-2">
+          <p>Se restaurarán las <strong>5 historias clínicas ginecológicas completas</strong> con todos los módulos de la plataforma:</p>
+          <ul class="list-disc pl-4 space-y-1 text-slate-600">
+            <li><strong>Luciana Ramos:</strong> Chequeo Preventivo & Implante Subdérmico Jadelle.</li>
+            <li><strong>Fiorella Mendoza:</strong> Control Prenatal 10 sem con Carnet MINSA y Ecografía 1T.</li>
+            <li><strong>Gabriela Paredes:</strong> Endometriosis Pélvica Severa, Mapeo IDEA y Cirugía Laparoscópica.</li>
+            <li><strong>Daniela Castro:</strong> NIC 2 / LIE-AG, Biopsia Cervical y Conización LEEP.</li>
+            <li><strong>Carmen Huamán:</strong> Menopausia, Atrofia Vaginal, Biopsia Pipelle y Salud Ósea.</li>
+          </ul>
+          <p class="text-[11px] text-primary font-bold mt-2">Incluye antecedentes del Dr. Patrick, consultas, FV completas, ecografías, recetas, órdenes, cotizaciones y citas de agenda.</p>
         </div>
       `,
       icon: "info",
       showCancelButton: true,
       confirmButtonColor: "#0A4D68",
       cancelButtonColor: "#64748B",
-      confirmButtonText: "Sí, restablecer casos",
+      confirmButtonText: "Sí, restablecer los 5 casos",
       cancelButtonText: "Cancelar",
     }).then((res) => {
       if (res.isConfirmed) {
         resetToSeedData();
         Swal.fire({
           icon: "success",
-          title: "Datos Restablecidos",
-          text: "Los 3 casos clínicos de prueba han sido recargados exitosamente.",
+          title: "Datos Clínicos Restablecidos",
+          text: "Las 5 historias clínicas de demostración han sido recargadas con éxito.",
           confirmButtonColor: "#0A4D68",
-          timer: 1500,
+          timer: 1600,
           showConfirmButton: false,
         });
       }
@@ -130,10 +138,10 @@ export default function PacientesPage() {
           <button
             onClick={handleResetDemo}
             className="px-3.5 py-2.5 rounded-xl border border-border bg-surface hover:bg-slate-100 text-slate-700 text-xs font-semibold shadow-2xs transition-colors flex items-center gap-1.5"
-            title="Recargar los 3 casos clínicos de prueba completos"
+            title="Recargar las 5 historias clínicas de demostración completas de CENDO"
           >
             <RotateCcw className="w-3.5 h-3.5 text-primary" />
-            <span className="hidden sm:inline">Restablecer 3 Demos</span>
+            <span className="hidden sm:inline">Restablecer 5 Casos</span>
           </button>
 
           <button
