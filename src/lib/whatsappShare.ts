@@ -12,6 +12,11 @@ import {
   LabOrder,
   PrenatalCard,
   PatientDocument,
+  MedicalConsultation,
+  UltrasoundReport,
+  MinorProcedureReport,
+  ProcedureQuote,
+  MedicalAppointment,
 } from "@/types/medical";
 
 export function cleanPhoneForWhatsApp(phone: string): string {
@@ -273,4 +278,178 @@ export function generateDocumentWhatsAppUrl(
 
   const encodedText = encodeURIComponent(message);
   return `https://wa.me/${targetPhone}?text=${encodedText}`;
+}
+
+export function generateConsultationWhatsAppUrl(
+  patient: Patient,
+  cons: MedicalConsultation,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(patient.phone);
+
+  const message = [
+    `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
+    ``,
+    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    ``,
+    `🩺 Le compartimos el resumen de su *Consulta Médica Ginecológica*:`,
+    `🗓 *Fecha de Atención:* ${cons.consultationDate}`,
+    `📋 *Motivo de Consulta:* ${cons.reasonForVisit}`,
+    `🩺 *Diagnóstico:* ${cons.diagnosis}${cons.cie10Code ? ` (${cons.cie10Code})` : ""}`,
+    ``,
+    `📌 *Plan de Tratamiento / Indicaciones:*`,
+    `${cons.treatmentPlan}`,
+    ``,
+    cons.nextAppointmentDate ? `🗓 *Próximo Control Recomendado:* ${cons.nextAppointmentDate}` : null,
+    `🏥 *Sede:* ${doctor.clinicAddress}`,
+    `📞 *Citas y Consultas:* ${doctor.phone}`,
+    ``,
+    `_CENDO - Centro Especializado de Endometriosis y Ginecología._`,
+  ].filter(Boolean).join("\n");
+
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+}
+
+export function generateUltrasoundWhatsAppUrl(
+  patient: Patient,
+  echo: UltrasoundReport,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(patient.phone);
+
+  const typeLabels: Record<string, string> = {
+    TRANSVAGINAL: "Ecografía Transvaginal",
+    PELVICA: "Ecografía Pélvica",
+    MAMA_BILATERAL: "Ecografía Mamaria Bilateral",
+    OBSTETRICA_1T: "Ecografía Obstétrica 1er Trimestre",
+    OBSTETRICA_2T_3T: "Ecografía Obstétrica de Detalle",
+    DOPPLER: "Ecografía Doppler Especializada",
+  };
+
+  const message = [
+    `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
+    ``,
+    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    ``,
+    `📡 Le compartimos las conclusiones de su *${typeLabels[echo.ultrasoundType] || "Ecografía"}*:`,
+    `🗓 *Fecha:* ${echo.reportDate}`,
+    `📋 *Indicación:* ${echo.indication}`,
+    `🩺 *Conclusión Diagnóstica:* ${echo.conclusion}`,
+    echo.findings.biradsCategory ? `🏷 *Clasificación:* ${echo.findings.biradsCategory}` : null,
+    echo.recommendations ? `📌 *Sugerencia / Plan:* ${echo.recommendations}` : null,
+    ``,
+    `🏥 *Sede:* ${doctor.clinicAddress}`,
+    `📞 *Citas:* ${doctor.phone}`,
+    ``,
+    `_Conserve este reporte para su control ecográfico._`,
+  ].filter(Boolean).join("\n");
+
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+}
+
+export function generateMinorProcedureWhatsAppUrl(
+  patient: Patient,
+  proc: MinorProcedureReport,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(patient.phone);
+
+  const message = [
+    `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
+    ``,
+    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    ``,
+    `🩺 Le compartimos el reporte e indicaciones post-procedimiento:`,
+    `📋 *Procedimiento Realizado:* ${proc.procedureType.replace(/_/g, " ")}`,
+    `🗓 *Fecha:* ${proc.procedureDate}`,
+    `🩺 *Diagnóstico Post-Operatorio:* ${proc.postOpDiagnosis}`,
+    proc.procedureDetails.specimenSentToPathology ? `🔬 *Muestra a Patología:* Enviada (${proc.procedureDetails.specimenDescription || "En estudio"})` : null,
+    ``,
+    `⚠️ *CUIDADOS E INDICACIONES POST-PROCEDIMIENTO:*`,
+    `${proc.postOpIndications}`,
+    proc.medicationsPrescribed ? `\n💊 *Medicamentos Indicados:*\n${proc.medicationsPrescribed}` : null,
+    proc.nextControlDate ? `\n🗓 *Próximo Control en Consultorio:* ${proc.nextControlDate}` : null,
+    ``,
+    `🏥 *Sede de Atención:* ${doctor.clinicAddress}`,
+    `📞 *Emergencias / Consultas:* ${doctor.phone}`,
+    ``,
+    `_CENDO - Compromiso con su bienestar y pronta recuperación._`,
+  ].filter(Boolean).join("\n");
+
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+}
+
+export function generateQuoteWhatsAppUrl(
+  quote: ProcedureQuote,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(quote.patientPhone);
+
+  const itemsLines = quote.items.map(
+    (item, idx) => `  ${idx + 1}. ${item.name} - S/ ${item.finalPrice.toFixed(2)}`
+  ).join("\n");
+
+  const message = [
+    `👋 *Estimada ${quote.patientName}*,`,
+    ``,
+    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    ``,
+    `📑 Le compartimos el *Presupuesto Oficial* solicitado para su atención:`,
+    `🗓 *Fecha de Emisión:* ${quote.quoteDate} (Vigencia: ${quote.validityDays} días)`,
+    ``,
+    `💼 *DETALLE DE PROCEDIMIENTOS:*`,
+    itemsLines,
+    ``,
+    quote.discountTotal > 0 ? `🔹 *Subtotal:* S/ ${quote.subtotal.toFixed(2)}` : null,
+    quote.discountTotal > 0 ? `🎁 *Descuento Especial:* -S/ ${quote.discountTotal.toFixed(2)}` : null,
+    `💰 *TOTAL A PAGAR:* *S/ ${quote.total.toFixed(2)}*`,
+    `💳 *Formas de Pago:* ${quote.paymentTerms}`,
+    quote.notes ? `📝 *Observaciones:* ${quote.notes}` : null,
+    ``,
+    `🏥 *Sede:* ${doctor.clinicAddress}`,
+    `📞 *Para agendar o resolver consultas:* ${doctor.phone}`,
+    ``,
+    `_CENDO - Presupuesto institucional garantizado._`,
+  ].filter(Boolean).join("\n");
+
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+}
+
+export function generateAppointmentReminderWhatsAppUrl(
+  appt: MedicalAppointment,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(appt.patientPhone);
+
+  const typeLabels: Record<string, string> = {
+    CONSULTA_PRIMERA_VEZ: "Consulta Ginecológica (Primera Vez)",
+    CONTROL_GINECOLOGICO: "Control Ginecológico Periódico",
+    CHEQUEO_INTEGRAL: "Chequeo Preventivo Integral CENDO",
+    CONTROL_PRENATAL: "Control Prenatal (MINSA/CLAP)",
+    COLPOSCOPIA: "Colposcopía Especializada",
+    ECOGRAFIA: "Ecografía Especializada",
+    PROCEDIMIENTO_MENOR: "Procedimiento Menor en Consultorio",
+  };
+
+  const message = [
+    `👋 *Recordatorio de Cita Médica en CENDO*`,
+    ``,
+    `Estimada *${appt.patientName}*, le recordamos su próxima cita médica con el *${doctor.doctorTitle} ${doctor.fullName}*:`,
+    ``,
+    `🗓 *Fecha:* *${appt.appointmentDate}*`,
+    `⏰ *Hora:* *${appt.appointmentTime}* (Duración aprox: ${appt.durationMinutes} min)`,
+    `🩺 *Motivo / Especialidad:* ${typeLabels[appt.appointmentType] || appt.reason}`,
+    `🏥 *Sede:* ${doctor.clinicAddress}`,
+    ``,
+    `💡 *Recomendaciones para su atención:*`,
+    `• Llegar con 10 minutos de anticipación.`,
+    `• Portar DNI físico y exámenes médicos previos.`,
+    `• Si no puede asistir, por favor avisar con 24h de anticipación.`,
+    ``,
+    `📞 *Confirmación o cambios:* ${doctor.phone}`,
+    ``,
+    `_¡Le esperamos en CENDO para brindarle la mejor atención!_`,
+  ].filter(Boolean).join("\n");
+
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
 }

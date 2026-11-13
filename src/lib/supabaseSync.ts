@@ -20,6 +20,12 @@ import {
   LabOrder,
   PrenatalCard,
   PatientDocument,
+  MedicalConsultation,
+  UltrasoundReport,
+  MinorProcedureReport,
+  ProcedureQuote,
+  MedicalAppointment,
+  WordHistoryDocument,
 } from "@/types/medical";
 
 export function ensureUuid(id: string): string {
@@ -497,4 +503,242 @@ export async function deleteDocumentFromSupabase(
   } catch {
     return false;
   }
+}
+
+// ============================================================================
+// ETAPAS B & C: CONSULTAS, ECOGRAFÍAS, PROCEDIMIENTOS, CITAS, COTIZACIONES & WORD
+// ============================================================================
+
+export async function syncConsultationToSupabase(cons: MedicalConsultation): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const patientUuid = getPatientUuid(cons.patientId);
+    const consUuid = ensureUuid(cons.id);
+
+    const { error } = await supabase.from("medical_consultations").upsert({
+      id: consUuid,
+      patient_id: patientUuid,
+      doctor_id: cons.doctorId,
+      doctor_name: cons.doctorName,
+      doctor_cmp: cons.doctorCmp,
+      doctor_rne: cons.doctorRne || null,
+      consultation_date: cons.consultationDate,
+      reason_for_visit: cons.reasonForVisit,
+      illness_time: cons.illnessTime || null,
+      symptoms: cons.symptoms || null,
+      vital_signs: cons.vitalSigns,
+      physical_exam: cons.physicalExam,
+      diagnosis: cons.diagnosis,
+      cie10_code: cons.cie10Code || null,
+      treatment_plan: cons.treatmentPlan,
+      next_appointment_date: cons.nextAppointmentDate || null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+
+    if (error) console.warn("Aviso sync consulta Supabase:", error.message);
+    return !error;
+  } catch { return false; }
+}
+
+export async function deleteConsultationFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("medical_consultations").delete().eq("id", targetId);
+    return !error;
+  } catch { return false; }
+}
+
+export async function syncUltrasoundToSupabase(rep: UltrasoundReport): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const patientUuid = getPatientUuid(rep.patientId);
+    const repUuid = ensureUuid(rep.id);
+
+    const { error } = await supabase.from("ultrasound_reports").upsert({
+      id: repUuid,
+      patient_id: patientUuid,
+      doctor_id: rep.doctorId,
+      doctor_name: rep.doctorName,
+      doctor_cmp: rep.doctorCmp,
+      doctor_rne: rep.doctorRne || null,
+      report_date: rep.reportDate,
+      ultrasound_type: rep.ultrasoundType,
+      indication: rep.indication,
+      findings: rep.findings,
+      conclusion: rep.conclusion,
+      recommendations: rep.recommendations || null,
+      images: rep.images,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+
+    if (error) console.warn("Aviso sync ecografia Supabase:", error.message);
+    return !error;
+  } catch { return false; }
+}
+
+export async function deleteUltrasoundFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("ultrasound_reports").delete().eq("id", targetId);
+    return !error;
+  } catch { return false; }
+}
+
+export async function syncMinorProcedureToSupabase(proc: MinorProcedureReport): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const patientUuid = getPatientUuid(proc.patientId);
+    const procUuid = ensureUuid(proc.id);
+
+    const { error } = await supabase.from("minor_procedures").upsert({
+      id: procUuid,
+      patient_id: patientUuid,
+      doctor_id: proc.doctorId,
+      doctor_name: proc.doctorName,
+      doctor_cmp: proc.doctorCmp,
+      doctor_rne: proc.doctorRne || null,
+      procedure_date: proc.procedureDate,
+      procedure_type: proc.procedureType,
+      pre_op_diagnosis: proc.preOpDiagnosis,
+      post_op_diagnosis: proc.postOpDiagnosis,
+      cie10_code: proc.cie10Code || null,
+      anesthesia_type: proc.anesthesiaType,
+      procedure_details: proc.procedureDetails,
+      post_op_indications: proc.postOpIndications,
+      medications_prescribed: proc.medicationsPrescribed || null,
+      next_control_date: proc.nextControlDate || null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+
+    if (error) console.warn("Aviso sync procedimiento Supabase:", error.message);
+    return !error;
+  } catch { return false; }
+}
+
+export async function deleteMinorProcedureFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("minor_procedures").delete().eq("id", targetId);
+    return !error;
+  } catch { return false; }
+}
+
+export async function syncAppointmentToSupabase(appt: MedicalAppointment): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const patientUuid = getPatientUuid(appt.patientId);
+    const apptUuid = ensureUuid(appt.id);
+
+    const { error } = await supabase.from("medical_appointments").upsert({
+      id: apptUuid,
+      patient_id: patientUuid,
+      doctor_id: appt.doctorId,
+      doctor_name: appt.doctorName,
+      appointment_date: appt.appointmentDate,
+      appointment_time: appt.appointmentTime,
+      duration_minutes: appt.durationMinutes,
+      appointment_type: appt.appointmentType,
+      reason: appt.reason,
+      status: appt.status,
+      notes: appt.notes || null,
+      reminder_sent: appt.reminderSent,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+
+    if (error) console.warn("Aviso sync cita Supabase:", error.message);
+    return !error;
+  } catch { return false; }
+}
+
+export async function deleteAppointmentFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("medical_appointments").delete().eq("id", targetId);
+    return !error;
+  } catch { return false; }
+}
+
+export async function syncQuoteToSupabase(q: ProcedureQuote): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const patientUuid = getPatientUuid(q.patientId);
+    const qUuid = ensureUuid(q.id);
+
+    const { error } = await supabase.from("procedure_quotes").upsert({
+      id: qUuid,
+      patient_id: patientUuid,
+      doctor_id: q.doctorId,
+      doctor_name: q.doctorName,
+      quote_date: q.quoteDate,
+      validity_days: q.validityDays,
+      items: q.items,
+      subtotal: q.subtotal,
+      discount_total: q.discountTotal,
+      total: q.total,
+      payment_terms: q.paymentTerms,
+      notes: q.notes || null,
+    }, { onConflict: "id" });
+
+    if (error) console.warn("Aviso sync cotizacion Supabase:", error.message);
+    return !error;
+  } catch { return false; }
+}
+
+export async function deleteQuoteFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("procedure_quotes").delete().eq("id", targetId);
+    return !error;
+  } catch { return false; }
+}
+
+export async function syncWordHistoryToSupabase(doc: WordHistoryDocument): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const patientUuid = getPatientUuid(doc.patientId);
+    const docUuid = ensureUuid(doc.id);
+
+    const { error } = await supabase.from("word_history_documents").upsert({
+      id: docUuid,
+      patient_id: patientUuid,
+      file_name: doc.fileName,
+      file_size: doc.fileSize,
+      file_url: doc.fileUrl,
+      extracted_text: doc.extractedText || null,
+      notes: doc.notes || null,
+      created_at: doc.createdAt,
+    }, { onConflict: "id" });
+
+    if (error) console.warn("Aviso sync word doc Supabase:", error.message);
+    return !error;
+  } catch { return false; }
+}
+
+export async function deleteWordHistoryFromSupabase(id: string, filePath?: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    if (filePath) {
+      await supabase.storage.from("lab-reports").remove([filePath]);
+    }
+    const { error } = await supabase.from("word_history_documents").delete().eq("id", targetId);
+    return !error;
+  } catch { return false; }
 }

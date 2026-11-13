@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
+  Calendar,
   FileText,
   Activity,
   Receipt,
@@ -87,6 +88,12 @@ export function DashboardSidebar({
       href: "/pacientes",
       icon: Users,
       badge: null,
+    },
+    {
+      name: "Agenda y Citas",
+      href: "/agenda",
+      icon: Calendar,
+      badge: "Hoy",
     },
     {
       name: "Informes de Colposcopía",

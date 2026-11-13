@@ -15,6 +15,12 @@ import {
   PrenatalVisitItem,
   PrenatalBaselineData,
   PatientDocument,
+  MedicalConsultation,
+  UltrasoundReport,
+  MinorProcedureReport,
+  ProcedureQuote,
+  MedicalAppointment,
+  WordHistoryDocument,
 } from "@/types/medical";
 import {
   syncPatientToSupabase,
@@ -29,6 +35,18 @@ import {
   deletePrenatalCardFromSupabase,
   syncDocumentToSupabase,
   deleteDocumentFromSupabase,
+  syncConsultationToSupabase,
+  deleteConsultationFromSupabase,
+  syncUltrasoundToSupabase,
+  deleteUltrasoundFromSupabase,
+  syncMinorProcedureToSupabase,
+  deleteMinorProcedureFromSupabase,
+  syncAppointmentToSupabase,
+  deleteAppointmentFromSupabase,
+  syncQuoteToSupabase,
+  deleteQuoteFromSupabase,
+  syncWordHistoryToSupabase,
+  deleteWordHistoryFromSupabase,
 } from "@/lib/supabaseSync";
 
 // Lista Inicial de Médicos y Especialistas CENDO
@@ -1165,6 +1183,410 @@ export const INITIAL_DOCUMENTS: PatientDocument[] = [
   },
 ];
 
+
+// ============================================================================
+// ETAPAS B & C: SEMILLAS CLÍNICAS (CONSULTAS, ECOGRAFÍAS, PROCEDIMIENTOS, CITAS, COTIZACIONES Y WORD)
+// ============================================================================
+
+export const INITIAL_CONSULTATIONS: MedicalConsultation[] = [
+  {
+    id: "40000000-0000-0000-0000-000000000001",
+    patientId: "pat-fiorella-mendoza",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    consultationDate: "2026-11-12",
+    reasonForVisit: "Dolor pélvico crónico cíclico severo (EVA 8/10), dismenorrea progresiva y dispareunia profunda",
+    illnessTime: "18 meses de evolución progresiva",
+    symptoms: "Dismenorrea incapacitante que no cede a AINEs habituales. Disquecia durante el periodo catamenial. Fatiga crónica.",
+    vitalSigns: {
+      bloodPressure: "110/70",
+      heartRate: 72,
+      temperature: 36.6,
+      weightKg: 56,
+      heightCm: 160,
+      bmi: 21.88,
+    },
+    physicalExam: {
+      generalExam: "Paciente en regular estado general, orientada en tiempo, espacio y persona. Facies de dolor moderado.",
+      breastsExam: "Mamas simétricas, turgentes, sin retracciones ni nódulos palpables. Axilas libres de adenopatías.",
+      externalGenitalia: "Genitales externos con distribución ginecoide habitual. Sin lesiones verrugosas ni inflamatorias.",
+      speculoscopy: "Vagina elástica. Cuello posterior, epitelio liso sin ectopia sangrante. Secreción habitual no fétida.",
+      bimanualPalpation: "Dolor exquisito a la palpación de ligamentos uterosacros y fondo de saco de Douglas con engrosamiento nodular palpable. Útero en RVF poco móvil por adherencias pélvicas. Anexo izquierdo aumentado de volumen.",
+    },
+    diagnosis: "Endometriosis pélvica profunda infiltrante (compartimento posterior y ligamentos uterosacros)",
+    cie10Code: "N80.3",
+    treatmentPlan: "1. Mapeo ecográfico transvaginal especializado para endometriosis con protocolo CENDO.\n2. RMN de pelvis de alta resolución sin contraste oral ni rectal.\n3. Tratamiento médico supresivo con Dienogest 2 mg diario continuo.\n4. Manejo multimodal del dolor con Ketorolaco / Dexketoprofeno condicional a crisis.",
+    nextAppointmentDate: "2026-11-28",
+    createdAt: "2026-11-12T10:30:00Z",
+    updatedAt: "2026-11-12T10:30:00Z",
+  },
+  {
+    id: "40000000-0000-0000-0000-000000000002",
+    patientId: "pat-luciana-ramos",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    consultationDate: "2026-11-05",
+    reasonForVisit: "Control gestacional de 7 semanas y evaluación de viabilidad embrionaria",
+    illnessTime: "Amenorrea de 7 semanas tras prueba de subunidad beta hCG positiva",
+    symptoms: "Náuseas matutinas leves, turgencia mamaria bilateral, sin sangrado transvaginal ni cólicos pélvicos.",
+    vitalSigns: {
+      bloodPressure: "105/65",
+      heartRate: 76,
+      temperature: 36.5,
+      weightKg: 58,
+      heightCm: 162,
+      bmi: 22.1,
+    },
+    physicalExam: {
+      generalExam: "Gestante en excelente estado general, hidratada, lúcida y colaboradora.",
+      breastsExam: "Mamas turgentes, aumento de red venosa colateral (red de Haller), sin nódulos patológicos palpables.",
+      externalGenitalia: "Vulva normoconfigurada sin pérdidas hemáticas.",
+      speculoscopy: "Cérvix violáceo fisiológico (signo de Chadwick positivo), orificio cervical externo puntiforme cerrado.",
+      bimanualPalpation: "Útero aumentado de tamaño acorde a 7 semanas de gestación, reblandecido (signo de Hegar positivo), anexos libres no dolorosos.",
+    },
+    diagnosis: "Embarazo intrauterino único de 7 semanas por FUM. Viabilidad clínica confirmada.",
+    cie10Code: "Z34.0",
+    treatmentPlan: "1. Continuar Ácido Fólico 0.5 mg diario + Doxilamina/Piridoxina para control de náuseas.\n2. Ecografía transvaginal de 1er trimestre para confirmación de biometría y LCF.\n3. Apertura de Carnet de Control Prenatal Oficial (MINSA/CLAP).",
+    nextAppointmentDate: "2026-12-05",
+    createdAt: "2026-11-05T09:15:00Z",
+    updatedAt: "2026-11-05T09:15:00Z",
+  },
+  {
+    id: "40000000-0000-0000-0000-000000000003",
+    patientId: "pat-daniela-castro",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    consultationDate: "2026-11-11",
+    reasonForVisit: "Evaluación de resultado de biopsia cervical (NIC 2 / LIE-AG) para conización diagnóstica y terapéutica LEEP",
+    illnessTime: "3 semanas tras colposcopía y toma de biopsia dirigida",
+    symptoms: "Asintomática actualmente. Refiere temor ante el resultado histológico y solicita explicación del procedimiento.",
+    vitalSigns: {
+      bloodPressure: "115/75",
+      heartRate: 68,
+      temperature: 36.7,
+      weightKg: 62,
+      heightCm: 165,
+      bmi: 22.77,
+    },
+    physicalExam: {
+      generalExam: "Paciente lúcida, afebril, hemodinámicamente estable.",
+      breastsExam: "Sin alteraciones clínicas.",
+      externalGenitalia: "Genitales normales sin lesiones.",
+      speculoscopy: "Cérvix con lechos de biopsia previa completamente cicatrizados en horas 1 y 7, sin sangrado ni secreciones anormales.",
+      bimanualPalpation: "Útero en AVF de tamaño normal, móvil, bordes regulares, no doloroso.",
+    },
+    diagnosis: "Neoplasia Intraepitelial Cervical Grado 2 (NIC 2 / LIE-AG) en cérvix uterino",
+    cie10Code: "N87.1",
+    treatmentPlan: "1. Programación de Cono LEEP ambulatorio bajo anestesia local con asa diatérmica.\n2. Presupuesto oficial entregado y consentimiento informado firmado.\n3. Perfil de coagulación y riesgo quirúrgico ambulatorio.",
+    nextAppointmentDate: "2026-11-20",
+    createdAt: "2026-11-11T12:00:00Z",
+    updatedAt: "2026-11-11T12:00:00Z",
+  },
+];
+
+export const INITIAL_ULTRASOUNDS: UltrasoundReport[] = [
+  {
+    id: "50000000-0000-0000-0000-000000000001",
+    patientId: "pat-fiorella-mendoza",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    reportDate: "2026-11-12",
+    ultrasoundType: "TRANSVAGINAL",
+    indication: "Mapeo ecográfico especializado de endometriosis y dolor pélvico crónico",
+    findings: {
+      uterusPosition: "RVF",
+      uterusDimensions: "78 x 46 x 52 mm",
+      uterusVolumeCc: 97,
+      myometriumStatus: "Heterogéneo difuso con asimetría de pared posterior sugerente de adenomiosis focal.",
+      endometriumThicknessMm: 6.8,
+      endometriumPattern: "Trilaminar",
+      rightOvaryDimensions: "32 x 22 mm",
+      leftOvaryDimensions: "44 x 36 mm",
+      ovariesNotes: "Ovario izquierdo adherido a cara posterior uterina con presencia de endometrioma ovárico de 38 x 32 mm, de contenido denso en vidrio esmerilado sin flujos Doppler internos. Ovario derecho con folículos antrales normales.",
+      douglasPouch: "Fondo de saco posterior obliterado. Signo del deslizamiento (sliding sign) NEGATIVO entre útero y recto-sigmoides, compatible con adherencias firmes.",
+    },
+    conclusion: "1. Endometrioma ovárico izquierdo de 3.8 cm (vidrio esmerilado homogéneo).\n2. Fondo de saco de Douglas obliterado con adherencia útero-rectal.\n3. Hallazgos compatibles con Adenomiosis focal miometrial posterior.",
+    recommendations: "Correlación con RMN de pelvis de alta resolución y planificación de laparoscopía ginecológica de resección completa CENDO.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=600&auto=format&fit=crop", caption: "Endometrioma ovárico izquierdo (38x32mm) eco denso homogéneo" },
+      { url: "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=600&auto=format&fit=crop", caption: "Adenomiosis miometrial pared posterior en RVF" },
+    ],
+    createdAt: "2026-11-12T11:00:00Z",
+    updatedAt: "2026-11-12T11:00:00Z",
+  },
+  {
+    id: "50000000-0000-0000-0000-000000000002",
+    patientId: "pat-carmen-huaman",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    reportDate: "2026-11-06",
+    ultrasoundType: "MAMA_BILATERAL",
+    indication: "Chequeo mamario preventivo anual y control de mastopatía fibroquística",
+    findings: {
+      breastPattern: "Parénquima fibroglandular de distribución difusa heterogénea bilateral (Patrón C).",
+      rightBreastFindings: "En radio 10 de mama derecha a 2 cm del pezón se aprecia quiste simple de paredes finas y refuerzo acústico posterior de 7 x 5 mm. Sin nódulos sólidos ni microcalcificaciones agrupadas.",
+      leftBreastFindings: "Sin lesiones nodulares sólidas ni quísticas dominantes. Ectasia ductal retroareolar fisiológica de 1.8 mm.",
+      biradsCategory: "BI-RADS 2",
+    },
+    conclusion: "Ecografía Mamaria Bilateral: BI-RADS 2 (Hallazgos benignos: Quiste simple aislado en mama derecha).",
+    recommendations: "Control ecográfico preventivo de rutina en 12 meses junto a Mamografía bilateral.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=600&auto=format&fit=crop", caption: "Mama derecha radio 10: Quiste simple anecoico bien delimitado" },
+    ],
+    createdAt: "2026-11-06T10:00:00Z",
+    updatedAt: "2026-11-06T10:00:00Z",
+  },
+  {
+    id: "50000000-0000-0000-0000-000000000003",
+    patientId: "pat-luciana-ramos",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    reportDate: "2026-11-05",
+    ultrasoundType: "OBSTETRICA_1T",
+    indication: "Determinación de viabilidad embrionaria y cálculo de edad gestacional biométrica",
+    findings: {
+      gestationalSacsCount: 1,
+      embryoCrownRumpLengthMm: 9.8,
+      gestationalAgeByEcho: "7 semanas 0 días",
+      fetalHeartRate: 142,
+      placentaLocation: "Trofo blasto anular normoimplantado cara posterior",
+      douglasPouch: "Libre",
+    },
+    conclusion: "Gestación intrauterina única activa de 7.0 semanas con vitalidad embrionaria demostrada (LCF: 142 lpm). Sin hematomas retrocoriales.",
+    recommendations: "Ecografía genética (11 - 13.6 semanas) para tamizaje de aneuploidías y preeclampsia precoz.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=600&auto=format&fit=crop", caption: "Saco gestacional intrauterino normoinserto con embrión y LCF +" },
+    ],
+    createdAt: "2026-11-05T09:40:00Z",
+    updatedAt: "2026-11-05T09:40:00Z",
+  },
+];
+
+export const INITIAL_MINOR_PROCEDURES: MinorProcedureReport[] = [
+  {
+    id: "60000000-0000-0000-0000-000000000001",
+    patientId: "pat-daniela-castro",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    procedureDate: "2026-10-24",
+    procedureType: "BIOPSIA_CERVICAL",
+    preOpDiagnosis: "Sospecha colposcópica de Lesión Intraepitelial de Alto Grado (LIE-AG) en cérvix",
+    postOpDiagnosis: "Biopsia de cérvix en horas 1:00 y 7:00 (enviada a Anatomía Patológica)",
+    cie10Code: "N87.1",
+    anesthesiaType: "Local (Lidocaína 2%)",
+    procedureDetails: {
+      asepsisTechnique: "Asepsia y antisepsia vulvovaginal con solución yodopovidona al 10%. Colocación de campos estériles y espéculo de Graves descartable.",
+      biopsySites: "Labio anterior hora 1:00 y labio posterior hora 7:00 en borde acetoblanco denso con mosaico grosero.",
+      specimenSentToPathology: true,
+      specimenDescription: "Dos fragmentos tisulares grisáceos de 3x2 mm fijados en formol al 10% rotulados Biopsia Cervical CENDO.",
+      bleedingAmount: "Mínimo (< 10 ml)",
+      hemostasisMethod: "Solución de Monsel",
+      complications: "Ninguna durante ni inmediatamente posterior al acto quirúrgico menor.",
+    },
+    postOpIndications: "1. No realizar esfuerzos físicos intensos por 72 horas.\n2. Abstinencia sexual por 7 a 10 días.\n3. No uso de tampones ni duchas vaginales.\n4. Flujo oscuro o grumos color café es normal por la solución de Monsel.\n5. Acudir por emergencia ante sangrado mayor a menstruación o fiebre > 38°C.",
+    medicationsPrescribed: "Paracetamol 500 mg c/8h condicional a molestia pélvica.",
+    nextControlDate: "2026-11-11",
+    createdAt: "2026-10-24T15:00:00Z",
+    updatedAt: "2026-10-24T15:00:00Z",
+  },
+  {
+    id: "60000000-0000-0000-0000-000000000002",
+    patientId: "pat-gabriela-paredes",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    procedureDate: "2026-10-18",
+    procedureType: "INSERCION_DIU",
+    preOpDiagnosis: "Dismenorrea y menorragia secundaria a endometriosis ovárica. Deseo de anticoncepción de larga duración (LARC).",
+    postOpDiagnosis: "Inserción exitosa de SIU Liberador de Levonorgestrel 52 mg (Mirena) intrauterino normoposicionado",
+    cie10Code: "Z30.1",
+    anesthesiaType: "Local (Lidocaína 2%)",
+    procedureDetails: {
+      asepsisTechnique: "Antisepsia cervicovaginal con clorhexidina al 2%. Histerometría con histerómetro descartable: 7.5 cm.",
+      biopsySites: "No aplica",
+      specimenSentToPathology: false,
+      bleedingAmount: "Mínimo (< 10 ml)",
+      hemostasisMethod: "Compresión",
+      complications: "Toleró adecuadamente el procedimiento sin reflejo vagal.",
+    },
+    postOpIndications: "1. Abstinencia sexual por 48 horas.\n2. Ecografía transvaginal de control en 4 semanas para corroborar posición de vástago y brazos.\n3. Es esperable spotting (manchado irregular) durante los primeros 2 a 3 meses de adaptación hormonal.",
+    medicationsPrescribed: "Ibuprofeno 400 mg cada 8 horas por 48 horas con alimentos.",
+    nextControlDate: "2026-11-18",
+    createdAt: "2026-10-18T16:00:00Z",
+    updatedAt: "2026-10-18T16:00:00Z",
+  },
+];
+
+export const INITIAL_QUOTES: ProcedureQuote[] = [
+  {
+    id: "70000000-0000-0000-0000-000000000001",
+    patientId: "pat-fiorella-mendoza",
+    patientName: "Fiorella Beatriz Mendoza Chávez",
+    patientPhone: "976 543 218",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    quoteDate: "2026-11-12",
+    validityDays: 30,
+    items: [
+      { procedureId: "tar-009", code: "CX-LAP-ENDO", name: "Cirugía Laparoscópica de Endometriosis Compleja (Avanzada / Profunda)", category: "Cirugía Laparoscópica", regularPrice: 6500, discountPercent: 10, finalPrice: 5850 },
+      { procedureId: "tar-005", code: "ECO-DOPPLER", name: "Ecografía Doppler Ginecológica / Pélvica de Alta Resolución", category: "Ecografía Especializada", regularPrice: 220, discountPercent: 0, finalPrice: 220 },
+      { procedureId: "tar-008", code: "BIO-ENDO", name: "Biopsia Endometrial con Cánula de Pipelle de Cornier", category: "Procedimientos de Consultorio", regularPrice: 280, discountPercent: 10, finalPrice: 252 },
+    ],
+    subtotal: 7000,
+    discountTotal: 678,
+    total: 6322,
+    paymentTerms: "50% al programar fecha quirúrgica, 50% 48 horas previas al internamiento en clínica asociada (San Felipe / Anglo Americana). Aceptamos Tarjetas de Crédito, Transferencia BCP / BBVA.",
+    notes: "Incluye honorarios quirúrgicos del equipo CENDO (Cirujano Principal, 1er Ayudante y Anestesiólogo) y controles postoperatorios por 30 días.",
+    createdAt: "2026-11-12T12:00:00Z",
+  },
+  {
+    id: "70000000-0000-0000-0000-000000000002",
+    patientId: "pat-daniela-castro",
+    patientName: "Daniela Fernanda Castro Morales",
+    patientPhone: "987 456 123",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    quoteDate: "2026-11-11",
+    validityDays: 15,
+    items: [
+      { procedureId: "tar-006", code: "LEEP-001", name: "Cono LEEP (Resección Electroquirúrgica con Asa Diatérmica)", category: "Procedimientos de Consultorio", regularPrice: 1200, discountPercent: 10, finalPrice: 1080 },
+      { procedureId: "tar-007", code: "PAT-001", name: "Estudio Histopatológico de Pieza Quirúrgica (Patología)", category: "Procedimientos de Consultorio", regularPrice: 250, discountPercent: 0, finalPrice: 250 },
+    ],
+    subtotal: 1450,
+    discountTotal: 120,
+    total: 1330,
+    paymentTerms: "Pago en módulo de recepción CENDO al momento del procedimiento. Tarjeta de débito/crédito o transferencia directa.",
+    notes: "Procedimiento ambulatorio bajo anestesia local en sala de procedimientos de CENDO.",
+    createdAt: "2026-11-11T12:30:00Z",
+  },
+];
+
+export const INITIAL_APPOINTMENTS: MedicalAppointment[] = [
+  {
+    id: "80000000-0000-0000-0000-000000000001",
+    patientId: "pat-luciana-ramos",
+    patientName: "Luciana María Ramos Figueroa",
+    patientDni: "73819204",
+    patientPhone: "981 234 567",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    appointmentDate: new Date().toISOString().split("T")[0],
+    appointmentTime: "09:00",
+    durationMinutes: 30,
+    appointmentType: "CONTROL_PRENATAL",
+    reason: "Control Prenatal Oficial (MINSA/CLAP) - 2da Atención y Evaluación Fetal",
+    status: "CONFIRMADA",
+    notes: "Traer carnet físico y ecografía de primer trimestre.",
+    reminderSent: true,
+    createdAt: "2026-11-10T08:00:00Z",
+    updatedAt: "2026-11-10T08:00:00Z",
+  },
+  {
+    id: "80000000-0000-0000-0000-000000000002",
+    patientId: "pat-fiorella-mendoza",
+    patientName: "Fiorella Beatriz Mendoza Chávez",
+    patientDni: "75294816",
+    patientPhone: "976 543 218",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    appointmentDate: new Date().toISOString().split("T")[0],
+    appointmentTime: "10:30",
+    durationMinutes: 45,
+    appointmentType: "CONSULTA_PRIMERA_VEZ",
+    reason: "Evaluación de dolor pélvico crónico e informe de RMN pelvis",
+    status: "EN_ESPERA",
+    notes: "Paciente en sala de espera de CENDO.",
+    reminderSent: true,
+    createdAt: "2026-11-10T08:30:00Z",
+    updatedAt: "2026-11-10T08:30:00Z",
+  },
+  {
+    id: "80000000-0000-0000-0000-000000000003",
+    patientId: "pat-daniela-castro",
+    patientName: "Daniela Fernanda Castro Morales",
+    patientDni: "74195820",
+    patientPhone: "987 456 123",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    appointmentDate: new Date().toISOString().split("T")[0],
+    appointmentTime: "12:00",
+    durationMinutes: 60,
+    appointmentType: "PROCEDIMIENTO_MENOR",
+    reason: "Cono LEEP ambulatorio bajo anestesia local con asa diatérmica",
+    status: "PENDIENTE",
+    notes: "Ayuno de líquidos 2 horas antes.",
+    reminderSent: false,
+    createdAt: "2026-11-10T09:00:00Z",
+    updatedAt: "2026-11-10T09:00:00Z",
+  },
+  {
+    id: "80000000-0000-0000-0000-000000000004",
+    patientId: "pat-gabriela-paredes",
+    patientName: "Gabriela Alejandra Paredes Vílchez",
+    patientDni: "71628493",
+    patientPhone: "992 847 163",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    appointmentDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+    appointmentTime: "15:00",
+    durationMinutes: 30,
+    appointmentType: "ECOGRAFIA",
+    reason: "Ecografía transvaginal control DIU Mirena y evaluación de endometrioma ovárico",
+    status: "PENDIENTE",
+    notes: "Vejiga vacía.",
+    reminderSent: false,
+    createdAt: "2026-11-10T09:30:00Z",
+    updatedAt: "2026-11-10T09:30:00Z",
+  },
+  {
+    id: "80000000-0000-0000-0000-000000000005",
+    patientId: "pat-carmen-huaman",
+    patientName: "Carmen Rosa Huamán Quispe",
+    patientDni: "09482715",
+    patientPhone: "965 318 742",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    appointmentDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+    appointmentTime: "16:30",
+    durationMinutes: 30,
+    appointmentType: "CHEQUEO_INTEGRAL",
+    reason: "Entrega de resultados de Densitometría y control integral de climaterio",
+    status: "CONFIRMADA",
+    notes: "Traer estudio de densitometría impreso.",
+    reminderSent: true,
+    createdAt: "2026-11-10T10:00:00Z",
+    updatedAt: "2026-11-10T10:00:00Z",
+  },
+];
+
+export const INITIAL_WORD_HISTORIES: WordHistoryDocument[] = [
+  {
+    id: "90000000-0000-0000-0000-000000000001",
+    patientId: "pat-fiorella-mendoza",
+    fileName: "HC-Previa-FiorellaMendoza-ClinicaSanBorja.docx",
+    fileSize: 45200,
+    fileUrl: "https://zfyfyeezztaqrzfpogiv.supabase.co/storage/v1/object/public/lab-reports/10000000-0000-0000-0000-000000000002/HC-Previa-FiorellaMendoza-ClinicaSanBorja.docx",
+    extractedText: "HISTORIA CLÍNICA ANTERIOR (MIGRADA DE FORMATO WORD):\nFecha: 14/03/2025\nPaciente: Mendoza Chávez, Fiorella Beatriz (29 años)\nAntecedentes: Sin alergias medicamentosas. Nuligesta. Dismenorrea severa desde menarquia.\nEvolución clínica: Refiere dismenorrea progresiva refractaria a ketoprofeno. Ecografía previa reporta quiste ovárico izquierdo de aspecto endometriósico de 3.2 cm.\nPlan anterior: Observación con anticonceptivos orales combinados (Etinilestradiol / Levonorgestrel).",
+    notes: "Historia clínica previa en formato Microsoft Word remitida por la paciente para archivo en su expediente CENDO.",
+    createdAt: "2026-11-10T09:00:00Z",
+  },
+];
+
 interface MedicalStoreState {
   // Autenticación, Médicos y Usuarios
   doctorsList: DoctorProfile[];
@@ -1272,6 +1694,70 @@ interface MedicalStoreState {
   addPatientDocument: (doc: PatientDocument) => void;
   deletePatientDocument: (id: string) => Promise<void>;
   getDocumentsByPatientId: (patientId: string) => PatientDocument[];
+
+  // Consultas Ginecológicas Estructuradas (Punto 13)
+  consultations: MedicalConsultation[];
+  addConsultation: (
+    consultation: Omit<MedicalConsultation, "id" | "createdAt" | "updatedAt">
+  ) => MedicalConsultation;
+  updateConsultation: (
+    id: string,
+    updates: Partial<MedicalConsultation>
+  ) => void;
+  deleteConsultation: (id: string) => void;
+  getConsultationsByPatientId: (patientId: string) => MedicalConsultation[];
+
+  // Formatos de Ecografía Especializada (Punto 5)
+  ultrasoundReports: UltrasoundReport[];
+  addUltrasoundReport: (
+    report: Omit<UltrasoundReport, "id" | "createdAt" | "updatedAt">
+  ) => UltrasoundReport;
+  updateUltrasoundReport: (
+    id: string,
+    updates: Partial<UltrasoundReport>
+  ) => void;
+  deleteUltrasoundReport: (id: string) => void;
+  getUltrasoundsByPatientId: (patientId: string) => UltrasoundReport[];
+
+  // Formatos de Procedimientos Menores & Biopsias (Punto 6)
+  minorProcedures: MinorProcedureReport[];
+  addMinorProcedure: (
+    proc: Omit<MinorProcedureReport, "id" | "createdAt" | "updatedAt">
+  ) => MinorProcedureReport;
+  updateMinorProcedure: (
+    id: string,
+    updates: Partial<MinorProcedureReport>
+  ) => void;
+  deleteMinorProcedure: (id: string) => void;
+  getMinorProceduresByPatientId: (patientId: string) => MinorProcedureReport[];
+
+  // Tarifas Cotizadas & Presupuestos por WhatsApp (Punto 3)
+  procedureQuotes: ProcedureQuote[];
+  addQuote: (
+    quote: Omit<ProcedureQuote, "id" | "createdAt">
+  ) => ProcedureQuote;
+  deleteQuote: (id: string) => void;
+  getQuotesByPatientId: (patientId: string) => ProcedureQuote[];
+
+  // Agenda de Citas y Disponibilidad (Puntos 10 y 11)
+  appointments: MedicalAppointment[];
+  addAppointment: (
+    appt: Omit<MedicalAppointment, "id" | "createdAt" | "updatedAt">
+  ) => MedicalAppointment;
+  updateAppointment: (
+    id: string,
+    updates: Partial<MedicalAppointment>
+  ) => void;
+  deleteAppointment: (id: string) => void;
+  getAppointmentsByDoctorId: (doctorId: string) => MedicalAppointment[];
+  getAppointmentsByPatientId: (patientId: string) => MedicalAppointment[];
+  getAppointmentsByDate: (date: string) => MedicalAppointment[];
+
+  // Historias Clínicas en Word (Punto 12)
+  wordHistories: WordHistoryDocument[];
+  addWordHistory: (doc: WordHistoryDocument) => void;
+  deleteWordHistory: (id: string) => Promise<void>;
+  getWordHistoriesByPatientId: (patientId: string) => WordHistoryDocument[];
 
   // Reset a datos iniciales
   resetToSeedData: () => void;
@@ -1488,6 +1974,12 @@ export const useMedicalStore = create<MedicalStoreState>()(
             labOrders: state.labOrders.filter((l) => l.patientId !== id),
             prenatalCards: state.prenatalCards.filter((c) => c.patientId !== id),
             patientDocuments: (state.patientDocuments || []).filter((d) => d.patientId !== id),
+            consultations: (state.consultations || []).filter((c) => c.patientId !== id),
+            ultrasoundReports: (state.ultrasoundReports || []).filter((u) => u.patientId !== id),
+            minorProcedures: (state.minorProcedures || []).filter((p) => p.patientId !== id),
+            procedureQuotes: (state.procedureQuotes || []).filter((q) => q.patientId !== id),
+            appointments: (state.appointments || []).filter((a) => a.patientId !== id),
+            wordHistories: (state.wordHistories || []).filter((w) => w.patientId !== id),
           };
         });
         deletePatientFromSupabase(id, targetDni);
@@ -1831,6 +2323,217 @@ export const useMedicalStore = create<MedicalStoreState>()(
         return (get().patientDocuments || []).filter((d) => d.patientId === patientId);
       },
 
+
+      // CONSULTAS GINECOLÓGICAS ESTRUCTURADAS (ETAPA B - PUNTO 13)
+      consultations: INITIAL_CONSULTATIONS,
+      addConsultation: (consData) => {
+        const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `cons-${Date.now()}`;
+        const now = new Date().toISOString();
+        const newCons: MedicalConsultation = {
+          ...consData,
+          id,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => ({
+          consultations: [newCons, ...(state.consultations || [])],
+        }));
+        syncConsultationToSupabase(newCons);
+        return newCons;
+      },
+      updateConsultation: (id, updates) => {
+        let updated: MedicalConsultation | null = null;
+        set((state) => ({
+          consultations: (state.consultations || []).map((c) => {
+            if (c.id === id) {
+              updated = { ...c, ...updates, updatedAt: new Date().toISOString() };
+              return updated;
+            }
+            return c;
+          }),
+        }));
+        if (updated) syncConsultationToSupabase(updated);
+      },
+      deleteConsultation: (id) => {
+        set((state) => ({
+          consultations: (state.consultations || []).filter((c) => c.id !== id),
+        }));
+        deleteConsultationFromSupabase(id);
+      },
+      getConsultationsByPatientId: (patientId) => {
+        return (get().consultations || []).filter((c) => c.patientId === patientId);
+      },
+
+      // FORMATOS DE ECOGRAFÍA ESPECIALIZADA (ETAPA B - PUNTO 5)
+      ultrasoundReports: INITIAL_ULTRASOUNDS,
+      addUltrasoundReport: (repData) => {
+        const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `echo-${Date.now()}`;
+        const now = new Date().toISOString();
+        const newReport: UltrasoundReport = {
+          ...repData,
+          id,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => ({
+          ultrasoundReports: [newReport, ...(state.ultrasoundReports || [])],
+        }));
+        syncUltrasoundToSupabase(newReport);
+        return newReport;
+      },
+      updateUltrasoundReport: (id, updates) => {
+        let updated: UltrasoundReport | null = null;
+        set((state) => ({
+          ultrasoundReports: (state.ultrasoundReports || []).map((u) => {
+            if (u.id === id) {
+              updated = { ...u, ...updates, updatedAt: new Date().toISOString() };
+              return updated;
+            }
+            return u;
+          }),
+        }));
+        if (updated) syncUltrasoundToSupabase(updated);
+      },
+      deleteUltrasoundReport: (id) => {
+        set((state) => ({
+          ultrasoundReports: (state.ultrasoundReports || []).filter((u) => u.id !== id),
+        }));
+        deleteUltrasoundFromSupabase(id);
+      },
+      getUltrasoundsByPatientId: (patientId) => {
+        return (get().ultrasoundReports || []).filter((u) => u.patientId === patientId);
+      },
+
+      // FORMATOS DE PROCEDIMIENTOS MENORES & BIOPSIAS (ETAPA B - PUNTO 6)
+      minorProcedures: INITIAL_MINOR_PROCEDURES,
+      addMinorProcedure: (procData) => {
+        const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `proc-${Date.now()}`;
+        const now = new Date().toISOString();
+        const newProc: MinorProcedureReport = {
+          ...procData,
+          id,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => ({
+          minorProcedures: [newProc, ...(state.minorProcedures || [])],
+        }));
+        syncMinorProcedureToSupabase(newProc);
+        return newProc;
+      },
+      updateMinorProcedure: (id, updates) => {
+        let updated: MinorProcedureReport | null = null;
+        set((state) => ({
+          minorProcedures: (state.minorProcedures || []).map((p) => {
+            if (p.id === id) {
+              updated = { ...p, ...updates, updatedAt: new Date().toISOString() };
+              return updated;
+            }
+            return p;
+          }),
+        }));
+        if (updated) syncMinorProcedureToSupabase(updated);
+      },
+      deleteMinorProcedure: (id) => {
+        set((state) => ({
+          minorProcedures: (state.minorProcedures || []).filter((p) => p.id !== id),
+        }));
+        deleteMinorProcedureFromSupabase(id);
+      },
+      getMinorProceduresByPatientId: (patientId) => {
+        return (get().minorProcedures || []).filter((p) => p.patientId === patientId);
+      },
+
+      // TARIFAS COTIZADAS & PRESUPUESTOS POR WHATSAPP (ETAPA C - PUNTO 3)
+      procedureQuotes: INITIAL_QUOTES,
+      addQuote: (quoteData) => {
+        const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `quote-${Date.now()}`;
+        const newQuote: ProcedureQuote = {
+          ...quoteData,
+          id,
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => ({
+          procedureQuotes: [newQuote, ...(state.procedureQuotes || [])],
+        }));
+        syncQuoteToSupabase(newQuote);
+        return newQuote;
+      },
+      deleteQuote: (id) => {
+        set((state) => ({
+          procedureQuotes: (state.procedureQuotes || []).filter((q) => q.id !== id),
+        }));
+        deleteQuoteFromSupabase(id);
+      },
+      getQuotesByPatientId: (patientId) => {
+        return (get().procedureQuotes || []).filter((q) => q.patientId === patientId);
+      },
+
+      // AGENDA DE CITAS Y DISPONIBILIDAD (ETAPA C - PUNTOS 10 Y 11)
+      appointments: INITIAL_APPOINTMENTS,
+      addAppointment: (apptData) => {
+        const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `appt-${Date.now()}`;
+        const now = new Date().toISOString();
+        const newAppt: MedicalAppointment = {
+          ...apptData,
+          id,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => ({
+          appointments: [newAppt, ...(state.appointments || [])],
+        }));
+        syncAppointmentToSupabase(newAppt);
+        return newAppt;
+      },
+      updateAppointment: (id, updates) => {
+        let updated: MedicalAppointment | null = null;
+        set((state) => ({
+          appointments: (state.appointments || []).map((a) => {
+            if (a.id === id) {
+              updated = { ...a, ...updates, updatedAt: new Date().toISOString() };
+              return updated;
+            }
+            return a;
+          }),
+        }));
+        if (updated) syncAppointmentToSupabase(updated);
+      },
+      deleteAppointment: (id) => {
+        set((state) => ({
+          appointments: (state.appointments || []).filter((a) => a.id !== id),
+        }));
+        deleteAppointmentFromSupabase(id);
+      },
+      getAppointmentsByDoctorId: (doctorId) => {
+        return (get().appointments || []).filter((a) => a.doctorId === doctorId);
+      },
+      getAppointmentsByPatientId: (patientId) => {
+        return (get().appointments || []).filter((a) => a.patientId === patientId);
+      },
+      getAppointmentsByDate: (date) => {
+        return (get().appointments || []).filter((a) => a.appointmentDate === date);
+      },
+
+      // HISTORIAS CLÍNICAS EN WORD (ETAPA C - PUNTO 12)
+      wordHistories: INITIAL_WORD_HISTORIES,
+      addWordHistory: (doc) => {
+        set((state) => ({
+          wordHistories: [doc, ...(state.wordHistories || [])],
+        }));
+        syncWordHistoryToSupabase(doc);
+      },
+      deleteWordHistory: async (id) => {
+        const doc = (get().wordHistories || []).find((w) => w.id === id);
+        set((state) => ({
+          wordHistories: (state.wordHistories || []).filter((w) => w.id !== id),
+        }));
+        await deleteWordHistoryFromSupabase(id, doc?.fileName);
+      },
+      getWordHistoriesByPatientId: (patientId) => {
+        return (get().wordHistories || []).filter((w) => w.patientId === patientId);
+      },
+
       // RESET
       resetToSeedData: () => {
         set({
@@ -1844,6 +2547,12 @@ export const useMedicalStore = create<MedicalStoreState>()(
           labOrders: INITIAL_LAB_ORDERS,
           prenatalCards: INITIAL_PRENATAL_CARDS,
           patientDocuments: INITIAL_DOCUMENTS,
+          consultations: INITIAL_CONSULTATIONS,
+          ultrasoundReports: INITIAL_ULTRASOUNDS,
+          minorProcedures: INITIAL_MINOR_PROCEDURES,
+          procedureQuotes: INITIAL_QUOTES,
+          appointments: INITIAL_APPOINTMENTS,
+          wordHistories: INITIAL_WORD_HISTORIES,
           tariffItems: INITIAL_TARIFF,
           vademecumItems: INITIAL_VADEMECUM,
         });
@@ -1851,9 +2560,9 @@ export const useMedicalStore = create<MedicalStoreState>()(
     }),
     {
       name: "cendo-storage",
-      version: 4,
+      version: 5,
       migrate: (persistedState: any, version: number) => {
-        if (version < 4) {
+        if (version < 5) {
           return {
             ...(persistedState || {}),
             doctorsList: INITIAL_DOCTORS,
@@ -1865,7 +2574,13 @@ export const useMedicalStore = create<MedicalStoreState>()(
             prescriptions: INITIAL_PRESCRIPTIONS,
             labOrders: INITIAL_LAB_ORDERS,
             prenatalCards: INITIAL_PRENATAL_CARDS,
-            patientDocuments: INITIAL_DOCUMENTS,
+            patientDocuments: persistedState?.patientDocuments || INITIAL_DOCUMENTS,
+            consultations: persistedState?.consultations || INITIAL_CONSULTATIONS,
+            ultrasoundReports: persistedState?.ultrasoundReports || INITIAL_ULTRASOUNDS,
+            minorProcedures: persistedState?.minorProcedures || INITIAL_MINOR_PROCEDURES,
+            procedureQuotes: persistedState?.procedureQuotes || INITIAL_QUOTES,
+            appointments: persistedState?.appointments || INITIAL_APPOINTMENTS,
+            wordHistories: persistedState?.wordHistories || INITIAL_WORD_HISTORIES,
             tariffItems: persistedState?.tariffItems || INITIAL_TARIFF,
             vademecumItems: persistedState?.vademecumItems || INITIAL_VADEMECUM,
           };

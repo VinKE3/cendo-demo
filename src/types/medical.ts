@@ -385,6 +385,239 @@ export interface PatientDocument {
   uploadedBy?: string;
 }
 
+// ============================================================================
+// ETAPA B: NUEVA CONSULTA GINECOLÓGICA ESTRUCTURADA (PUNTO 13)
+// ============================================================================
+
+export interface ConsultationVitalSigns {
+  bloodPressure: string; // ej. "110/70"
+  heartRate: number; // lpm
+  temperature: number; // °C
+  weightKg: number; // kg
+  heightCm: number; // cm
+  bmi: number; // IMC
+}
+
+export interface ConsultationPhysicalExam {
+  generalExam: string;
+  breastsExam: string;
+  externalGenitalia: string;
+  speculoscopy: string; // Vagina y cérvix
+  bimanualPalpation: string; // Útero y anexos
+}
+
+export interface MedicalConsultation {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  doctorName: string;
+  doctorCmp: string;
+  doctorRne?: string;
+  consultationDate: string; // YYYY-MM-DD
+  reasonForVisit: string;
+  illnessTime?: string;
+  symptoms?: string;
+  vitalSigns: ConsultationVitalSigns;
+  physicalExam: ConsultationPhysicalExam;
+  diagnosis: string;
+  cie10Code?: string;
+  treatmentPlan: string;
+  nextAppointmentDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// ETAPA B: FORMATOS DE ECOGRAFÍA ESPECIALIZADA (PUNTO 5)
+// ============================================================================
+
+export type UltrasoundType =
+  | "TRANSVAGINAL"
+  | "PELVICA"
+  | "MAMA_BILATERAL"
+  | "OBSTETRICA_1T"
+  | "OBSTETRICA_2T_3T"
+  | "DOPPLER";
+
+export interface UltrasoundFindings {
+  // Ginecológica
+  uterusPosition?: "AVF" | "RVF" | "Indiferente";
+  uterusDimensions?: string;
+  uterusVolumeCc?: number;
+  myometriumStatus?: string;
+  endometriumThicknessMm?: number;
+  endometriumPattern?: "Trilaminar" | "Secretor" | "Atrófico" | "Engrosado irregular";
+  rightOvaryDimensions?: string;
+  leftOvaryDimensions?: string;
+  ovariesNotes?: string;
+  douglasPouch?: string;
+  // Mama Bilateral
+  breastPattern?: string;
+  rightBreastFindings?: string;
+  leftBreastFindings?: string;
+  biradsCategory?: "BI-RADS 1" | "BI-RADS 2" | "BI-RADS 3" | "BI-RADS 4" | "BI-RADS 5";
+  // Obstétrica
+  gestationalSacsCount?: number;
+  embryoCrownRumpLengthMm?: number;
+  gestationalAgeByEcho?: string;
+  fetalHeartRate?: number;
+  placentaLocation?: string;
+  amnioticFluidIndex?: string;
+}
+
+export interface UltrasoundReport {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  doctorName: string;
+  doctorCmp: string;
+  doctorRne?: string;
+  reportDate: string;
+  ultrasoundType: UltrasoundType;
+  indication: string;
+  findings: UltrasoundFindings;
+  conclusion: string;
+  recommendations?: string;
+  images: { url: string; caption: string }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// ETAPA B: FORMATOS DE PROCEDIMIENTOS MENORES & BIOPSIAS (PUNTO 6)
+// ============================================================================
+
+export type ProcedureType =
+  | "BIOPSIA_CERVICAL"
+  | "BIOPSIA_ENDOMETRIAL"
+  | "CONO_LEEP"
+  | "POLIPECTOMIA"
+  | "INSERCION_DIU"
+  | "RETIRO_DIU"
+  | "INSERCION_IMPLANTE"
+  | "RETIRO_IMPLANTE"
+  | "OTRO";
+
+export interface ProcedureDetails {
+  asepsisTechnique: string;
+  biopsySites?: string;
+  specimenSentToPathology: boolean;
+  specimenDescription?: string;
+  bleedingAmount: "Mínimo (< 10 ml)" | "Escaso" | "Moderado";
+  hemostasisMethod: "Solución de Monsel" | "Electrocoagulación" | "Compresión" | "Sutura";
+  complications: string;
+}
+
+export interface MinorProcedureReport {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  doctorName: string;
+  doctorCmp: string;
+  doctorRne?: string;
+  procedureDate: string;
+  procedureType: ProcedureType;
+  preOpDiagnosis: string;
+  postOpDiagnosis: string;
+  cie10Code?: string;
+  anesthesiaType: "Local (Lidocaína 2%)" | "Sedación" | "Sin Anestesia" | "Tópica";
+  procedureDetails: ProcedureDetails;
+  postOpIndications: string;
+  medicationsPrescribed?: string;
+  nextControlDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// ETAPA C: TARIFAS COTIZADAS Y PRESUPUESTOS POR WHATSAPP (PUNTO 3)
+// ============================================================================
+
+export interface QuoteItem {
+  procedureId: string;
+  code: string;
+  name: string;
+  category: string;
+  regularPrice: number;
+  discountPercent?: number;
+  finalPrice: number;
+}
+
+export interface ProcedureQuote {
+  id: string;
+  patientId: string;
+  patientName: string;
+  patientPhone: string;
+  doctorId: string;
+  doctorName: string;
+  quoteDate: string;
+  validityDays: number;
+  items: QuoteItem[];
+  subtotal: number;
+  discountTotal: number;
+  total: number;
+  paymentTerms: string;
+  notes?: string;
+  createdAt: string;
+}
+
+// ============================================================================
+// ETAPA C: AGENDA DE CITAS Y DISPONIBILIDAD (PUNTOS 10 Y 11)
+// ============================================================================
+
+export type AppointmentStatus =
+  | "PENDIENTE"
+  | "CONFIRMADA"
+  | "EN_ESPERA"
+  | "ATENDIDA"
+  | "CANCELADA"
+  | "NO_ASISTIO";
+
+export type AppointmentType =
+  | "CONSULTA_PRIMERA_VEZ"
+  | "CONTROL_GINECOLOGICO"
+  | "CHEQUEO_INTEGRAL"
+  | "CONTROL_PRENATAL"
+  | "COLPOSCOPIA"
+  | "ECOGRAFIA"
+  | "PROCEDIMIENTO_MENOR";
+
+export interface MedicalAppointment {
+  id: string;
+  patientId: string;
+  patientName: string;
+  patientDni: string;
+  patientPhone: string;
+  doctorId: string;
+  doctorName: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  durationMinutes: number;
+  appointmentType: AppointmentType;
+  reason: string;
+  status: AppointmentStatus;
+  notes?: string;
+  reminderSent: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// ETAPA C: HISTORIAS CLÍNICAS EN WORD (PUNTO 12)
+// ============================================================================
+
+export interface WordHistoryDocument {
+  id: string;
+  patientId: string;
+  fileName: string;
+  fileSize: number;
+  fileUrl: string;
+  extractedText?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+
 
 
 
