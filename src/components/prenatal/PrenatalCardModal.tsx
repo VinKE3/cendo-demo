@@ -53,6 +53,7 @@ export function PrenatalCardModal({
     getPrenatalCardByPatientId,
     addPrenatalCard,
     updatePrenatalCard,
+    getBackground,
   } = useMedicalStore();
 
   const [activeTab, setActiveTab] = useState<"baseline" | "visits" | "risks">("visits");
@@ -105,13 +106,18 @@ export function PrenatalCardModal({
       setBaselineData(existingCard.baseline);
       setVisitsList(existingCard.visits || []);
     } else {
-      // Plantilla por defecto para la paciente
-      const defFum = "2026-09-26";
+      // Plantilla por defecto para la paciente tomada de su Ficha de Antecedentes (si existe)
+      const bg = getBackground(patient.id);
+      const defFum = bg?.lastMenstrualPeriod || "2026-09-26";
+      const validCivilStatus: "Soltera" | "Casada" | "Conviviente" | "Otro" =
+        patient.civilStatus === "Casada" || patient.civilStatus === "Conviviente" || patient.civilStatus === "Soltera"
+          ? patient.civilStatus
+          : "Soltera";
       setBaselineData({
-        insuranceType: "PRIVADO",
+        insuranceType: patient.insuranceInfo?.toUpperCase().includes("EPS") ? "PRIVADO" : "No Aplica",
         insuranceCode: `CENDO-${patient.dni}`,
         educationLevel: "Superior Univ",
-        civilStatus: "Soltera",
+        civilStatus: validCivilStatus,
         gestas: 1,
         abortos: 0,
         partosVaginales: 0,
@@ -119,8 +125,8 @@ export function PrenatalCardModal({
         nacidosVivos: 0,
         nacidosMuertos: 0,
         viven: 0,
-        familyHistory: ["Niega hipertensión o diabetes familiar"],
-        personalHistory: ["Niega cirugías previas"],
+        familyHistory: bg?.familyHistory ? [bg.familyHistory] : ["Niega hipertensión o diabetes familiar"],
+        personalHistory: bg?.surgeriesHistory ? [bg.surgeriesHistory] : ["Niega cirugías previas"],
         previousVaccines: { rubella: true, hepatitisB: true, hpv: true, yellowFever: true },
         usualWeightKg: 56.0,
         heightCm: 160,
@@ -137,7 +143,7 @@ export function PrenatalCardModal({
       });
       setVisitsList([]);
     }
-  }, [existingCard, patient, isOpen]);
+  }, [existingCard, patient, isOpen, getBackground]);
 
   // Recalcular Naegele reactivamente si cambia la FUM
   const handleFumChange = (newFum: string) => {
