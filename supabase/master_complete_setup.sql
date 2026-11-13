@@ -30,6 +30,16 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS doctor_title TEXT DEFAULT 'Dr.';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS specialty TEXT DEFAULT 'Ginecología y Obstetricia';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS cmp TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS rne TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS clinic_name TEXT DEFAULT 'CENDO - Centro de Endometriosis y Ginecología';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS clinic_address TEXT DEFAULT 'Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT '985 945 697';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS contact_email TEXT DEFAULT 'cendoperu@gmail.com';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
 -- 3. TABLA: patients (Directorio Maestro de Pacientes CENDO)
 CREATE TABLE IF NOT EXISTS public.patients (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -562,26 +572,24 @@ ON CONFLICT (id) DO UPDATE SET
     insurance_info = EXCLUDED.insurance_info,
     updated_at = NOW();
 
--- Perfil del Director Médico
-INSERT INTO public.profiles (
-    id, email, full_name, doctor_title, specialty, cmp, rne, clinic_name, clinic_address, phone, contact_email
-) VALUES (
-    'a0000000-0000-0000-0000-000000000001',
-    'cendoperu@gmail.com',
-    'Patrick José Jacinto Gomero',
-    'Dr.',
-    'Ginecología y Obstetricia',
-    '61693',
-    '38657',
-    'CENDO - Centro de Endometriosis y Ginecología',
-    'Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima',
-    '985 945 697',
-    'cendoperu@gmail.com'
-) ON CONFLICT (email) DO UPDATE SET
-    full_name = EXCLUDED.full_name,
-    doctor_title = EXCLUDED.doctor_title,
-    cmp = EXCLUDED.cmp,
-    rne = EXCLUDED.rne,
-    clinic_name = EXCLUDED.clinic_name,
-    clinic_address = EXCLUDED.clinic_address,
-    updated_at = NOW();
+-- Perfil del Director Médico (Con manejo seguro de excepciones por si profiles está atada a auth.users)
+DO $$
+BEGIN
+    INSERT INTO public.profiles (
+        id, email, full_name, doctor_title, specialty, cmp, rne, clinic_name, clinic_address, phone, contact_email
+    ) VALUES (
+        'a0000000-0000-0000-0000-000000000001',
+        'cendoperu@gmail.com',
+        'Patrick José Jacinto Gomero',
+        'Dr.',
+        'Ginecología y Obstetricia',
+        '61693',
+        '38657',
+        'CENDO - Centro de Endometriosis y Ginecología',
+        'Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima',
+        '985 945 697',
+        'cendoperu@gmail.com'
+    ) ON CONFLICT DO NOTHING;
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END $$;
