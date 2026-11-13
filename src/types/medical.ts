@@ -167,3 +167,40 @@ export interface MedicationVademecum {
   createdAt: string;
 }
 
+export type PrescriptionRoute =
+  | "Vía Vaginal"
+  | "Vía Oral"
+  | "Vía Tópica"
+  | "Vía Intramuscular"
+  | "Vía Subcutánea"
+  | "Otra";
+
+export interface PrescriptionItem {
+  id: string;
+  medicationName: string; // ej: "Ginedazol (Metronidazol 500mg + Miconazol 100mg)"
+  presentation: string; // ej: "Caja x 10 óvulos vaginales"
+  route: PrescriptionRoute | string;
+  dosage: string; // ej: "1 óvulo"
+  frequency: string; // ej: "Cada 24 horas por las noches"
+  duration: string; // ej: "Por 7 días continuos"
+  instructions?: string; // ej: "Abstinencia sexual durante el tratamiento"
+  quantity?: string; // ej: "1 caja"
+}
+
+export interface MedicalPrescription {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  doctorName: string;
+  doctorCmp: string;
+  doctorRne: string;
+  prescriptionDate: string; // YYYY-MM-DD
+  diagnosis: string;
+  cie10Code?: string;
+  items: PrescriptionItem[];
+  generalIndications?: string;
+  nextAppointmentDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

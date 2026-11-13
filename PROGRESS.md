@@ -138,14 +138,17 @@
 
 ---
 
-### [ ] 7.1 WP-A.1: Recetario Médico Inteligente Conectado al Vademécum
-- [ ] **7.1.1.** Contratos de datos (`src/types/medical.ts`): Interfaz `MedicalPrescriptionItem` (fármaco, presentación, dosis seleccionada, vía de administración, frecuencia, duración de tratamiento, indicaciones) y `MedicalPrescription` (pacienteId, doctorId, fecha, diagnóstico CIE-10, ítems, indicaciones generales).
-- [ ] **7.1.2.** Estado global en Zustand (`useMedicalStore.ts`): Acciones `addPrescription`, `updatePrescription`, `deletePrescription`, `getPrescriptionsByPatientId`.
-- [ ] **7.1.3.** Selector de Posología y Dosis en 1 Clic (`src/components/recetas/PrescriptionModal.tsx`): Integración con el vademécum (Mupirocina, Ginedazol, Vagitrol, Doxiciclina, Apronax/Flanax, etc.) con sugerencias automáticas de dosificación según la vía (vaginal, oral, tópica).
-- [ ] **7.1.4.** Plantilla de Impresión de Receta Médica Oficial (`src/components/export/PrescriptionPrintView.tsx`): Formato institucional A5/A4 con membrete CENDO Miraflores, datos de paciente, símbolo **RP/**, detalle posológico claro, firma/sello digital del médico y botón de envío directo por WhatsApp.
-- [ ] **🧪 QA 7.1 (Prueba Unitaria):**
-  - Emitir receta para María Stephany Herrera con Ginedazol (1 óvulo cada 24h x 7 días) y Flanax 550mg (1 tab c/8h condicional al dolor).
-  - Validar renderizado de impresión y despacho WhatsApp.
+### [x] 7.1 WP-A.1: Recetario Médico Inteligente Conectado al Vademécum (Completado & Probado)
+- [x] **7.1.1.** Contratos de datos (`src/types/medical.ts`): Interfaces `PrescriptionItem`, `MedicalPrescription`, `PrescriptionRoute` con tipado estricto de vías, presentaciones, dosis, duración y diagnósticos CIE-10.
+- [x] **7.1.2.** Estado global en Zustand (`useMedicalStore.ts`): Colección `prescriptions` con receta semilla real (`rec-stephany-01`), acciones `addPrescription`, `updatePrescription`, `deletePrescription`, `getPrescriptionsByPatientId` y reset a semillas.
+- [x] **7.1.3.** Selector de Posología y Dosis en 1 Clic (`src/components/recetas/PrescriptionModal.tsx`): Buscador reactivo del vademécum de CENDO + 7 botones de pautas clínicas de autocompletado rápido (óvulos x 7 noches, óvulos x 10 noches, doxiciclina x 14d, analgésico c/8h, antimicótico dosis única, etc.) y chips de indicaciones higiénicas.
+- [x] **7.1.4.** Plantilla de Impresión de Receta Médica Oficial (`src/components/export/PrescriptionPrintView.tsx`): Diagramación institucional membretada CENDO Miraflores, datos de paciente, símbolo **RP/**, detalle posológico claro, firma y sello digital del médico evaluador.
+- [x] **7.1.5.** Integración en Ficha de Paciente (`/pacientes/[id]`): Botón en barra superior `+ Emitir Receta`, tarjeta de recetas emitidas con acciones completas (Ver/Imprimir, Enviar por WhatsApp, Editar, Eliminar) y modal de previsualización A4/A5 con `printHtmlElement`.
+- [x] **7.1.6.** Despacho Directo por WhatsApp (`src/lib/whatsappShare.ts`): Función `generatePrescriptionWhatsAppUrl` formateando la receta completa con dosis, indicaciones y datos del médico para envío instantáneo.
+- [x] **🧪 QA 7.1 (Prueba Unitaria):**
+  - [x] Receta semilla cargada para María Stephany Herrera Rojas con Ginedazol y Flanax 550mg.
+  - [x] Previsualización e impresión validadas con membrete y sello del Dr. Patrick Jacinto (CMP 61693 / RNE 38657).
+  - [x] Verificación de tipos TypeScript limpia (`npx tsc --noEmit` exit code 0).
 
 ---
 

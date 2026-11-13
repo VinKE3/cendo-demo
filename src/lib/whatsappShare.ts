@@ -3,7 +3,7 @@
  * Permite al Dr. Patrick enviar informes, resúmenes y citas con 1 solo clic.
  */
 
-import { Patient, ColposcopyReport, ClinicalCheckup, DoctorProfile } from "@/types/medical";
+import { Patient, ColposcopyReport, ClinicalCheckup, DoctorProfile, MedicalPrescription } from "@/types/medical";
 
 export function cleanPhoneForWhatsApp(phone: string): string {
   // Quitar espacios, guiones y caracteres no numéricos
@@ -74,6 +74,59 @@ export function generateCheckupWhatsAppUrl(
     `📞 *Consultas:* ${doctor.phone}`,
     ``,
     `_CENDO - Especialistas en Endometriosis y Cirugía Ginecológica de Alta Precisión._`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const encodedText = encodeURIComponent(message);
+  return `https://wa.me/${targetPhone}?text=${encodedText}`;
+}
+
+export function generatePrescriptionWhatsAppUrl(
+  patient: Patient,
+  prescription: MedicalPrescription,
+  doctor: DoctorProfile
+): string {
+  const targetPhone = cleanPhoneForWhatsApp(patient.phone);
+
+  const itemsFormatted = prescription.items
+    .map((item, idx) => {
+      return [
+        `💊 *${idx + 1}. ${item.medicationName}* (${item.presentation})`,
+        `   • *Dosis:* ${item.dosage} - ${item.route}`,
+        `   • *Frecuencia:* ${item.frequency}`,
+        `   • *Duración:* ${item.duration}`,
+        item.instructions ? `   • *Indicación:* ${item.instructions}` : null,
+        item.quantity ? `   • *Cantidad:* ${item.quantity}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
+    })
+    .join("\n\n");
+
+  const message = [
+    `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
+    ``,
+    `Le saluda el *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    ``,
+    `📋 Le enviamos su *RECETA MÉDICA OFICIAL* emitida el ${prescription.prescriptionDate}:`,
+    prescription.diagnosis ? `🩺 *Diagnóstico:* ${prescription.diagnosis}` : null,
+    ``,
+    `*TRATAMIENTO PRESCRITO (RP/):*`,
+    itemsFormatted,
+    ``,
+    prescription.generalIndications
+      ? `📌 *Indicaciones Generales:* ${prescription.generalIndications}\n`
+      : null,
+    prescription.nextAppointmentDate
+      ? `🗓 *Próximo Control:* ${prescription.nextAppointmentDate}\n`
+      : null,
+    `👨‍⚕️ *Médico Evaluador:* ${doctor.doctorTitle} ${doctor.fullName}`,
+    `📜 *Colegiatura:* CMP ${doctor.cmp} | RNE ${doctor.rne}`,
+    `🏥 *Sede:* ${doctor.clinicAddress}`,
+    `📞 *Central:* ${doctor.phone}`,
+    ``,
+    `_Conserve este mensaje para su farmacia o tratamiento médico._`,
   ]
     .filter(Boolean)
     .join("\n");

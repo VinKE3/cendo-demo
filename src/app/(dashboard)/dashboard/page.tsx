@@ -199,7 +199,7 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <Link
             href="/colposcopia"
             className="p-3 rounded-xl bg-primary text-white hover:bg-primary-hover font-semibold text-xs flex flex-col items-center justify-center gap-2 text-center transition-all shadow-xs hover:shadow-sm"
@@ -214,6 +214,14 @@ export default function DashboardPage() {
           >
             <Activity className="w-5 h-5 text-primary" />
             <span>Nuevo Chequeo / Eco</span>
+          </Link>
+
+          <Link
+            href="/pacientes/pat-stephany-herrera"
+            className="p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 font-semibold text-xs flex flex-col items-center justify-center gap-2 text-center transition-all shadow-xs"
+          >
+            <Pill className="w-5 h-5 text-emerald-700" />
+            <span>Emitir Receta (RP/)</span>
           </Link>
 
           <Link

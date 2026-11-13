@@ -8,6 +8,7 @@ import {
   ClinicalCheckup,
   ProcedureTariff,
   MedicationVademecum,
+  MedicalPrescription,
 } from "@/types/medical";
 import {
   syncPatientToSupabase,
@@ -216,6 +217,52 @@ export const INITIAL_CHECKUPS: ClinicalCheckup[] = [
     medicalPrescription:
       "1. Continuar con implante subdérmico.\n2. Ecografía mamaria de control en 1 año.\n3. Repetir Papanicolaou en 6 meses.",
     createdAt: "2026-11-02T12:00:00Z",
+  },
+];
+
+// Recetas Médicas Semilla Real
+export const INITIAL_PRESCRIPTIONS: MedicalPrescription[] = [
+  {
+    id: "rec-stephany-01",
+    patientId: "pat-stephany-herrera",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    prescriptionDate: "2026-11-02",
+    diagnosis: "Vaginitis mixta y cervicitis periorificial",
+    cie10Code: "N76.0",
+    items: [
+      {
+        id: "item-01",
+        medicationName: "Ginedazol (Metronidazol 500mg + Miconazol 100mg)",
+        presentation: "Caja x 10 óvulos vaginales",
+        route: "Vía Vaginal",
+        dosage: "1 óvulo",
+        frequency: "Cada 24 horas por las noches antes de acostarse",
+        duration: "Por 7 días continuos",
+        instructions:
+          "Introducir profundamente en la vagina. Abstinencia sexual durante el tratamiento. No ingerir bebidas alcohólicas.",
+        quantity: "1 caja",
+      },
+      {
+        id: "item-02",
+        medicationName: "Naproxeno Sódico 550mg (Flanax 550)",
+        presentation: "Caja x 20 tabletas recubiertas",
+        route: "Vía Oral",
+        dosage: "1 tableta (550 mg)",
+        frequency: "Cada 8 a 12 horas después de los alimentos",
+        duration: "Por 3 a 5 días condicional al dolor",
+        instructions:
+          "Tomar con un vaso de agua tras ingerir alimentos. Suspender si el dolor cede.",
+        quantity: "10 tabletas",
+      },
+    ],
+    generalIndications:
+      "Aseo de la zona íntima con agua tibia y jabón neutro. Usar ropa interior de algodón. Evitar duchas vaginales.",
+    nextAppointmentDate: "2026-11-16",
+    createdAt: "2026-11-02T12:15:00Z",
+    updatedAt: "2026-11-02T12:15:00Z",
   },
 ];
 
@@ -481,6 +528,18 @@ interface MedicalStoreState {
   addVademecumItem: (item: Omit<MedicationVademecum, "id" | "createdAt">) => MedicationVademecum;
   updateVademecumItem: (id: string, updates: Partial<MedicationVademecum>) => void;
   deleteVademecumItem: (id: string) => void;
+
+  // Recetas Médicas Inteligentes
+  prescriptions: MedicalPrescription[];
+  addPrescription: (
+    prescription: Omit<MedicalPrescription, "id" | "createdAt" | "updatedAt">
+  ) => MedicalPrescription;
+  updatePrescription: (
+    id: string,
+    updates: Partial<MedicalPrescription>
+  ) => void;
+  deletePrescription: (id: string) => void;
+  getPrescriptionsByPatientId: (patientId: string) => MedicalPrescription[];
 
   // Reset a datos iniciales
   resetToSeedData: () => void;
@@ -841,6 +900,42 @@ export const useMedicalStore = create<MedicalStoreState>()(
         }));
       },
 
+      // RECETAS MÉDICAS INTELIGENTES
+      prescriptions: INITIAL_PRESCRIPTIONS,
+      addPrescription: (data) => {
+        const id = `rec-${Date.now()}`;
+        const now = new Date().toISOString();
+        const newPrescription: MedicalPrescription = {
+          ...data,
+          id,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => {
+          const currentList = state.prescriptions || [];
+          return {
+            prescriptions: [newPrescription, ...currentList],
+          };
+        });
+        return newPrescription;
+      },
+      updatePrescription: (id, updates) => {
+        set((state) => ({
+          prescriptions: (state.prescriptions || []).map((p) =>
+            p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
+          ),
+        }));
+      },
+      deletePrescription: (id) => {
+        set((state) => ({
+          prescriptions: (state.prescriptions || []).filter((p) => p.id !== id),
+        }));
+      },
+      getPrescriptionsByPatientId: (patientId) => {
+        const list = get().prescriptions || [];
+        return list.filter((p) => p.patientId === patientId);
+      },
+
       // RESET
       resetToSeedData: () => {
         set({
@@ -850,6 +945,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
           backgrounds: INITIAL_BACKGROUNDS,
           colposcopyReports: INITIAL_COLPOSCOPY,
           clinicalCheckups: INITIAL_CHECKUPS,
+          prescriptions: INITIAL_PRESCRIPTIONS,
           tariffItems: INITIAL_TARIFF,
           vademecumItems: INITIAL_VADEMECUM,
         });

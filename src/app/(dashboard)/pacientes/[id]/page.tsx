@@ -21,14 +21,26 @@ import {
   Stethoscope,
   ShieldCheck,
   MessageCircle,
+  Pill,
+  Printer,
+  Trash2,
+  X,
 } from "lucide-react";
+import Swal from "sweetalert2";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { PatientModal } from "@/components/pacientes/PatientModal";
 import { PatientBackgroundModal } from "@/components/pacientes/PatientBackgroundModal";
 import { ColposcopyModal } from "@/components/colposcopia/ColposcopyModal";
 import { CheckupModal } from "@/components/chequeos/CheckupModal";
-import { Patient, ColposcopyReport, ClinicalCheckup } from "@/types/medical";
-import { generateColposcopyWhatsAppUrl, generateCheckupWhatsAppUrl } from "@/lib/whatsappShare";
+import { PrescriptionModal } from "@/components/recetas/PrescriptionModal";
+import { PrescriptionPrintView } from "@/components/export/PrescriptionPrintView";
+import { printHtmlElement } from "@/lib/pdfGenerator";
+import { Patient, ColposcopyReport, ClinicalCheckup, MedicalPrescription } from "@/types/medical";
+import {
+  generateColposcopyWhatsAppUrl,
+  generateCheckupWhatsAppUrl,
+  generatePrescriptionWhatsAppUrl,
+} from "@/lib/whatsappShare";
 
 export default function FichaPacientePage() {
   const params = useParams();
@@ -41,12 +53,18 @@ export default function FichaPacientePage() {
   const [editingColpo, setEditingColpo] = useState<ColposcopyReport | null>(null);
   const [isCheckupModalOpen, setIsCheckupModalOpen] = useState(false);
   const [editingCheckup, setEditingCheckup] = useState<ClinicalCheckup | null>(null);
+  const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+  const [editingPrescription, setEditingPrescription] = useState<MedicalPrescription | null>(null);
+  const [viewingPrescription, setViewingPrescription] = useState<MedicalPrescription | null>(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const {
     getPatientById,
     getBackground,
     getColposcopyByPatientId,
     getCheckupsByPatientId,
+    getPrescriptionsByPatientId,
+    deletePrescription,
     doctorProfile,
   } = useMedicalStore();
 
@@ -54,6 +72,7 @@ export default function FichaPacientePage() {
   const bg = getBackground(patientId);
   const colpos = getColposcopyByPatientId(patientId);
   const checkups = getCheckupsByPatientId(patientId);
+  const prescriptions = getPrescriptionsByPatientId(patientId);
 
   // Calculadora Automática de Semanas / Días de Amenorrea por FUR
   const furCalculation = useMemo(() => {
@@ -157,6 +176,17 @@ export default function FichaPacientePage() {
           >
             <Activity className="w-3.5 h-3.5 text-indigo-600" />
             <span>+ Nuevo Chequeo / Eco</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setEditingPrescription(null);
+              setIsPrescriptionModalOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <Pill className="w-3.5 h-3.5 text-emerald-600" />
+            <span>+ Emitir Receta</span>
           </button>
         </div>
       </div>
@@ -559,6 +589,129 @@ export default function FichaPacientePage() {
             )}
           </div>
         </div>
+        {/* Recetas Médicas Emitidas para la Paciente */}
+        <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4 lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <Pill className="w-5 h-5 text-emerald-600" />
+              <h3 className="font-heading font-bold text-sm text-heading">
+                Recetas Médicas Emitidas ({prescriptions.length})
+              </h3>
+            </div>
+            <button
+              onClick={() => {
+                setEditingPrescription(null);
+                setIsPrescriptionModalOpen(true);
+              }}
+              className="text-xs text-emerald-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nueva Receta</span>
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {prescriptions.length > 0 ? (
+              prescriptions.map((rec) => (
+                <div
+                  key={rec.id}
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-emerald-300 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800">
+                      REC-{rec.id.replace("rec-", "").slice(0, 8)}
+                    </span>
+                    <span className="text-xs font-mono font-semibold text-muted">
+                      {rec.prescriptionDate}
+                    </span>
+                  </div>
+
+                  <p className="text-xs font-semibold text-heading leading-snug">
+                    {rec.diagnosis || "Sin diagnóstico especificado"}
+                  </p>
+
+                  {/* Medicamentos Prescritos */}
+                  <div className="space-y-1.5 pt-1 border-t border-slate-200">
+                    {rec.items.map((item, idx) => (
+                      <div key={item.id} className="text-xs text-slate-700 flex items-start gap-1.5">
+                        <span className="font-bold text-emerald-700 font-mono text-[11px] shrink-0">
+                          {idx + 1}.
+                        </span>
+                        <div>
+                          <strong>{item.medicationName}</strong>: {item.dosage} &bull; {item.frequency} &bull; {item.duration}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => {
+                        const url = generatePrescriptionWhatsAppUrl(patient, rec, doctorProfile);
+                        window.open(url, "_blank");
+                      }}
+                      className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
+                      title="Enviar receta por WhatsApp"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setViewingPrescription(rec);
+                        setIsPrintModalOpen(true);
+                      }}
+                      className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>Ver / Imprimir</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEditingPrescription(rec);
+                        setIsPrescriptionModalOpen(true);
+                      }}
+                      className="text-xs font-semibold text-slate-700 hover:text-primary transition-colors cursor-pointer"
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        Swal.fire({
+                          title: "¿Eliminar Receta?",
+                          text: "Esta acción no se puede deshacer.",
+                          icon: "warning",
+                          showCancelButton: true,
+                          confirmButtonColor: "#EF4444",
+                          confirmButtonText: "Sí, eliminar",
+                          cancelButtonText: "Cancelar",
+                        }).then((res) => {
+                          if (res.isConfirmed) {
+                            deletePrescription(rec.id);
+                          }
+                        });
+                      }}
+                      className="text-xs font-semibold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center space-y-1">
+                <Pill className="w-8 h-8 text-muted mx-auto" />
+                <p className="text-xs font-semibold text-heading">Sin recetas médicas emitidas</p>
+                <p className="text-[11px] text-muted">
+                  Emita una receta médica conectada al vademécum con selección de dosis en 1 clic.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Modales de Edición */}
@@ -590,6 +743,70 @@ export default function FichaPacientePage() {
         initialData={editingCheckup}
         defaultPatientId={patient.id}
       />
+
+      {/* Modal de Receta Médica Inteligente */}
+      <PrescriptionModal
+        isOpen={isPrescriptionModalOpen}
+        onClose={() => setIsPrescriptionModalOpen(false)}
+        patient={patient}
+        prescriptionToEdit={editingPrescription}
+        onSavedAndPrint={(savedRec) => {
+          setViewingPrescription(savedRec);
+          setIsPrintModalOpen(true);
+        }}
+      />
+
+      {/* Modal de Previsualización e Impresión de Receta */}
+      {isPrintModalOpen && viewingPrescription && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-4xl my-6 overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="bg-primary px-6 py-4 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-secondary" />
+                <h3 className="text-base font-heading font-bold">
+                  Previsualización de Receta Médica Oficial (RP/)
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = generatePrescriptionWhatsAppUrl(patient, viewingPrescription, doctorProfile);
+                    window.open(url, "_blank");
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Enviar WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => printHtmlElement("prescription-print-sheet", `Receta_${patient.lastName}_${patient.firstName}`)}
+                  className="px-4 py-1.5 rounded-lg bg-secondary hover:bg-secondary-hover text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir / Guardar PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPrintModalOpen(false)}
+                  className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
+              <PrescriptionPrintView
+                prescription={viewingPrescription}
+                patient={patient}
+                doctor={doctorProfile}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
