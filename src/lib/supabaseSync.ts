@@ -11,7 +11,42 @@
  */
 
 import { createClient } from "@/lib/supabase/client";
-import { Patient, ColposcopyReport, ClinicalCheckup, PatientBackground } from "@/types/medical";
+import {
+  Patient,
+  ColposcopyReport,
+  ClinicalCheckup,
+  PatientBackground,
+  MedicalPrescription,
+  LabOrder,
+  PrenatalCard,
+} from "@/types/medical";
+
+export function ensureUuid(id: string): string {
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return id;
+  }
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : "00000000-0000-0000-0000-000000000000";
+}
+
+export function getPatientUuid(patientId: string, dni?: string): string {
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(patientId)) {
+    return patientId;
+  }
+  if (dni === "72961954" || patientId === "pat-stephany-herrera") {
+    return "11111111-1111-1111-1111-111111111111";
+  }
+  if (dni === "74829105" || patientId === "pat-camila-rossi") {
+    return "22222222-2222-2222-2222-222222222222";
+  }
+  if (dni === "71948263" || patientId === "pat-valeria-alarcon") {
+    return "33333333-3333-3333-3333-333333333333";
+  }
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : "00000000-0000-0000-0000-000000000000";
+}
 
 export async function syncPatientToSupabase(patient: Patient): Promise<boolean> {
   try {
@@ -20,22 +55,23 @@ export async function syncPatientToSupabase(patient: Patient): Promise<boolean> 
       return false;
     }
 
+    const uuid = getPatientUuid(patient.id, patient.dni);
+
     const { error } = await supabase.from("patients").upsert(
       {
-        id: patient.id,
-        dni: patient.dni,
-        first_name: patient.firstName,
-        last_name: patient.lastName,
+        id: uuid,
+        document_type: "DNI",
+        document_number: patient.dni,
+        full_name: `${(patient.lastName || "").trim().toUpperCase()}, ${(patient.firstName || "").trim().toUpperCase()}`,
         birth_date: patient.birthDate,
-        age: patient.age,
-        phone: patient.phone,
-        email: patient.email,
-        address: patient.address,
-        civil_status: patient.civilStatus,
-        occupation: patient.occupation,
+        phone: patient.phone || null,
+        email: patient.email || null,
+        address: patient.address || null,
+        district: "Miraflores",
+        insurance_info: "Particular",
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "id" }
+      { onConflict: "document_number" }
     );
 
     if (error) {
@@ -48,14 +84,31 @@ export async function syncPatientToSupabase(patient: Patient): Promise<boolean> 
   }
 }
 
-export async function deletePatientFromSupabase(patientId: string): Promise<boolean> {
+export async function deletePatientFromSupabase(patientId: string, dni?: string): Promise<boolean> {
   try {
     const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
       return false;
     }
 
-    const { error } = await supabase.from("patients").delete().eq("id", patientId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(patientId);
+    let query = supabase.from("patients").delete();
+
+    if (isUuid) {
+      query = query.eq("id", patientId);
+    } else if (dni) {
+      query = query.eq("document_number", dni);
+    } else if (patientId === "pat-stephany-herrera") {
+      query = query.eq("document_number", "72961954");
+    } else if (patientId === "pat-camila-rossi") {
+      query = query.eq("document_number", "74829105");
+    } else if (patientId === "pat-valeria-alarcon") {
+      query = query.eq("document_number", "71948263");
+    } else {
+      query = query.eq("id", patientId);
+    }
+
+    const { error } = await query;
     if (error) {
       console.warn("Aviso delete paciente Supabase:", error.message);
       return false;
@@ -143,6 +196,174 @@ export async function syncColposcopyToSupabase(report: ColposcopyReport): Promis
 
     if (error) {
       console.warn("Aviso sync colposcopía Supabase:", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncPrescriptionToSupabase(rec: MedicalPrescription): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+
+    const patientUuid = getPatientUuid(rec.patientId);
+    const recUuid = ensureUuid(rec.id);
+
+    const { error } = await supabase.from("medical_prescriptions").upsert(
+      {
+        id: recUuid,
+        patient_id: patientUuid,
+        doctor_id: rec.doctorId,
+        doctor_name: rec.doctorName,
+        doctor_cmp: rec.doctorCmp,
+        doctor_rne: rec.doctorRne || null,
+        prescription_date: rec.prescriptionDate,
+        diagnosis: rec.diagnosis,
+        cie10_code: rec.cie10Code || null,
+        items: rec.items,
+        general_indications: rec.generalIndications || null,
+        next_appointment_date: rec.nextAppointmentDate || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" }
+    );
+
+    if (error) {
+      console.warn("Aviso sync receta Supabase:", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function deletePrescriptionFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("medical_prescriptions").delete().eq("id", targetId);
+    if (error) {
+      console.warn("Aviso delete receta Supabase:", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncLabOrderToSupabase(order: LabOrder): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+
+    const patientUuid = getPatientUuid(order.patientId);
+    const orderUuid = ensureUuid(order.id);
+
+    const { error } = await supabase.from("lab_orders").upsert(
+      {
+        id: orderUuid,
+        patient_id: patientUuid,
+        doctor_id: order.doctorId,
+        doctor_name: order.doctorName,
+        doctor_cmp: order.doctorCmp,
+        doctor_rne: order.doctorRne || null,
+        order_date: order.orderDate,
+        diagnosis: order.diagnosis,
+        cie10_code: order.cie10Code || null,
+        urgency: order.urgency,
+        items: order.items,
+        custom_tests: order.customTests || null,
+        patient_instructions: order.patientInstructions || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" }
+    );
+
+    if (error) {
+      console.warn("Aviso sync orden laboratorio Supabase:", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteLabOrderFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("lab_orders").delete().eq("id", targetId);
+    if (error) {
+      console.warn("Aviso delete lab order Supabase:", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncPrenatalCardToSupabase(card: PrenatalCard): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+
+    const patientUuid = getPatientUuid(card.patientId);
+    const cardUuid = ensureUuid(card.id);
+
+    const { error } = await supabase.from("prenatal_cards").upsert(
+      {
+        id: cardUuid,
+        patient_id: patientUuid,
+        clinic_establishment: card.clinicEstablishment,
+        attending_doctor_id: card.attendingDoctorId,
+        attending_doctor_name: card.attendingDoctorName,
+        baseline: card.baseline,
+        visits: card.visits,
+        maternal_pathologies: card.maternalPathologies,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" }
+    );
+
+    if (error) {
+      console.warn("Aviso sync carnet prenatal Supabase:", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function deletePrenatalCardFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("prenatal_cards").delete().eq("id", targetId);
+    if (error) {
+      console.warn("Aviso delete carnet prenatal Supabase:", error.message);
       return false;
     }
     return true;

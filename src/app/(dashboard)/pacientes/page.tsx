@@ -14,6 +14,7 @@ import {
   MapPin,
   Calendar,
   Sparkles,
+  RotateCcw,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { useMedicalStore } from "@/store/useMedicalStore";
@@ -25,7 +26,36 @@ export default function PacientesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
-  const { patients, deletePatient } = useMedicalStore();
+  const { patients, deletePatient, resetToSeedData } = useMedicalStore();
+
+  const handleResetDemo = () => {
+    Swal.fire({
+      title: "¿Restablecer casos de prueba?",
+      html: `
+        <div class="text-left text-xs space-y-1">
+          <p>Se restaurarán las <strong>3 historias clínicas de prueba</strong> (Stephany Herrera, Camila Rossi y Valeria Alarcón) con sus colposcopías, ecografías, recetas, órdenes y carnet prenatal.</p>
+        </div>
+      `,
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#0A4D68",
+      cancelButtonColor: "#64748B",
+      confirmButtonText: "Sí, restablecer casos",
+      cancelButtonText: "Cancelar",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        resetToSeedData();
+        Swal.fire({
+          icon: "success",
+          title: "Datos Restablecidos",
+          text: "Los 3 casos clínicos de prueba han sido recargados exitosamente.",
+          confirmButtonColor: "#0A4D68",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
 
   const filtered = patients.filter((p) => {
     const q = search.toLowerCase().trim();
@@ -55,7 +85,7 @@ export default function PacientesPage() {
       html: `
         <div class="text-left text-xs space-y-1">
           <p>¿Está seguro de eliminar del sistema a <strong>${p.lastName}, ${p.firstName}</strong> (DNI: ${p.dni})?</p>
-          <p class="text-red-600 font-semibold mt-2">Esta acción borrará también sus antecedentes, informes colposcópicos y chequeos asociados.</p>
+          <p class="text-red-600 font-semibold mt-2">Esta acción eliminará de forma permanente todos sus antecedentes, colposcopías, ecografías, recetas médicas, órdenes de laboratorio y carnet prenatal.</p>
         </div>
       `,
       icon: "warning",
@@ -96,13 +126,24 @@ export default function PacientesPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4 text-secondary" />
-          <span>+ Registrar Nueva Paciente</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={handleResetDemo}
+            className="px-3.5 py-2.5 rounded-xl border border-border bg-surface hover:bg-slate-100 text-slate-700 text-xs font-semibold shadow-2xs transition-colors flex items-center gap-1.5"
+            title="Recargar los 3 casos clínicos de prueba completos"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-primary" />
+            <span className="hidden sm:inline">Restablecer 3 Demos</span>
+          </button>
+
+          <button
+            onClick={handleOpenCreate}
+            className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2"
+          >
+            <Plus className="w-4 h-4 text-secondary" />
+            <span>+ Registrar Nueva Paciente</span>
+          </button>
+        </div>
       </div>
 
       {/* Buscador de Pacientes */}

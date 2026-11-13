@@ -201,6 +201,23 @@
 
 ---
 
+### [x] 7.6 Banco de Datos Clínicos de Demostración & Persistencia Multicapa (Completado & Probado)
+- [x] **7.6.1.** Configuración de 3 Pacientes Arquetípicas Demo con Casos Clínicos Reales Completos:
+  1. **María Stephany Herrera Rojas (DNI 72961954, 28 años):** Chequeo ginecológico anual preventivo, Colposcopía con ectopia periorificial y ZT Tipo 1 (sin biopsia), Ecografía mamaria con quiste benigno BI-RADS 2, Receta de óvulos de Ginedazol + Naproxeno, Orden de laboratorio con CA-125 y PAP ThinPrep, y Carnet Prenatal de 2 atenciones incipientes.
+  2. **Camila Lucía Rossi Valdivia (DNI 74829105, 29 años):** Caso Obstétrico Especializado. Gestante de 18 semanas, Carnet Prenatal MINSA/CLAP completo con 3 atenciones prenatales sucesivas (semanas 8, 13 y 18 con evolución de peso materno, PA, altura uterina de 16 cm, FCF 146 lpm, situación Longitudinal, presentación Cefálica, posición Izquierda, Proteinuria/Edema negativos), Receta prenatal de Sulfato Ferroso 300mg + Ácido Fólico 400mcg y Carbonato de Calcio 500mg con Vitamina D3, y Orden de Laboratorio Prenatal de 2do Trimestre (TTG 75g 2h, Hemograma, EGO con Urocultivo, Proteinuria de 24h, VDRL y VIH).
+  3. **Valeria Sofía Alarcón Benavides (DNI 71948263, 27 años):** Caso Ginecológico de Complejidad / Endometriosis & Displasia Cervical. Paciente con dismenorrea severa EVA 8/10 y dispareunia; Colposcopía IFCPC 2011 con biopsia cervical Tischler tomada en reloj a horas 12:00 y 6:00 (mosaico y punteado fino Grado 1 / LIE-BG NIC 1); Chequeo ecográfico con Endometrioma ovárico izquierdo de 32x28 mm en vidrio esmerilado; Receta de Dienogest 2mg (Visannette) x 3 meses continuos + Naproxeno 550mg condicional; y Orden de Laboratorio con CA-125, CA 19-9, PCR-us, Panel VPH 23 Genotipos PCR y estudio histopatológico de biopsia cervical.
+- [x] **7.6.2.** Persistencia de Datos Híbrida y Segura:
+  - **Local-First Reactivo:** Motor Zustand persistido en `localStorage` con llave `cendo-storage` versionado (`version: 2`) con función `migrate` que hidrata automáticamente las nuevas historias clínicas sin requerir borrado de caché del navegador.
+  - **Supabase Cloud Sync:** Sincronización en segundo plano con base de datos PostgreSQL en la nube ante conectividad disponible con patrón resiliente *offline-first*.
+- [x] **7.6.3.** Borrado Seguro en Cascada (Zero-Orphan Cascade Deletion):
+  - La función `deletePatient(id)` fue auditada y blindada para purgar en un solo clic atómico todas las dependencias de la paciente: antecedentes (`backgrounds`), colposcopías (`colposcopyReports`), chequeos ecográficos (`clinicalCheckups`), recetas médicas (`prescriptions`), órdenes de laboratorio (`labOrders`) y carnet prenatal (`prenatalCards`), además de sincronizar la baja en Supabase.
+  - Se incorporó un botón de autoservicio `"Restablecer 3 Demos"` en el directorio `/pacientes` para permitir al evaluador o al Dr. Patrick borrar historias durante las pruebas y recargarlas instantáneamente tantas veces como sea necesario.
+- [x] **🧪 QA 7.6 (Prueba de Compilación y Tipos):**
+  - `npx tsc --noEmit` exit code 0.
+  - `npm run build` exit code 0 (13/13 rutas estáticas/dinámicas compiladas exitosamente).
+
+---
+
 ## 📅 PRÓXIMA ETAPA: ETAPA B (Nuevos Módulos de Informes Clínicos Especializados)
 - **WP-B.1:** Módulo Independiente de Informes de Ecografía Especializada (Mama Bilateral, Transvaginal, Pélvica, Doppler obstétrico) con cálculo de BI-RADS / IOTA y plantillas en 1 clic.
 - **WP-B.2:** Módulo de Informes de Procedimientos Ginecológicos Menores & Quirúrgicos (Biopsia de cérvix/endometrio, Cono LEEP, Polipectomía, Histeroscopía de consultorio).

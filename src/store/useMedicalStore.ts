@@ -20,6 +20,12 @@ import {
   deletePatientFromSupabase,
   syncBackgroundToSupabase,
   syncColposcopyToSupabase,
+  syncPrescriptionToSupabase,
+  deletePrescriptionFromSupabase,
+  syncLabOrderToSupabase,
+  deleteLabOrderFromSupabase,
+  syncPrenatalCardToSupabase,
+  deletePrenatalCardFromSupabase,
 } from "@/lib/supabaseSync";
 
 // Lista Inicial de Médicos y Especialistas CENDO
@@ -105,7 +111,7 @@ export const INITIAL_DOCTORS: DoctorProfile[] = [
 // Perfil Activo Inicial: Dr. Patrick José Jacinto Gomero (Director Médico)
 export const INITIAL_DOCTOR: DoctorProfile = INITIAL_DOCTORS[0];
 
-// Paciente Semilla Real: María Stephany Herrera Rojas
+// Pacientes Semilla de Demostración Clínica CENDO
 export const INITIAL_PATIENTS: Patient[] = [
   {
     id: "pat-stephany-herrera",
@@ -122,9 +128,39 @@ export const INITIAL_PATIENTS: Patient[] = [
     createdAt: "2026-11-01T10:00:00Z",
     updatedAt: "2026-11-02T15:30:00Z",
   },
+  {
+    id: "pat-camila-rossi",
+    dni: "74829105",
+    firstName: "CAMILA LUCÍA",
+    lastName: "ROSSI VALDIVIA",
+    birthDate: "2000-05-14",
+    age: 26,
+    phone: "987 654 321",
+    email: "camila.rossi@gmail.com",
+    address: "Av. 28 de Julio 884, Dpto 302, Miraflores",
+    civilStatus: "Conviviente",
+    occupation: "Arquitecta de Interiores",
+    createdAt: "2026-11-05T09:00:00Z",
+    updatedAt: "2026-11-11T12:00:00Z",
+  },
+  {
+    id: "pat-valeria-alarcon",
+    dni: "71948263",
+    firstName: "VALERIA SOFÍA",
+    lastName: "ALARCÓN BENAVIDES",
+    birthDate: "1995-08-20",
+    age: 31,
+    phone: "976 543 210",
+    email: "valeria.alarcon@outlook.com",
+    address: "Av. Angamos Oeste 1120, Dpto 401, Miraflores",
+    civilStatus: "Soltera",
+    occupation: "Ingeniera Industrial",
+    createdAt: "2026-11-06T14:30:00Z",
+    updatedAt: "2026-11-08T16:00:00Z",
+  },
 ];
 
-// Antecedentes Gineco-Obstétricos de la Paciente Semilla
+// Antecedentes Gineco-Obstétricos de las Pacientes Semilla
 export const INITIAL_BACKGROUNDS: Record<string, PatientBackground> = {
   "pat-stephany-herrera": {
     id: "bg-stephany-herrera",
@@ -142,6 +178,40 @@ export const INITIAL_BACKGROUNDS: Record<string, PatientBackground> = {
     familyHistory: "Madre con antecedente de miomatosis uterina operada",
     notes: "Paciente acude a chequeo ginecológico y evaluación por resultado PAP.",
     updatedAt: "2026-11-02T15:30:00Z",
+  },
+  "pat-camila-rossi": {
+    id: "bg-camila-rossi",
+    patientId: "pat-camila-rossi",
+    menarche: 13,
+    sexualDebutAge: 19,
+    sexualPartnersCount: 1,
+    obstetricFormula: "G1 P0000",
+    contraceptiveMethod: "Ninguno (Embarazo planificado)",
+    lastMenstrualPeriod: "2026-07-08",
+    papHistory: "Negativo para lesión intraepitelial (2025)",
+    vphTestHistory: "No realizado",
+    medicalAllergies: "Niega alergias medicamentosas",
+    surgeriesHistory: "Niega cirugías previas",
+    familyHistory: "Sin antecedentes familiares de diabetes gestacional ni preeclampsia",
+    notes: "Gestante primigesta de 18 semanas que cursa embarazo normoevolutivo.",
+    updatedAt: "2026-11-11T12:00:00Z",
+  },
+  "pat-valeria-alarcon": {
+    id: "bg-valeria-alarcon",
+    patientId: "pat-valeria-alarcon",
+    menarche: 11,
+    sexualDebutAge: 17,
+    sexualPartnersCount: 3,
+    obstetricFormula: "G0 P0000",
+    contraceptiveMethod: "Preservativo de barrera",
+    lastMenstrualPeriod: "2026-10-18",
+    papHistory: "LIE-BG (Lesión Intraepitelial Escamosa de Bajo Grado / NIC 1)",
+    vphTestHistory: "Positivo para genotipos de alto riesgo",
+    medicalAllergies: "Alergia confirmada a la Penicilina",
+    surgeriesHistory: "Niega antecedentes quirúrgicos",
+    familyHistory: "Hermana menor con antecedente de endometriosis pélvica laparoscópica",
+    notes: "Paciente con dismenorrea severa EVA 8/10, dispareunia profunda y citología cervical anormal.",
+    updatedAt: "2026-11-08T16:00:00Z",
   },
 };
 
@@ -197,6 +267,61 @@ export const INITIAL_COLPOSCOPY: ColposcopyReport[] = [
     doctorName: "Dr. Patrick José Jacinto Gomero (CMP 61693 / RNE 38657)",
     createdAt: "2026-11-02T11:30:00Z",
   },
+  {
+    id: "colpo-valeria-01",
+    patientId: "pat-valeria-alarcon",
+    reportDate: "2026-11-08",
+    adequateColposcopy: true,
+    squamocolumnarJunctionVisible: "Visible",
+    transformationZoneType: "Tipo 1",
+    matureSquamousEpithelium: true,
+    ectopy: true,
+    nabothCyst: false,
+    cryptOpenings: true,
+    deciduosis: false,
+    thinAcetowhiteEpithelium: true,
+    denseAcetowhiteEpithelium: false,
+    irregularBorder: true,
+    fineMosaic: true,
+    coarseMosaic: false,
+    finePunctation: true,
+    coarsePunctation: false,
+    sharpBorders: false,
+    atypicalVessels: false,
+    leukoplakia: false,
+    schillerTest: "Positivo (Yodonegativo en horas 12 y 6)",
+    cervicalBiopsyTaken: true,
+    biopsyClockHours: ["12", "6"],
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=500&auto=format&fit=crop",
+        caption: "Cérvix con SSF: Ectropion periorificial con epitelio columnar evertido",
+        timestamp: "2026-11-08 14:45",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?q=80&w=500&auto=format&fit=crop",
+        caption: "Ácido acético al 5%: Acetoblanco tenue con punteado fino en hora 12",
+        timestamp: "2026-11-08 14:48",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?q=80&w=500&auto=format&fit=crop",
+        caption: "Mosaico fino focal en labio posterior a horas 6",
+        timestamp: "2026-11-08 14:51",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=500&auto=format&fit=crop",
+        caption: "Test de Lugol: Captación heterogénea con yodonegatividad en horas 12 y 6",
+        timestamp: "2026-11-08 14:54",
+      },
+    ],
+    diagnosis:
+      "1. Colposcopía adecuada. 2. ZT Tipo 1. 3. Hallazgos colposcópicos anormales Grado 1 (menor): Mosaico fino y punteado fino a horas 12 y 6 compatible con LIE-BG (NIC 1).",
+    planRecommendations:
+      "Biopsia de cérvix dirigida tomada a horas 12:00 y 6:00 enviada a patología. Se indica control citológico en 6 meses y pauta hormonal para endometriosis asociada.",
+    cie10Code: "N87.0",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    createdAt: "2026-11-08T15:00:00Z",
+  },
 ];
 
 // Informe de Chequeo y Ecografías Semilla Real
@@ -223,6 +348,28 @@ export const INITIAL_CHECKUPS: ClinicalCheckup[] = [
       "1. Continuar con implante subdérmico.\n2. Ecografía mamaria de control en 1 año.\n3. Repetir Papanicolaou en 6 meses.",
     createdAt: "2026-11-02T12:00:00Z",
   },
+  {
+    id: "chk-valeria-01",
+    patientId: "pat-valeria-alarcon",
+    checkupDate: "2026-11-08",
+    reasonForConsultation: "Dismenorrea severa invalidante (EVA 8/10), dispareunia profunda y evaluación pélvica",
+    breastUltrasoundFindings:
+      "Mamas de ecogenicidad fibrogranular normal sin lesiones sólidas ni microcalcificaciones sospechosas. Regiones axilares libres.",
+    breastUltrasoundBirads: "BI-RADS 1 (Negativo a malignidad)",
+    breastLesionMeasurements: "Sin lesiones focales",
+    transvaginalUltrasoundFindings:
+      "Útero en retroversoflexión leve de 74 x 42 x 38 mm. Endometrio regular de 7.5 mm. En ovario izquierdo se visualiza imagen quística unilocular de 32 x 28 mm con ecos internos en vidrio esmerilado homogéneo compatible con endometrioma ovárico.",
+    uterusMeasurements: "74 x 42 x 38 mm (Vol: 62 cc)",
+    endometriumThicknessMm: 7.5,
+    ovariesFindings: "Ovario derecho normal (25 x 18 mm). Ovario izquierdo aumentado de volumen con endometrioma de 32 mm.",
+    papResult: "LIE-BG (Lesión Intraepitelial Escamosa de Bajo Grado)",
+    vphResult: "Positivo para Virus del Papiloma Humano",
+    conclusions:
+      "1. Endometriosis ovárica izquierda (Endometrioma de 32 mm). 2. Dismenorrea secundaria severa. 3. Displasia cervical leve (LIE-BG).",
+    medicalPrescription:
+      "1. Dienogest 2mg diario continuo x 3 meses.\n2. Naproxeno sódico 550mg condicional al dolor.\n3. Control ecográfico transvaginal en 90 días.",
+    createdAt: "2026-11-08T15:30:00Z",
+  },
 ];
 
 // Recetas Médicas Semilla Real
@@ -231,7 +378,7 @@ export const INITIAL_PRESCRIPTIONS: MedicalPrescription[] = [
     id: "rec-stephany-01",
     patientId: "pat-stephany-herrera",
     doctorId: "doc-patrick-jacinto",
-    doctorName: "Patrick José Jacinto Gomero",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
     doctorCmp: "61693",
     doctorRne: "38657",
     prescriptionDate: "2026-11-02",
@@ -268,6 +415,90 @@ export const INITIAL_PRESCRIPTIONS: MedicalPrescription[] = [
     nextAppointmentDate: "2026-11-16",
     createdAt: "2026-11-02T12:15:00Z",
     updatedAt: "2026-11-02T12:15:00Z",
+  },
+  {
+    id: "rec-camila-01",
+    patientId: "pat-camila-rossi",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    prescriptionDate: "2026-11-11",
+    diagnosis: "Supervisión de embarazo normal de 18 semanas - Suplementación prenatal",
+    cie10Code: "Z34.8",
+    items: [
+      {
+        id: "item-cam-01",
+        medicationName: "Sulfato Ferroso 300mg + Ácido Fólico 400mcg (Hierro Elemental 60mg)",
+        presentation: "Caja x 90 tabletas",
+        route: "Vía Oral",
+        dosage: "1 tableta",
+        frequency: "Cada 24 horas en ayunas",
+        duration: "Durante todo el segundo y tercer trimestre (90 días)",
+        instructions:
+          "Tomar 30 minutos antes del desayuno con jugo de naranja o limonada rica en Vitamina C. No ingerir simultáneamente con leche, té o café.",
+        quantity: "1 caja x 90 tabletas",
+      },
+      {
+        id: "item-cam-02",
+        medicationName: "Carbonato de Calcio 500mg + Colecalciferol 400 UI (Vitamina D3)",
+        presentation: "Frasco x 60 tabletas masticables",
+        route: "Vía Oral",
+        dosage: "1 tableta masticable",
+        frequency: "Cada 12 horas con las comidas principales",
+        duration: "Por 60 días continuos",
+        instructions:
+          "Masticar bien después del almuerzo y la cena. Separar al menos 2 horas de la toma de hierro para evitar competencia en la absorción.",
+        quantity: "1 frasco x 60 tabletas",
+      },
+    ],
+    generalIndications:
+      "Ingesta hídrica mínima de 2.5 litros de agua al día. Dieta balanceada rica en fibra, legumbres y vegetales verdes. Control de movimientos fetales diarios.",
+    nextAppointmentDate: "2026-12-09",
+    createdAt: "2026-11-11T12:30:00Z",
+    updatedAt: "2026-11-11T12:30:00Z",
+  },
+  {
+    id: "rec-valeria-01",
+    patientId: "pat-valeria-alarcon",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    prescriptionDate: "2026-11-08",
+    diagnosis: "Endometrioma ovárico izquierdo y dismenorrea secundaria severa",
+    cie10Code: "N80.1",
+    items: [
+      {
+        id: "item-val-01",
+        medicationName: "Dienogest 2mg (Visannette / Endometriox)",
+        presentation: "Caja x 28 comprimidos recubiertos",
+        route: "Vía Oral",
+        dosage: "1 comprimido (2 mg)",
+        frequency: "Cada 24 horas a la misma hora todos los días",
+        duration: "Por 3 meses continuos sin interrupción",
+        instructions:
+          "Tomar siempre al acostarse con un vaso con agua. Es fundamental la toma continua ininterrumpida aun en presencia de manchado (spotting).",
+        quantity: "3 cajas x 28 comprimidos",
+      },
+      {
+        id: "item-val-02",
+        medicationName: "Naproxeno Sódico 550mg (Flanax 550)",
+        presentation: "Caja x 20 tabletas",
+        route: "Vía Oral",
+        dosage: "1 tableta (550 mg)",
+        frequency: "Cada 8 a 12 horas condicional al dolor pélvico",
+        duration: "Por 3 a 5 días durante los picos de dolor",
+        instructions:
+          "Tomar siempre después de los alimentos para protección gástrica.",
+        quantity: "1 caja x 20 tabletas",
+      },
+    ],
+    generalIndications:
+      "Evitar alimentos ultraprocesados e inflamatorios (azúcares refinados, carnes rojas en exceso). Realizar actividad física aeróbica de bajo impacto 30 min al día.",
+    nextAppointmentDate: "2027-02-08",
+    createdAt: "2026-11-08T15:45:00Z",
+    updatedAt: "2026-11-08T15:45:00Z",
   },
 ];
 
@@ -326,6 +557,114 @@ export const INITIAL_LAB_ORDERS: LabOrder[] = [
       "Ayuno de 8 a 10 horas. No tener relaciones sexuales ni colocarse óvulos, cremas ni duchas vaginales 48 horas antes de la toma de muestra. Entregar primera orina de la mañana.",
     createdAt: "2026-11-02T12:20:00Z",
     updatedAt: "2026-11-02T12:20:00Z",
+  },
+  {
+    id: "lab-camila-01",
+    patientId: "pat-camila-rossi",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    orderDate: "2026-11-11",
+    diagnosis: "Control prenatal II trimestre (18 sem) - Tamizaje diabetes gestacional y bacteriuria",
+    cie10Code: "Z34.8",
+    urgency: "Rutina",
+    items: [
+      {
+        id: "lab-cam-item-1",
+        category: "Prenatal & Gestación",
+        testName: "Test de Tolerancia Oral a la Glucosa (TTG 75g - 2 Horas)",
+        sampleType: "Sangre venosa en ayunas + 2h post-carga",
+        notes: "Ayuno de 8 a 10 horas. Traer solución de 75g de glucosa anhidra.",
+      },
+      {
+        id: "lab-cam-item-2",
+        category: "Hematología & Bioquímica",
+        testName: "Hemograma Completo + Recuento Plaquetario + Ferritina Sérica",
+        sampleType: "Sangre con EDTA",
+        notes: "Evaluación de anemia fisiológica de la gestación",
+      },
+      {
+        id: "lab-cam-item-3",
+        category: "Orina & Función Renal",
+        testName: "Examen Completo de Orina (EGO) + Urocultivo con Antibiograma",
+        sampleType: "Orina chorro medio",
+        notes: "Higiene genital previa con agua estéril sin antisépticos",
+      },
+      {
+        id: "lab-cam-item-4",
+        category: "Prenatal & Gestación",
+        testName: "Proteinuria en Orina de 24 Horas",
+        sampleType: "Orina de 24 horas",
+        notes: "Descarte de preeclampsia y nefropatía gestacional",
+      },
+      {
+        id: "lab-cam-item-5",
+        category: "Infeccioso & Microbiología",
+        testName: "Serología VDRL / RPR Cuantitativo + ELISA VIH 4ta Generación",
+        sampleType: "Suero sanguíneo",
+        notes: "Segundo control serológico del embarazo según norma técnica MINSA",
+      },
+    ],
+    customTests: "Perfil tiroideo gestacional (TSH sensible + T4 Libre)",
+    patientInstructions:
+      "Acudir con 8 a 10 horas de ayuno estricto a las 7:30 AM. La prueba de tolerancia a la glucosa requiere permanencia en reposo en el laboratorio durante 2 horas. Recolectar la orina de 24 horas en recipiente estéril.",
+    createdAt: "2026-11-11T12:40:00Z",
+    updatedAt: "2026-11-11T12:40:00Z",
+  },
+  {
+    id: "lab-valeria-01",
+    patientId: "pat-valeria-alarcon",
+    doctorId: "doc-patrick-jacinto",
+    doctorName: "Dr. Patrick José Jacinto Gomero",
+    doctorCmp: "61693",
+    doctorRne: "38657",
+    orderDate: "2026-11-08",
+    diagnosis: "Endometrioma ovárico izquierdo de 32mm y citología cervical anormal LIE-BG",
+    cie10Code: "N80.1",
+    urgency: "Rutina",
+    items: [
+      {
+        id: "lab-val-item-1",
+        category: "Ginecología & Marcadores",
+        testName: "CA-125 (Marcador Tumoral Ovárico y Marcador de Endometriosis)",
+        sampleType: "Suero sanguíneo",
+        notes: "Tomar preferentemente fuera de los días de sangrado menstrual",
+      },
+      {
+        id: "lab-val-item-2",
+        category: "Ginecología & Marcadores",
+        testName: "Marcador Tumoral CA 19-9",
+        sampleType: "Suero sanguíneo",
+        notes: "Ayuno de 8 horas",
+      },
+      {
+        id: "lab-val-item-3",
+        category: "Hematología & Bioquímica",
+        testName: "Proteína C Reactiva Ultrasensible (PCR-us) + Perfil Lipídico",
+        sampleType: "Suero sanguíneo",
+        notes: "Evaluación de inflamación sistémica por endometriosis",
+      },
+      {
+        id: "lab-val-item-4",
+        category: "Infeccioso & Microbiología",
+        testName: "Panel Tipificación VPH 23 Genotipos (PCR en tiempo real)",
+        sampleType: "Cepillado endocervical",
+        notes: "Abstinencia sexual 48 horas previas",
+      },
+      {
+        id: "lab-val-item-5",
+        category: "Ginecología & Marcadores",
+        testName: "Estudio Histopatológico de Biopsia Cervical (2 fragmentos: horas 12 y 6)",
+        sampleType: "Fragmentos de tejido en formol al 10%",
+        notes: "Muestra obtenida en colposcopía. Descarte de NIC 1 vs NIC 2/3.",
+      },
+    ],
+    customTests: "Hormona Antimülleriana (AMH) para evaluación de reserva ovárica",
+    patientInstructions:
+      "Ayuno de 8 a 10 horas. Abstinencia sexual estricta por 48 horas. Entregar los 2 frascos de biopsia debidamente rotulados al servicio de patología.",
+    createdAt: "2026-11-08T15:50:00Z",
+    updatedAt: "2026-11-08T15:50:00Z",
   },
 ];
 
@@ -459,6 +798,154 @@ export const INITIAL_PRENATAL_CARDS: PrenatalCard[] = [
     ],
     createdAt: "2026-10-24T10:30:00Z",
     updatedAt: "2026-11-12T11:15:00Z",
+  },
+  {
+    id: "pnc-camila-01",
+    patientId: "pat-camila-rossi",
+    clinicEstablishment: "CENDO - Centro de Endometriosis & Ginecología Especializada",
+    attendingDoctorId: "doc-patrick-jacinto",
+    attendingDoctorName: "Dr. Patrick José Jacinto Gomero",
+    baseline: {
+      insuranceType: "PRIVADO",
+      insuranceCode: "RIMAC-74829105",
+      educationLevel: "Superior Univ",
+      civilStatus: "Casada",
+      fatherName: "Mateo Fernando Benavides Castro",
+      fatherDni: "42109845",
+      gestas: 1,
+      abortos: 0,
+      partosVaginales: 0,
+      cesareas: 0,
+      nacidosVivos: 0,
+      nacidosMuertos: 0,
+      viven: 0,
+      rnMayorPesoGramos: 0,
+      multipleHistory: false,
+      pretermHistory: false,
+      familyHistory: [
+        "Madre hipertensa controlada",
+      ],
+      personalHistory: [
+        "Niega diabetes mellitus, hipertensión o asma",
+        "Alergia a AINEs leve (eritema cutáneo con ketorolaco)",
+      ],
+      previousVaccines: {
+        rubella: true,
+        hepatitisB: true,
+        hpv: true,
+        yellowFever: false,
+      },
+      usualWeightKg: 58.0,
+      heightCm: 165,
+      bloodGroup: "O",
+      rhFactor: "Rh (+)",
+      smokerCigarettesDay: 0,
+      drugsUse: false,
+      fum: "2026-07-08",
+      fumDoubt: false,
+      ultrasoundGestationalAgeWeeks: 12,
+      ultrasoundDate: "2026-09-30",
+      fpp: "2027-04-15",
+      clinicalExam: "Normal",
+      breastsExam: "Normal",
+      cervixExam: "Normal",
+      pelvisExam: "Normal",
+      dentalExam: "Normal",
+      hemoglobin1: 12.4,
+      bloodGlucose1: 82,
+      vdrlRpr1: "No reactivo",
+      hivScreening1: "Negativo",
+      hepatitisBScreening: "Negativo",
+      completeUrineExam: "Normal",
+      urineCulture: "Negativo",
+      papTestResult: "Normal",
+      colposcopyResult: "Normal",
+    },
+    visits: [
+      {
+        visitNumber: 1,
+        visitDate: "2026-09-02",
+        visitTime: "09:30",
+        gestationalAgeWeeks: 8,
+        gestationalAgeDays: 0,
+        maternalWeightKg: 58.2,
+        temperature: 36.6,
+        bloodPressure: "105/65",
+        maternalPulse: 72,
+        uterineHeightCm: 0,
+        fetusSituation: "NA",
+        fetusPresentation: "NA",
+        fetusPosition: "NA",
+        fetalHeartRate: 0,
+        fetalMovements: "NA",
+        proteinuria: "-",
+        edema: "SE",
+        tendonReflex: "+",
+        ironFolicAcidGiven: false,
+        calciumGiven: false,
+        counselingGiven: "NUT / ITS / PF",
+        nextAppointmentDate: "2026-10-07",
+        attendingDoctorName: "Dr. Patrick José Jacinto Gomero",
+        notes: "Primer control prenatal. Gestación incipiente de 8 sem por FUM. Se inicia Ácido Fólico 0.5mg VO diario.",
+      },
+      {
+        visitNumber: 2,
+        visitDate: "2026-10-07",
+        visitTime: "10:15",
+        gestationalAgeWeeks: 13,
+        gestationalAgeDays: 0,
+        maternalWeightKg: 59.8,
+        temperature: 36.5,
+        bloodPressure: "110/70",
+        maternalPulse: 74,
+        uterineHeightCm: 10,
+        fetusSituation: "NA",
+        fetusPresentation: "NA",
+        fetusPosition: "NA",
+        fetalHeartRate: 152,
+        fetalMovements: "NA",
+        proteinuria: "-",
+        edema: "SE",
+        tendonReflex: "+",
+        ironFolicAcidGiven: true,
+        calciumGiven: true,
+        counselingGiven: "NUT / S. ALARMA",
+        ultrasoundGestationalAge: "13 sem 1 d",
+        nextAppointmentDate: "2026-11-11",
+        attendingDoctorName: "Dr. Patrick José Jacinto Gomero",
+        notes: "Ecografía genética (11-13.6 sem) con translucencia nucal normal y hueso nasal presente. Se indica suplementación con Fe + Ca.",
+      },
+      {
+        visitNumber: 3,
+        visitDate: "2026-11-11",
+        visitTime: "11:00",
+        gestationalAgeWeeks: 18,
+        gestationalAgeDays: 0,
+        maternalWeightKg: 61.5,
+        temperature: 36.7,
+        bloodPressure: "112/72",
+        maternalPulse: 78,
+        uterineHeightCm: 16,
+        fetusSituation: "L",
+        fetusPresentation: "C",
+        fetusPosition: "I",
+        fetalHeartRate: 146,
+        fetalMovements: "+",
+        proteinuria: "-",
+        edema: "SE",
+        tendonReflex: "+",
+        ironFolicAcidGiven: true,
+        calciumGiven: true,
+        counselingGiven: "NUT / PSICOPROF",
+        ultrasoundGestationalAge: "18 sem 0 d",
+        nextAppointmentDate: "2026-12-09",
+        attendingDoctorName: "Dr. Patrick José Jacinto Gomero",
+        notes: "Embarazo normoevolutivo de 18 semanas. Movimientos fetales percibidos por la madre. Se solicita perfil de laboratorio prenatal de 2do trimestre (TTG 75g) y ecografía morfológica.",
+      },
+    ],
+    maternalPathologies: [],
+    createdAt: "2026-09-02T09:30:00Z",
+    updatedAt: "2026-11-11T11:00:00Z",
   },
 ];
 
@@ -966,6 +1453,8 @@ export const useMedicalStore = create<MedicalStoreState>()(
         }
       },
       deletePatient: (id) => {
+        const targetPatient = get().patients.find((p) => p.id === id);
+        const targetDni = targetPatient?.dni;
         set((state) => {
           const nextBackgrounds = { ...state.backgrounds };
           delete nextBackgrounds[id];
@@ -974,9 +1463,12 @@ export const useMedicalStore = create<MedicalStoreState>()(
             backgrounds: nextBackgrounds,
             colposcopyReports: state.colposcopyReports.filter((r) => r.patientId !== id),
             clinicalCheckups: state.clinicalCheckups.filter((c) => c.patientId !== id),
+            prescriptions: state.prescriptions.filter((p) => p.patientId !== id),
+            labOrders: state.labOrders.filter((l) => l.patientId !== id),
+            prenatalCards: state.prenatalCards.filter((c) => c.patientId !== id),
           };
         });
-        deletePatientFromSupabase(id);
+        deletePatientFromSupabase(id, targetDni);
       },
       getPatientById: (id) => get().patients.find((p) => p.id === id),
       getPatientByDni: (dni) => get().patients.find((p) => p.dni === dni),
@@ -1141,19 +1633,27 @@ export const useMedicalStore = create<MedicalStoreState>()(
             prescriptions: [newPrescription, ...currentList],
           };
         });
+        syncPrescriptionToSupabase(newPrescription);
         return newPrescription;
       },
       updatePrescription: (id, updates) => {
+        let updated: MedicalPrescription | null = null;
         set((state) => ({
-          prescriptions: (state.prescriptions || []).map((p) =>
-            p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
-          ),
+          prescriptions: (state.prescriptions || []).map((p) => {
+            if (p.id === id) {
+              updated = { ...p, ...updates, updatedAt: new Date().toISOString() };
+              return updated;
+            }
+            return p;
+          }),
         }));
+        if (updated) syncPrescriptionToSupabase(updated);
       },
       deletePrescription: (id) => {
         set((state) => ({
           prescriptions: (state.prescriptions || []).filter((p) => p.id !== id),
         }));
+        deletePrescriptionFromSupabase(id);
       },
       getPrescriptionsByPatientId: (patientId) => {
         const list = get().prescriptions || [];
@@ -1177,19 +1677,27 @@ export const useMedicalStore = create<MedicalStoreState>()(
             labOrders: [newLabOrder, ...currentList],
           };
         });
+        syncLabOrderToSupabase(newLabOrder);
         return newLabOrder;
       },
       updateLabOrder: (id, updates) => {
+        let updated: LabOrder | null = null;
         set((state) => ({
-          labOrders: (state.labOrders || []).map((ord) =>
-            ord.id === id ? { ...ord, ...updates, updatedAt: new Date().toISOString() } : ord
-          ),
+          labOrders: (state.labOrders || []).map((ord) => {
+            if (ord.id === id) {
+              updated = { ...ord, ...updates, updatedAt: new Date().toISOString() };
+              return updated;
+            }
+            return ord;
+          }),
         }));
+        if (updated) syncLabOrderToSupabase(updated);
       },
       deleteLabOrder: (id) => {
         set((state) => ({
           labOrders: (state.labOrders || []).filter((ord) => ord.id !== id),
         }));
+        deleteLabOrderFromSupabase(id);
       },
       getLabOrdersByPatientId: (patientId) => {
         const list = get().labOrders || [];
@@ -1213,21 +1721,27 @@ export const useMedicalStore = create<MedicalStoreState>()(
             prenatalCards: [newCard, ...currentList],
           };
         });
+        syncPrenatalCardToSupabase(newCard);
         return newCard;
       },
       updatePrenatalCard: (id, updates) => {
+        let updated: PrenatalCard | null = null;
         set((state) => ({
-          prenatalCards: (state.prenatalCards || []).map((card) =>
-            card.id === id
-              ? { ...card, ...updates, updatedAt: new Date().toISOString() }
-              : card
-          ),
+          prenatalCards: (state.prenatalCards || []).map((card) => {
+            if (card.id === id) {
+              updated = { ...card, ...updates, updatedAt: new Date().toISOString() };
+              return updated;
+            }
+            return card;
+          }),
         }));
+        if (updated) syncPrenatalCardToSupabase(updated);
       },
       deletePrenatalCard: (id) => {
         set((state) => ({
           prenatalCards: (state.prenatalCards || []).filter((c) => c.id !== id),
         }));
+        deletePrenatalCardFromSupabase(id);
       },
       getPrenatalCardByPatientId: (patientId) => {
         const list = get().prenatalCards || [];
@@ -1295,6 +1809,55 @@ export const useMedicalStore = create<MedicalStoreState>()(
     }),
     {
       name: "cendo-storage",
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2) {
+          const state = persistedState || {};
+          const existingPatients = state.patients || [];
+          const existingIds = new Set(existingPatients.map((p: any) => p.id));
+          const newPatientsToAdd = INITIAL_PATIENTS.filter((p) => !existingIds.has(p.id));
+
+          return {
+            ...state,
+            doctorsList: state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS,
+            patients: [...existingPatients, ...newPatientsToAdd],
+            backgrounds: { ...INITIAL_BACKGROUNDS, ...(state.backgrounds || {}) },
+            colposcopyReports: [
+              ...(state.colposcopyReports || []),
+              ...INITIAL_COLPOSCOPY.filter(
+                (c) => !(state.colposcopyReports || []).some((ec: any) => ec.id === c.id)
+              ),
+            ],
+            clinicalCheckups: [
+              ...(state.clinicalCheckups || []),
+              ...INITIAL_CHECKUPS.filter(
+                (c) => !(state.clinicalCheckups || []).some((ec: any) => ec.id === c.id)
+              ),
+            ],
+            prescriptions: [
+              ...(state.prescriptions || []),
+              ...INITIAL_PRESCRIPTIONS.filter(
+                (p) => !(state.prescriptions || []).some((ep: any) => ep.id === p.id)
+              ),
+            ],
+            labOrders: [
+              ...(state.labOrders || []),
+              ...INITIAL_LAB_ORDERS.filter(
+                (l) => !(state.labOrders || []).some((el: any) => el.id === l.id)
+              ),
+            ],
+            prenatalCards: [
+              ...(state.prenatalCards || []),
+              ...INITIAL_PRENATAL_CARDS.filter(
+                (p) => !(state.prenatalCards || []).some((ep: any) => ep.id === p.id)
+              ),
+            ],
+            tariffItems: state.tariffItems && state.tariffItems.length > 0 ? state.tariffItems : INITIAL_TARIFF,
+            vademecumItems: state.vademecumItems && state.vademecumItems.length > 0 ? state.vademecumItems : INITIAL_VADEMECUM,
+          };
+        }
+        return persistedState;
+      },
       storage: createJSONStorage(() => localStorage),
     }
   )
