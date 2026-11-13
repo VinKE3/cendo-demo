@@ -533,6 +533,51 @@ export function PrenatalCardModal({
                         })}
                       </tr>
 
+                      {/* Pulso Materno & Temperatura */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50">Pulso (lpm) / T°</td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-l border-slate-100 font-mono">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-1 text-[11px]">
+                                  <input
+                                    type="number"
+                                    value={v.maternalPulse || ""}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].maternalPulse = parseInt(e.target.value, 10) || 0;
+                                      setVisitsList(updated);
+                                    }}
+                                    placeholder="76"
+                                    className="w-10 text-center border rounded py-0.5 text-xs"
+                                    title="Pulso materno (latidos por minuto)"
+                                  />
+                                  <span>/</span>
+                                  <input
+                                    type="number"
+                                    step="0.1"
+                                    value={v.temperature || ""}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].temperature = parseFloat(e.target.value) || 0;
+                                      setVisitsList(updated);
+                                    }}
+                                    placeholder="36.5"
+                                    className="w-11 text-center border rounded py-0.5 text-xs"
+                                    title="Temperatura corporal (°C)"
+                                  />
+                                  <span>°</span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
                       {/* Altura Uterina */}
                       <tr>
                         <td className="p-2.5 font-bold text-slate-700 bg-slate-50">Altura Uterina (cm)</td>
@@ -551,6 +596,68 @@ export function PrenatalCardModal({
                                   }}
                                   className="w-12 text-center border rounded py-0.5 text-xs"
                                 />
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Situación / Presentación / Posición (Sit / Pres / Pos) */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50">Sit / Pres / Pos</td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-1.5 text-center border-l border-slate-100">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-0.5 text-[10px] font-mono">
+                                  <select
+                                    value={v.fetusSituation}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].fetusSituation = e.target.value as any;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="px-1 py-0.5 border rounded text-[10px] bg-white font-bold"
+                                    title="Situación: L (Longitudinal), T (Transversa), NA"
+                                  >
+                                    <option value="NA">NA</option>
+                                    <option value="L">L</option>
+                                    <option value="T">T</option>
+                                  </select>
+                                  <span>/</span>
+                                  <select
+                                    value={v.fetusPresentation}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].fetusPresentation = e.target.value as any;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="px-1 py-0.5 border rounded text-[10px] bg-white font-bold"
+                                    title="Presentación: C (Cefálica), P (Podálica), NA"
+                                  >
+                                    <option value="NA">NA</option>
+                                    <option value="C">C</option>
+                                    <option value="P">P</option>
+                                  </select>
+                                  <span>/</span>
+                                  <select
+                                    value={v.fetusPosition}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].fetusPosition = e.target.value as any;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="px-1 py-0.5 border rounded text-[10px] bg-white font-bold"
+                                    title="Posición: I (Izquierda), D (Derecha), NA"
+                                  >
+                                    <option value="NA">NA</option>
+                                    <option value="I">I</option>
+                                    <option value="D">D</option>
+                                  </select>
+                                </div>
                               ) : (
                                 <span className="text-slate-300">—</span>
                               )}
@@ -591,13 +698,30 @@ export function PrenatalCardModal({
 
                       {/* Mov. Fetales & Proteinuria */}
                       <tr>
-                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50">Proteinuria / Edema</td>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50">Mov. Fetal / Proteinuria</td>
                         {Array.from({ length: 9 }).map((_, idx) => {
                           const v = visitsList[idx];
                           return (
                             <td key={idx} className="p-1.5 text-center border-l border-slate-100">
                               {v ? (
                                 <div className="flex items-center justify-center gap-1 text-[10px] font-mono">
+                                  <select
+                                    value={v.fetalMovements || "NA"}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].fetalMovements = e.target.value as any;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="px-1 py-0.5 border rounded text-[10px] font-bold bg-white text-slate-700 border-slate-200"
+                                    title="Movimientos Fetales: NA, +, ++, +++, SM (Sin Movimiento)"
+                                  >
+                                    <option value="NA">Mov: NA</option>
+                                    <option value="+">Mov: +</option>
+                                    <option value="++">Mov: ++</option>
+                                    <option value="+++">Mov: +++</option>
+                                    <option value="SM">Mov: SM</option>
+                                  </select>
+
                                   <select
                                     value={v.proteinuria}
                                     onChange={(e) => {
@@ -618,7 +742,24 @@ export function PrenatalCardModal({
                                     <option value="+++">Prot: +++</option>
                                     <option value="NSH">Prot: NSH</option>
                                   </select>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
 
+                      {/* Edema & Reflejos (ROT) */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50">Edema / Reflejos</td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-1.5 text-center border-l border-slate-100">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-1 text-[10px] font-mono">
                                   <select
                                     value={v.edema}
                                     onChange={(e) => {
@@ -631,12 +772,28 @@ export function PrenatalCardModal({
                                         ? "bg-amber-100 text-amber-800 border-amber-300"
                                         : "bg-white text-slate-700 border-slate-200"
                                     }`}
-                                    title="Edema (Examen físico)"
+                                    title="Edema (Examen físico: SE = Sin Edema, +, ++, +++)"
                                   >
-                                    <option value="SE">SE</option>
+                                    <option value="SE">Ed: SE</option>
                                     <option value="+">Ed: +</option>
                                     <option value="++">Ed: ++</option>
                                     <option value="+++">Ed: +++</option>
+                                  </select>
+
+                                  <select
+                                    value={v.tendonReflex || "+"}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].tendonReflex = e.target.value as any;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="px-1 py-0.5 border rounded text-[10px] font-bold bg-white text-slate-700 border-slate-200"
+                                    title="Reflejos osteotendinosos: +, ++, +++, 0 (Abolido)"
+                                  >
+                                    <option value="+">ROT: +</option>
+                                    <option value="++">ROT: ++</option>
+                                    <option value="+++">ROT: +++</option>
+                                    <option value="0">ROT: 0</option>
                                   </select>
                                 </div>
                               ) : (
