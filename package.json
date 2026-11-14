@@ -12,7 +12,8 @@
     "test:tarifario": "node scripts/test-tarifario-crud.mjs",
     "seed:tarifario": "node scripts/seed-tarifario.mjs",
     "test:usuarios": "node scripts/test-usuarios-crud.mjs",
-    "test:pacientes": "node scripts/test-pacientes-crud.mjs"
+    "test:pacientes": "node scripts/test-pacientes-crud.mjs",
+    "seed:pacientes": "node scripts/seed-pacientes.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
