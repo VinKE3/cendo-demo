@@ -25,8 +25,8 @@ flowchart LR
     Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Fase1["Fase 1: Catálogos Maestros\n(100% Certificada:\nVademécum, Tarifario, Médicos)"]
     Fase1 --> Fase2["Fase 2: Pacientes & Antecedentes\n(100% Certificada:\nFichas + Historial Gineco-Obstétrico)"]
     Fase2 --> Mod6["Fase 3 / Módulo 6: Agenda de Citas\n(100% Certificado con Anti-Solapamiento)"]
-    Mod6 --> Mod7["Módulo 7: Consultas & Examen Físico\n(Siguiente Gran Paso)"]
-    Mod7 --> Mod8["Módulo 8: Recetas Médicas Inteligentes\n(Pendiente)"]
+    Mod6 --> Mod7["Módulo 7: Consultas & Examen Físico\n(100% Certificado con IMC y CIE-10)"]
+    Mod7 --> Mod8["Módulo 8: Recetas Médicas Inteligentes\n(Siguiente Gran Paso)"]
 ```
 
 ---
@@ -189,9 +189,24 @@ flowchart LR
   - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 #### 🩺 Módulo 7: Consulta Ginecológica Estructurada (`src/modules/consultas/`)
-- [ ] `consultas.types.ts`, `consultas.validator.ts` (signos vitales: PA, FC, IMC), `consultas.service.ts`.
-- [ ] Registro de motivo de consulta, tiempo de enfermedad, examen físico especuloscópico y CIE-10.
-- [ ] Persistencia en `public.medical_consultations`.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/consultas/consultas.types.ts`: `MedicalConsultation`, `ConsultationVitalSigns`, `ConsultationPhysicalExam`, `CreateConsultationInput`.
+  - [x] `src/modules/consultas/consultas.validator.ts`:
+    - [x] Calculadora dinámica y clasificación clínica de IMC (`calculateBmi`, `classifyBmi`).
+    - [x] Validación Zod de presión arterial sistólica/diastólica y signos vitales.
+    - [x] Catálogo maestro de diagnósticos frecuentes con códigos CIE-10 ginecológicos (`FREQUENT_DIAGNOSES`).
+  - [x] `src/modules/consultas/consultas.service.ts`:
+    - [x] `fetchConsultationsFromSupabase()`: Lectura de atenciones con filtrado por paciente.
+    - [x] `saveConsultationToSupabase()`: Upsert en `public.medical_consultations` con campos clínicos JSONB.
+    - [x] `deleteConsultationFromSupabase()`: Borrado seguro en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Tabla `public.medical_consultations` con soporte nativo JSONB para signos vitales y examen físico.
+- [x] **Interfaz Gráfica:**
+  - [x] Integración de `ConsultationModal` con cálculo automático de IMC y validación clínica modular.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-consultas-crud.mjs` (`npm run test:consultas`) con 4/4 PASS (100%).
+  - [x] Inyección de 5 consultas clínicas estructuradas oficiales con `npm run seed:consultas`.
+  - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 #### 💊 Módulo 8: Recetario Médico Inteligente (`src/modules/recetas/`)
 - [ ] Integración con el Vademécum de la Fase 1 (autocompletado al escribir).

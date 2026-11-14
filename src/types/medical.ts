@@ -307,50 +307,15 @@ export interface PatientDocument {
 }
 
 // ============================================================================
-// ETAPA B: NUEVA CONSULTA GINECOLÓGICA ESTRUCTURADA (PUNTO 13)
+// ETAPA B: NUEVA CONSULTA GINECOLÓGICA ESTRUCTURADA (PUNTO 13) - MODULARIZADO
 // ============================================================================
 
-export interface ConsultationVitalSigns {
-  bloodPressure: string; // ej. "110/70"
-  heartRate: number; // lpm
-  respiratoryRate?: number; // rpm (Frecuencia respiratoria)
-  temperature: number; // °C
-  oxygenSaturation?: number; // % (Saturación de O2)
-  weightKg: number; // kg
-  heightCm: number; // cm
-  bmi: number; // IMC
-}
-
-export interface ConsultationPhysicalExam {
-  generalExam: string;
-  breastsExam: string;
-  externalGenitalia: string;
-  speculoscopy: string; // Vagina y cérvix
-  bimanualPalpation: string; // Útero y anexos
-}
-
-export interface MedicalConsultation {
-  id: string;
-  patientId: string;
-  doctorId: string;
-  doctorName: string;
-  doctorCmp: string;
-  doctorRne?: string;
-  consultationDate: string; // YYYY-MM-DD
-  reasonForVisit: string;
-  illnessTime?: string;
-  symptoms?: string;
-  vitalSigns: ConsultationVitalSigns;
-  physicalExam: ConsultationPhysicalExam;
-  diagnosis: string;
-  cie10Code?: string;
-  treatmentPlan: string;
-  auxiliaryExams?: string; // Exámenes auxiliares solicitados
-  prescriptionNotes?: string; // Receta prescrita en consulta
-  nextAppointmentDate?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type {
+  ConsultationVitalSigns,
+  ConsultationPhysicalExam,
+  MedicalConsultation,
+  CreateConsultationInput,
+} from "@/modules/consultas";
 
 // ============================================================================
 // ETAPA B: FORMATOS DE ECOGRAFÍA ESPECIALIZADA (PUNTO 5)

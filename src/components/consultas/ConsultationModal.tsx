@@ -18,6 +18,12 @@ import {
 import { Patient, DoctorProfile, MedicalConsultation } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateConsultationWhatsAppUrl } from "@/lib/whatsappShare";
+import {
+  FREQUENT_DIAGNOSES,
+  calculateBmi,
+  classifyBmi,
+  validateConsultationInput,
+} from "@/modules/consultas";
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -26,18 +32,6 @@ interface ConsultationModalProps {
   consultationToEdit?: MedicalConsultation | null;
   onSavedAndPrint?: (consultation: MedicalConsultation) => void;
 }
-
-const FREQUENT_DIAGNOSES = [
-  { label: "Endometriosis pélvica profunda (N80.3)", code: "N80.3", text: "Endometriosis pélvica profunda infiltrante (ligamentos uterosacros y tabique rectovaginal)" },
-  { label: "Endometrioma ovárico (N80.1)", code: "N80.1", text: "Endometrioma ovárico con dolor pélvico cíclico y dispareunia" },
-  { label: "Adenomiosis uterina (N80.0)", code: "N80.0", text: "Adenomiosis uterina difusa con dismenorrea y menorragia" },
-  { label: "Displasia Cervical NIC 2 / LIE-AG (N87.1)", code: "N87.1", text: "Neoplasia Intraepitelial Cervical Grado 2 (NIC 2 / LIE-AG) en cérvix uterino" },
-  { label: "Displasia Cervical NIC 1 / LIE-BG (N87.0)", code: "N87.0", text: "Neoplasia Intraepitelial Cervical Grado 1 (NIC 1 / LIE-BG) asociada a VPH" },
-  { label: "Control de Embarazo Normal (Z34.0)", code: "Z34.0", text: "Supervisión de primer embarazo normal de curso favorable" },
-  { label: "Miomatosis Uterina Sintomática (D25.9)", code: "D25.9", text: "Leiomiomatosis uterina intramural sintomática" },
-  { label: "Síndrome de Ovario Poliquístico (E28.2)", code: "E28.2", text: "Síndrome de Ovario Poliquístico (SOP) fenotipo ovulatorio irregular" },
-  { label: "Vaginitis / Cervicitis Mixta (N76.0)", code: "N76.0", text: "Cervicovaginitis mixta aguda en tratamiento antimicrobiano" },
-];
 
 export function ConsultationModal({
   isOpen,
@@ -79,11 +73,7 @@ export function ConsultationModal({
 
   // IMC dinámico
   const bmi = useMemo(() => {
-    if (weightKg > 0 && heightCm > 0) {
-      const hMeters = heightCm / 100;
-      return Number((weightKg / (hMeters * hMeters)).toFixed(2));
-    }
-    return 22.0;
+    return calculateBmi(weightKg, heightCm);
   }, [weightKg, heightCm]);
 
   useEffect(() => {
@@ -193,6 +183,17 @@ export function ConsultationModal({
       prescriptionNotes: prescriptionNotes.trim() || undefined,
       nextAppointmentDate: nextAppointmentDate || undefined,
     };
+
+    const validation = validateConsultationInput(payload);
+    if (!validation.success) {
+      Swal.fire({
+        icon: "warning",
+        title: "Dato Clínico Requerido",
+        text: validation.error,
+        confirmButtonColor: "#0A4D68",
+      });
+      return;
+    }
 
     let result: MedicalConsultation;
     if (consultationToEdit) {
