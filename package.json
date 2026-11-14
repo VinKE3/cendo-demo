@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:vademecum": "node scripts/test-vademecum-crud.mjs",
+    "seed:vademecum": "node scripts/seed-vademecum.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
