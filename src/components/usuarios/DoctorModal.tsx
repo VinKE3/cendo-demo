@@ -139,7 +139,7 @@ export function DoctorModal({ isOpen, onClose, doctorToEdit }: DoctorModalProps)
   const onSubmit = async (data: DoctorFormData) => {
     try {
       if (isEditing && doctorToEdit) {
-        updateDoctor(doctorToEdit.id, {
+        await updateDoctor(doctorToEdit.id, {
           fullName: data.fullName.trim(),
           doctorTitle: data.doctorTitle,
           specialty: data.specialty.trim(),
@@ -157,12 +157,12 @@ export function DoctorModal({ isOpen, onClose, doctorToEdit }: DoctorModalProps)
         await Swal.fire({
           icon: "success",
           title: "Datos Actualizados",
-          text: `La información de ${data.doctorTitle} ${data.fullName} ha sido guardada exitosamente.`,
+          text: `La información de ${data.doctorTitle} ${data.fullName} ha sido sincronizada con la base de datos de CENDO.`,
           confirmButtonColor: "#0A4D68",
           timer: 1800,
         });
       } else {
-        addDoctor({
+        await addDoctor({
           fullName: data.fullName.trim(),
           doctorTitle: data.doctorTitle,
           specialty: data.specialty.trim(),
@@ -187,7 +187,7 @@ export function DoctorModal({ isOpen, onClose, doctorToEdit }: DoctorModalProps)
 
         await Swal.fire({
           icon: "success",
-          title: "Médico Registrado Exitosamente",
+          title: "Médico Registrado y Sincronizado",
           html: `
             <div class="text-left text-xs text-slate-700 space-y-2.5 p-3 bg-slate-50 rounded-xl border border-slate-200 mt-2">
               <p><strong>Médico:</strong> ${data.doctorTitle} ${data.fullName}</p>

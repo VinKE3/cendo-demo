@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Swal from "sweetalert2";
 import {
   Users,
@@ -35,7 +35,13 @@ export default function UsuariosPage() {
     deleteDoctor,
     toggleDoctorActive,
     resetDoctorPassword,
+    fetchDoctors,
   } = useMedicalStore();
+
+  // Sincronizar médicos desde Supabase al cargar la vista
+  useEffect(() => {
+    fetchDoctors();
+  }, [fetchDoctors]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [doctorToEdit, setDoctorToEdit] = useState<DoctorProfile | null>(null);
@@ -111,14 +117,14 @@ export default function UsuariosPage() {
       cancelButtonColor: "#64748B",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-    }).then((res) => {
+    }).then(async (res) => {
       if (res.isConfirmed) {
-        const result = deleteDoctor(doc.id);
+        const result = await deleteDoctor(doc.id);
         if (result.success) {
           Swal.fire({
             icon: "success",
             title: "Médico Eliminado",
-            text: "El profesional ha sido retirado del sistema.",
+            text: "El profesional ha sido retirado del sistema y de la base de datos.",
             confirmButtonColor: "#0A4D68",
             timer: 1500,
           });
@@ -145,7 +151,7 @@ export default function UsuariosPage() {
           <p><strong>Usuario / Correo:</strong> <code>${doc.email}</code></p>
           <p><strong>CMP:</strong> ${doc.cmp} &bull; <strong>RNE:</strong> ${doc.rne}</p>
           <p class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">
-            Ingrese la nueva clave o conserve la sugerida generada de forma aleatoria:
+            Ingrese la nueva clave personalizada o conserve la clave sugerida:
           </p>
         </div>
       `,
@@ -157,7 +163,7 @@ export default function UsuariosPage() {
         autocorrect: "off",
       },
       showCancelButton: true,
-      confirmButtonText: "Guardar Nueva Clave",
+      confirmButtonText: "Guardar en Base de Datos",
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#0A4D68",
       cancelButtonColor: "#64748B",
@@ -169,17 +175,27 @@ export default function UsuariosPage() {
     });
 
     if (newPassword) {
-      const res = resetDoctorPassword(doc.id, newPassword);
+      Swal.fire({
+        title: "Actualizando...",
+        text: "Sincronizando contraseña en la base de datos de CENDO...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const res = await resetDoctorPassword(doc.id, newPassword);
       if (res.success) {
         const notifyText = `🏥 CENDO - Centro de Endometriosis\nEstimado(a) ${doc.doctorTitle} ${doc.fullName},\n\nSu contraseña de acceso al Portal Médico ha sido restablecida por la Dirección Médica (Dr. Patrick Jacinto):\n🔗 Enlace: https://app.cendo.pe/login\n📧 Usuario: ${doc.email}\n🔑 Nueva Contraseña: ${newPassword}\n\nPor favor, conserve sus credenciales en estricta reserva conforme a la Ley N° 29733.`;
 
         await Swal.fire({
           icon: "success",
-          title: "Contraseña Actualizada",
+          title: "Contraseña Sincronizada",
           html: `
             <div class="text-left text-xs space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-200 mt-2">
-              <p>Se ha actualizado la contraseña de <strong>${doc.doctorTitle} ${doc.fullName}</strong>.</p>
-              <p><strong>Nueva clave:</strong> <code class="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-300">${newPassword}</code></p>
+              <p>Se ha actualizado la contraseña de <strong>${doc.doctorTitle} ${doc.fullName}</strong> en la <strong>Base de Datos Oficial de CENDO</strong>.</p>
+              <p class="text-slate-500">El médico ya puede ingresar con esta nueva clave desde cualquier dispositivo (PC, Tablet o Celular).</p>
+              <p class="pt-1"><strong>Nueva clave:</strong> <code class="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-300">${newPassword}</code></p>
             </div>
           `,
           showCancelButton: true,

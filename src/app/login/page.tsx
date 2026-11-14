@@ -44,7 +44,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { loginWithCredentials, loginDemo, isAuthenticated } = useMedicalStore();
+  const { loginWithCredentials, isAuthenticated } = useMedicalStore();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -58,13 +58,12 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "cendoperu@gmail.com",
-      password: "Cendo123",
+      email: "",
+      password: "",
       rememberMe: true,
     },
   });
@@ -112,7 +111,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
     try {
-      const result = loginWithCredentials(data.email, data.password);
+      const result = await loginWithCredentials(data.email, data.password);
 
       if (!result.success || !result.doctor) {
         await Swal.fire({
@@ -382,31 +381,6 @@ export default function LoginPage() {
               </label>
             </div>
 
-            {/* Credenciales Demo Oficiales */}
-            <div className="p-2.5 rounded-xl bg-sky-50/80 border border-sky-200 flex items-center justify-between text-xs text-sky-950">
-              <div className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-primary shrink-0" />
-                <div>
-                  <p className="font-semibold text-slate-800 text-xs">
-                    Dr. Patrick Jacinto (Director Médico)
-                  </p>
-                  <p className="text-[11px] text-slate-500 font-mono">
-                    cendoperu@gmail.com &bull; <strong className="text-primary">Cendo123</strong>
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setValue("email", "cendoperu@gmail.com");
-                  setValue("password", "Cendo123");
-                }}
-                className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-white border border-sky-300 text-primary hover:bg-sky-100 transition-colors shadow-2xs cursor-pointer"
-              >
-                Auto-llenar
-              </button>
-            </div>
-
             {/* Botón de Ingreso Principal */}
             <button
               type="submit"
@@ -425,19 +399,6 @@ export default function LoginPage() {
                   <ArrowRight className="w-4 h-4 text-white/80" />
                 </>
               )}
-            </button>
-
-            {/* Botón Alternativo de Acceso Rápido Demo */}
-            <button
-              type="button"
-              onClick={() => {
-                loginDemo();
-                router.push("/dashboard");
-              }}
-              className="w-full py-2.5 px-4 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-semibold text-xs transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-secondary" />
-              <span>Acceso Rápido Demo Asistencial (1 Clic)</span>
             </button>
           </form>
 

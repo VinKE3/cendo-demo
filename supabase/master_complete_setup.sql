@@ -39,6 +39,10 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS clinic_address TEXT DEFAULT
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT '985 945 697';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS contact_email TEXT DEFAULT 'cendoperu@gmail.com';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS password TEXT NOT NULL DEFAULT 'Cendo123';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'doctor';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS signature_url TEXT;
 
 -- 3. TABLA: patients (Directorio Maestro de Pacientes CENDO)
 CREATE TABLE IF NOT EXISTS public.patients (

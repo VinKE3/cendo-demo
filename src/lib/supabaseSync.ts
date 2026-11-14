@@ -26,6 +26,8 @@ import {
   ProcedureQuote,
   MedicalAppointment,
   WordHistoryDocument,
+  DoctorProfile,
+  DoctorRole,
 } from "@/types/medical";
 
 export function ensureUuid(id: string): string {
@@ -757,4 +759,193 @@ export async function deleteWordHistoryFromSupabase(id: string, filePath?: strin
     const { error } = await supabase.from("word_history_documents").delete().eq("id", targetId);
     return !error;
   } catch { return false; }
+}
+
+// ============================================================================
+// SINCRONIZACIÓN PROFESIONAL DE PERFILES MÉDICOS Y CONTRASEÑAS (PROFILES)
+// ============================================================================
+
+export function profileRowToDoctorProfile(row: any): DoctorProfile {
+  return {
+    id: row.id || ensureUuid(""),
+    email: row.email,
+    password: row.password || "Cendo123",
+    fullName: row.full_name || "Médico Especialista",
+    doctorTitle: row.doctor_title || "Dr.",
+    specialty: row.specialty || "Ginecología y Obstetricia",
+    cmp: row.cmp || "",
+    rne: row.rne || "",
+    clinicName: row.clinic_name || "CENDO - Centro de Endometriosis y Ginecología",
+    clinicAddress: row.clinic_address || "Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima",
+    phone: row.phone || "985 945 697",
+    contactEmail: row.contact_email || row.email,
+    avatarUrl: row.avatar_url || "",
+    signatureUrl: row.signature_url || "",
+    role: (row.role as DoctorRole) || "doctor",
+    isActive: row.is_active !== false,
+    createdAt: row.created_at || new Date().toISOString(),
+  };
+}
+
+export function doctorProfileToProfileRow(doc: DoctorProfile): any {
+  return {
+    email: doc.email.trim().toLowerCase(),
+    full_name: doc.fullName,
+    doctor_title: doc.doctorTitle || "Dr.",
+    specialty: doc.specialty,
+    cmp: doc.cmp,
+    rne: doc.rne,
+    clinic_name: doc.clinicName || "CENDO - Centro de Endometriosis y Ginecología",
+    clinic_address: doc.clinicAddress || "Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima",
+    phone: doc.phone || "985 945 697",
+    contact_email: doc.contactEmail || doc.email,
+    avatar_url: doc.avatarUrl || null,
+    signature_url: doc.signatureUrl || null,
+    role: doc.role || "doctor",
+    password: doc.password || "Cendo123",
+    is_active: doc.isActive !== false,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+export async function fetchDoctorsFromSupabase(): Promise<DoctorProfile[] | null> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return null;
+    }
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: true });
+
+    if (error || !data || data.length === 0) {
+      return null;
+    }
+    return data.map(profileRowToDoctorProfile);
+  } catch (err) {
+    console.error("fetchDoctorsFromSupabase error:", err);
+    return null;
+  }
+}
+
+export async function syncDoctorProfileToSupabase(doc: DoctorProfile): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+    const payload = doctorProfileToProfileRow(doc);
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(doc.id)) {
+      payload.id = doc.id;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .upsert(payload, { onConflict: "email" });
+
+    if (error) {
+      console.warn("Aviso sync doctor Supabase:", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncDoctorPasswordToSupabase(emailOrId: string, newPassword: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+    const clean = emailOrId.trim();
+    const query = clean.includes("@")
+      ? supabase.from("profiles").update({ password: newPassword.trim(), updated_at: new Date().toISOString() }).ilike("email", clean.toLowerCase())
+      : supabase.from("profiles").update({ password: newPassword.trim(), updated_at: new Date().toISOString() }).eq("id", clean);
+
+    const { error } = await query;
+    if (error) {
+      console.warn("Aviso sync password Supabase:", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteDoctorFromSupabase(emailOrId: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+    const clean = emailOrId.trim();
+    const query = clean.includes("@")
+      ? supabase.from("profiles").delete().ilike("email", clean.toLowerCase())
+      : supabase.from("profiles").delete().eq("id", clean);
+
+    const { error } = await query;
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function authenticateWithSupabase(
+  email: string,
+  password?: string
+): Promise<{ success: boolean; doctor?: DoctorProfile; error?: string }> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return { success: false, error: "Base de datos no configurada." };
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = (password || "").trim();
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .ilike("email", cleanEmail)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("Aviso authenticateWithSupabase:", error.message);
+      return { success: false, error: `Error de conexión: ${error.message}` };
+    }
+
+    if (!data) {
+      return {
+        success: false,
+        error: "El correo electrónico no se encuentra registrado en el sistema CENDO.",
+      };
+    }
+
+    const doctor = profileRowToDoctorProfile(data);
+
+    if (!doctor.isActive) {
+      return {
+        success: false,
+        error: "Esta cuenta médica se encuentra inactiva. Contacte al Director Médico (Dr. Patrick Jacinto).",
+      };
+    }
+
+    // Comparar contra la clave almacenada en la base de datos PostgreSQL
+    const expectedPassword = (data.password || "Cendo123").trim();
+    if (cleanPassword !== expectedPassword) {
+      return {
+        success: false,
+        error: "Contraseña incorrecta. Verifique sus credenciales institucionales.",
+      };
+    }
+
+    return { success: true, doctor };
+  } catch (err: any) {
+    console.error("authenticateWithSupabase catch:", err);
+    return { success: false, error: err.message || "Error al autenticar." };
+  }
 }

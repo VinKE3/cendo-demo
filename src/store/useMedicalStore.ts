@@ -47,6 +47,11 @@ import {
   deleteQuoteFromSupabase,
   syncWordHistoryToSupabase,
   deleteWordHistoryFromSupabase,
+  syncDoctorProfileToSupabase,
+  syncDoctorPasswordToSupabase,
+  deleteDoctorFromSupabase,
+  fetchDoctorsFromSupabase,
+  authenticateWithSupabase,
 } from "@/lib/supabaseSync";
 
 // Lista Inicial de Médicos y Especialistas CENDO
@@ -1862,16 +1867,17 @@ interface MedicalStoreState {
   loginWithCredentials: (
     email: string,
     password?: string
-  ) => { success: boolean; doctor?: DoctorProfile; error?: string };
+  ) => Promise<{ success: boolean; doctor?: DoctorProfile; error?: string }>;
   switchActiveDoctor: (doctorId: string) => void;
-  addDoctor: (doctor: Omit<DoctorProfile, "id" | "createdAt">) => DoctorProfile;
-  updateDoctor: (id: string, updates: Partial<DoctorProfile>) => void;
+  fetchDoctors: () => Promise<void>;
+  addDoctor: (doctor: Omit<DoctorProfile, "id" | "createdAt">) => Promise<DoctorProfile>;
+  updateDoctor: (id: string, updates: Partial<DoctorProfile>) => Promise<void>;
   resetDoctorPassword: (
     doctorId: string,
     newPassword: string
-  ) => { success: boolean; error?: string };
-  deleteDoctor: (id: string) => { success: boolean; error?: string };
-  toggleDoctorActive: (id: string) => void;
+  ) => Promise<{ success: boolean; error?: string }>;
+  deleteDoctor: (id: string) => Promise<{ success: boolean; error?: string }>;
+  toggleDoctorActive: (id: string) => Promise<void>;
   logout: () => void;
 
   // Pacientes
@@ -2060,9 +2066,39 @@ export const useMedicalStore = create<MedicalStoreState>()(
         });
       },
 
-      loginWithCredentials: (email: string, password?: string) => {
-        const state = get();
+      loginWithCredentials: async (email: string, password?: string) => {
         const cleanEmail = email.trim().toLowerCase();
+        const cleanPassword = (password || "").trim();
+
+        // 1. Prioridad: Autenticar directamente en tiempo real con Supabase
+        const dbAuth = await authenticateWithSupabase(cleanEmail, cleanPassword);
+
+        if (dbAuth.success && dbAuth.doctor) {
+          const doc = dbAuth.doctor;
+          set((state) => {
+            const list = state.doctorsList || [];
+            const exists = list.some((d) => d.email.toLowerCase() === doc.email.toLowerCase());
+            const updatedList = exists
+              ? list.map((d) => (d.email.toLowerCase() === doc.email.toLowerCase() ? doc : d))
+              : [...list, doc];
+
+            return {
+              doctorProfile: doc,
+              doctorsList: updatedList,
+              isAuthenticated: true,
+              userRole: doc.role === "director" ? "admin" : "doctor",
+            };
+          });
+          return { success: true, doctor: doc };
+        }
+
+        // Si la base de datos arrojó un error explícito de credenciales
+        if (dbAuth.error && !dbAuth.error.includes("conexión") && !dbAuth.error.includes("no configurada")) {
+          return { success: false, error: dbAuth.error };
+        }
+
+        // 2. Respaldo local por si la base de datos estuviera temporalmente inaccesible
+        const state = get();
         const list = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
         const found = list.find((d) => d.email.toLowerCase() === cleanEmail);
 
@@ -2080,18 +2116,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
           };
         }
 
-        const cleanPassword = (password || "").trim();
-        const validPasswords = [
-          found.password,
-          "Cendo123",
-          "cendo123",
-          "pjacinto@cendo",
-          "cbenavides@cendo",
-          "amorales@cendo",
-          "Cendo2026",
-          "admin",
-        ].filter(Boolean);
-
+        const validPasswords = [found.password, "Cendo123"].filter(Boolean);
         if (cleanPassword && !validPasswords.includes(cleanPassword)) {
           return {
             success: false,
@@ -2108,6 +2133,22 @@ export const useMedicalStore = create<MedicalStoreState>()(
         return { success: true, doctor: found };
       },
 
+      fetchDoctors: async () => {
+        const liveDoctors = await fetchDoctorsFromSupabase();
+        if (liveDoctors && liveDoctors.length > 0) {
+          set((state) => {
+            const activeId = state.doctorProfile?.id;
+            const updatedActive =
+              liveDoctors.find((d) => d.id === activeId || d.email.toLowerCase() === state.doctorProfile?.email?.toLowerCase()) ||
+              state.doctorProfile;
+            return {
+              doctorsList: liveDoctors,
+              doctorProfile: updatedActive,
+            };
+          });
+        }
+      },
+
       switchActiveDoctor: (doctorId: string) => {
         const state = get();
         const list = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
@@ -2121,7 +2162,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
         }
       },
 
-      addDoctor: (doctorData) => {
+      addDoctor: async (doctorData) => {
         const id = `doc-${Date.now()}`;
         const newDoctor: DoctorProfile = {
           ...doctorData,
@@ -2134,68 +2175,104 @@ export const useMedicalStore = create<MedicalStoreState>()(
             doctorsList: [...currentList, newDoctor],
           };
         });
+        await syncDoctorProfileToSupabase(newDoctor);
         return newDoctor;
       },
 
-      updateDoctor: (id, updates) => {
+      updateDoctor: async (id, updates) => {
+        let updatedDoctor: DoctorProfile | undefined;
         set((state) => {
           const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
-          const updatedList = currentList.map((d) => (d.id === id ? { ...d, ...updates } : d));
-          const updatedActive = state.doctorProfile.id === id ? { ...state.doctorProfile, ...updates } : state.doctorProfile;
+          const updatedList = currentList.map((d) => {
+            if (d.id === id) {
+              updatedDoctor = { ...d, ...updates };
+              return updatedDoctor;
+            }
+            return d;
+          });
+          const updatedActive = state.doctorProfile.id === id && updatedDoctor ? updatedDoctor : state.doctorProfile;
           return {
             doctorsList: updatedList,
             doctorProfile: updatedActive,
           };
         });
+        if (updatedDoctor) {
+          await syncDoctorProfileToSupabase(updatedDoctor);
+        }
       },
 
-      resetDoctorPassword: (doctorId, newPassword) => {
+      resetDoctorPassword: async (doctorId, newPassword) => {
         const state = get();
         const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
         const doctor = currentList.find((d) => d.id === doctorId);
         if (!doctor) {
           return { success: false, error: "Profesional médico no encontrado en CENDO." };
         }
+        const cleanPassword = newPassword.trim();
+        const updatedDoc = { ...doctor, password: cleanPassword };
         const updatedList = currentList.map((d) =>
-          d.id === doctorId ? { ...d, password: newPassword } : d
+          d.id === doctorId ? updatedDoc : d
         );
         const updatedActive =
           state.doctorProfile.id === doctorId
-            ? { ...state.doctorProfile, password: newPassword }
+            ? { ...state.doctorProfile, password: cleanPassword }
             : state.doctorProfile;
         set({
           doctorsList: updatedList,
           doctorProfile: updatedActive,
         });
+
+        // Sincronizar inmediatamente con PostgreSQL en Supabase
+        await syncDoctorPasswordToSupabase(doctor.email, cleanPassword);
+
         return { success: true };
       },
 
-      deleteDoctor: (id) => {
-        if (id === "doc-patrick-jacinto") {
+      deleteDoctor: async (id) => {
+        if (id === "doc-patrick-jacinto" || id === "a0000000-0000-0000-0000-000000000001") {
           return {
             success: false,
             error: "No se puede eliminar la cuenta del Director Médico Principal (Dr. Patrick Jacinto).",
           };
         }
+        const state = get();
+        const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+        const doctor = currentList.find((d) => d.id === id);
+
         set((state) => {
-          const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
-          const filtered = currentList.filter((d) => d.id !== id);
+          const list = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
+          const filtered = list.filter((d) => d.id !== id);
           const newActive = state.doctorProfile.id === id ? (filtered[0] || INITIAL_DOCTOR) : state.doctorProfile;
           return {
             doctorsList: filtered,
             doctorProfile: newActive,
           };
         });
+
+        if (doctor) {
+          await deleteDoctorFromSupabase(doctor.email);
+        }
+
         return { success: true };
       },
 
-      toggleDoctorActive: (id) => {
-        if (id === "doc-patrick-jacinto") return;
+      toggleDoctorActive: async (id) => {
+        if (id === "doc-patrick-jacinto" || id === "a0000000-0000-0000-0000-000000000001") return;
+        let targetDoctor: DoctorProfile | undefined;
         set((state) => {
           const currentList = state.doctorsList && state.doctorsList.length > 0 ? state.doctorsList : INITIAL_DOCTORS;
-          const updated = currentList.map((d) => (d.id === id ? { ...d, isActive: !d.isActive } : d));
+          const updated = currentList.map((d) => {
+            if (d.id === id) {
+              targetDoctor = { ...d, isActive: !d.isActive };
+              return targetDoctor;
+            }
+            return d;
+          });
           return { doctorsList: updated };
         });
+        if (targetDoctor) {
+          await syncDoctorProfileToSupabase(targetDoctor);
+        }
       },
 
       logout: () => {
