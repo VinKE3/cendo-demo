@@ -11,6 +11,8 @@ import {
   Command,
   Shield,
   Stethoscope,
+  Cloud,
+  RefreshCw,
 } from "lucide-react";
 import { useMedicalStore } from "@/store/useMedicalStore";
 
@@ -24,6 +26,8 @@ export function DashboardHeader({
   onOpenMobileMenu,
 }: DashboardHeaderProps) {
   const doctorProfile = useMedicalStore((state) => state.doctorProfile);
+  const isCloudSyncing = useMedicalStore((state) => state.isCloudSyncing);
+  const loadAllFromDatabase = useMedicalStore((state) => state.loadAllFromDatabase);
 
   const doctorInitials = doctorProfile.fullName
     .split(" ")
@@ -66,7 +70,22 @@ export function DashboardHeader({
       </div>
 
       {/* Datos del Doctor & Consultorio Miraflores */}
-      <div className="flex items-center gap-4 ml-4">
+      <div className="flex items-center gap-3 sm:gap-4 ml-4">
+        {/* Indicador de Nube Supabase */}
+        <button
+          onClick={() => loadAllFromDatabase()}
+          disabled={isCloudSyncing}
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-xs text-slate-700 font-medium transition-colors cursor-pointer"
+          title="Haga clic para sincronizar todos los datos con Supabase en la nube"
+        >
+          {isCloudSyncing ? (
+            <RefreshCw className="w-3.5 h-3.5 text-secondary animate-spin" />
+          ) : (
+            <Cloud className="w-3.5 h-3.5 text-emerald-600" />
+          )}
+          <span className="hidden xl:inline">{isCloudSyncing ? "Sincronizando..." : "Supabase Cloud"}</span>
+        </button>
+
         {/* Indicador de Consultorio / Sede */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-accent-soft/70 border border-primary/15 text-xs text-primary font-medium">
           <span className="relative flex h-2 w-2">

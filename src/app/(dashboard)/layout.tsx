@@ -39,6 +39,9 @@ export default function DashboardLayout({
 
     if (!isAuthenticated) {
       router.replace("/login");
+    } else {
+      // Cargar sincronizadamente toda la base de datos médica en vivo desde Supabase Cloud
+      useMedicalStore.getState().loadAllFromDatabase();
     }
   }, [isHydrated, isAuthenticated, router]);
 

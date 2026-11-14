@@ -27,6 +27,13 @@ import {
   deletePatientFromSupabase,
   syncBackgroundToSupabase,
   syncColposcopyToSupabase,
+  deleteColposcopyFromSupabase,
+  syncCheckupToSupabase,
+  deleteCheckupFromSupabase,
+  syncTariffToSupabase,
+  deleteTariffFromSupabase,
+  syncVademecumToSupabase,
+  deleteVademecumFromSupabase,
   syncPrescriptionToSupabase,
   deletePrescriptionFromSupabase,
   syncLabOrderToSupabase,
@@ -52,6 +59,8 @@ import {
   deleteDoctorFromSupabase,
   fetchDoctorsFromSupabase,
   authenticateWithSupabase,
+  fetchAllDataFromSupabase,
+  getPatientUuid,
 } from "@/lib/supabaseSync";
 
 // Lista Inicial de Médicos y Especialistas CENDO
@@ -2031,6 +2040,10 @@ interface MedicalStoreState {
 
   // Reset a datos iniciales
   resetToSeedData: () => void;
+
+  // Sincronización Total con Base de Datos Supabase Cloud (17 Tablas)
+  isCloudSyncing: boolean;
+  loadAllFromDatabase: () => Promise<{ success: boolean; count: number }>;
 }
 
 export const useMedicalStore = create<MedicalStoreState>()(
@@ -2041,6 +2054,104 @@ export const useMedicalStore = create<MedicalStoreState>()(
       doctorProfile: INITIAL_DOCTOR,
       isAuthenticated: false,
       userRole: "admin",
+      isCloudSyncing: false,
+
+      loadAllFromDatabase: async () => {
+        set({ isCloudSyncing: true });
+        try {
+          const cloudData = await fetchAllDataFromSupabase();
+          if (!cloudData) {
+            set({ isCloudSyncing: false });
+            return { success: false, count: 0 };
+          }
+
+          set((state) => {
+            const updates: Partial<MedicalStoreState> = { isCloudSyncing: false };
+
+            if (cloudData.doctors && cloudData.doctors.length > 0) {
+              updates.doctorsList = cloudData.doctors;
+              const currentDoc = cloudData.doctors.find(
+                (d) => d.email.toLowerCase() === state.doctorProfile.email.toLowerCase()
+              );
+              if (currentDoc) {
+                updates.doctorProfile = currentDoc;
+              }
+            }
+
+            if (cloudData.patients && cloudData.patients.length > 0) {
+              updates.patients = cloudData.patients;
+            }
+
+            if (cloudData.patientBackgrounds && Object.keys(cloudData.patientBackgrounds).length > 0) {
+              updates.backgrounds = { ...state.backgrounds, ...cloudData.patientBackgrounds };
+            }
+
+            if (cloudData.consultations && cloudData.consultations.length > 0) {
+              updates.consultations = cloudData.consultations;
+            }
+
+            if (cloudData.ultrasoundReports && cloudData.ultrasoundReports.length > 0) {
+              updates.ultrasoundReports = cloudData.ultrasoundReports;
+            }
+
+            if (cloudData.colposcopyReports && cloudData.colposcopyReports.length > 0) {
+              updates.colposcopyReports = cloudData.colposcopyReports;
+            }
+
+            if (cloudData.clinicalCheckups && cloudData.clinicalCheckups.length > 0) {
+              updates.clinicalCheckups = cloudData.clinicalCheckups;
+            }
+
+            if (cloudData.minorProcedures && cloudData.minorProcedures.length > 0) {
+              updates.minorProcedures = cloudData.minorProcedures;
+            }
+
+            if (cloudData.prescriptions && cloudData.prescriptions.length > 0) {
+              updates.prescriptions = cloudData.prescriptions;
+            }
+
+            if (cloudData.labOrders && cloudData.labOrders.length > 0) {
+              updates.labOrders = cloudData.labOrders;
+            }
+
+            if (cloudData.prenatalCards && cloudData.prenatalCards.length > 0) {
+              updates.prenatalCards = cloudData.prenatalCards;
+            }
+
+            if (cloudData.patientDocuments && cloudData.patientDocuments.length > 0) {
+              updates.patientDocuments = cloudData.patientDocuments;
+            }
+
+            if (cloudData.procedureQuotes && cloudData.procedureQuotes.length > 0) {
+              updates.procedureQuotes = cloudData.procedureQuotes;
+            }
+
+            if (cloudData.appointments && cloudData.appointments.length > 0) {
+              updates.appointments = cloudData.appointments;
+            }
+
+            if (cloudData.wordHistories && cloudData.wordHistories.length > 0) {
+              updates.wordHistories = cloudData.wordHistories;
+            }
+
+            if (cloudData.proceduresTariff && cloudData.proceduresTariff.length > 0) {
+              updates.tariffItems = cloudData.proceduresTariff;
+            }
+
+            if (cloudData.medicationsVademecum && cloudData.medicationsVademecum.length > 0) {
+              updates.vademecumItems = cloudData.medicationsVademecum;
+            }
+
+            return updates;
+          });
+
+          return { success: true, count: cloudData.patients?.length || 0 };
+        } catch (err) {
+          console.error("loadAllFromDatabase error:", err);
+          set({ isCloudSyncing: false });
+          return { success: false, count: 0 };
+        }
+      },
 
       loginDemo: () => {
         const state = get();
@@ -2337,7 +2448,13 @@ export const useMedicalStore = create<MedicalStoreState>()(
         });
         deletePatientFromSupabase(id, targetDni);
       },
-      getPatientById: (id) => get().patients.find((p) => p.id === id),
+      getPatientById: (id) =>
+        get().patients.find(
+          (p) =>
+            p.id === id ||
+            (p.dni && p.dni === id) ||
+            getPatientUuid(p.id) === getPatientUuid(id)
+        ),
       getPatientByDni: (dni) => get().patients.find((p) => p.dni === dni),
 
       // ANTECEDENTES
@@ -2372,10 +2489,12 @@ export const useMedicalStore = create<MedicalStoreState>()(
             ...data,
             updatedAt: new Date().toISOString(),
           };
+          const pUuid = getPatientUuid(patientId);
           return {
             backgrounds: {
               ...state.backgrounds,
               [patientId]: updatedBg,
+              [pUuid]: updatedBg,
             },
           };
         });
@@ -2383,12 +2502,19 @@ export const useMedicalStore = create<MedicalStoreState>()(
           syncBackgroundToSupabase(updatedBg);
         }
       },
-      getBackground: (patientId) => get().backgrounds[patientId],
+      getBackground: (patientId) => {
+        const bgs = get().backgrounds;
+        if (!bgs) return undefined;
+        if (bgs[patientId]) return bgs[patientId];
+        const uuid = getPatientUuid(patientId);
+        if (bgs[uuid]) return bgs[uuid];
+        return Object.values(bgs).find((b) => b.patientId === patientId || getPatientUuid(b.patientId) === uuid);
+      },
 
       // COLPOSCOPÍA
       colposcopyReports: INITIAL_COLPOSCOPY,
       addColposcopyReport: (reportData) => {
-        const id = `colpo-${Date.now()}`;
+        const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `colpo-${Date.now()}`;
         const newReport: ColposcopyReport = {
           ...reportData,
           id,
@@ -2401,24 +2527,35 @@ export const useMedicalStore = create<MedicalStoreState>()(
         return newReport;
       },
       updateColposcopyReport: (id, updates) => {
+        let updated: ColposcopyReport | null = null;
         set((state) => ({
-          colposcopyReports: state.colposcopyReports.map((r) =>
-            r.id === id ? { ...r, ...updates } : r
-          ),
+          colposcopyReports: state.colposcopyReports.map((r) => {
+            if (r.id === id) {
+              updated = { ...r, ...updates };
+              return updated;
+            }
+            return r;
+          }),
         }));
+        if (updated) syncColposcopyToSupabase(updated);
       },
       deleteColposcopyReport: (id) => {
         set((state) => ({
           colposcopyReports: state.colposcopyReports.filter((r) => r.id !== id),
         }));
+        deleteColposcopyFromSupabase(id);
       },
-      getColposcopyByPatientId: (patientId) =>
-        get().colposcopyReports.filter((r) => r.patientId === patientId),
+      getColposcopyByPatientId: (patientId) => {
+        const targetUuid = getPatientUuid(patientId);
+        return get().colposcopyReports.filter(
+          (r) => r.patientId === patientId || getPatientUuid(r.patientId) === targetUuid
+        );
+      },
 
       // CHEQUEOS
       clinicalCheckups: INITIAL_CHECKUPS,
       addClinicalCheckup: (checkupData) => {
-        const id = `chk-${Date.now()}`;
+        const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `chk-${Date.now()}`;
         const newCheckup: ClinicalCheckup = {
           ...checkupData,
           id,
@@ -2427,45 +2564,67 @@ export const useMedicalStore = create<MedicalStoreState>()(
         set((state) => ({
           clinicalCheckups: [newCheckup, ...state.clinicalCheckups],
         }));
+        syncCheckupToSupabase(newCheckup);
         return newCheckup;
       },
       updateClinicalCheckup: (id, updates) => {
+        let updated: ClinicalCheckup | null = null;
         set((state) => ({
-          clinicalCheckups: state.clinicalCheckups.map((c) =>
-            c.id === id ? { ...c, ...updates } : c
-          ),
+          clinicalCheckups: state.clinicalCheckups.map((c) => {
+            if (c.id === id) {
+              updated = { ...c, ...updates };
+              return updated;
+            }
+            return c;
+          }),
         }));
+        if (updated) syncCheckupToSupabase(updated);
       },
       deleteClinicalCheckup: (id) => {
         set((state) => ({
           clinicalCheckups: state.clinicalCheckups.filter((c) => c.id !== id),
         }));
+        deleteCheckupFromSupabase(id);
       },
-      getCheckupsByPatientId: (patientId) =>
-        get().clinicalCheckups.filter((c) => c.patientId === patientId),
+      getCheckupsByPatientId: (patientId) => {
+        const targetUuid = getPatientUuid(patientId);
+        return get().clinicalCheckups.filter(
+          (c) => c.patientId === patientId || getPatientUuid(c.patientId) === targetUuid
+        );
+      },
 
       // TARIFARIO
       tariffItems: INITIAL_TARIFF,
       addTariffItem: (item) => {
         const newItem: ProcedureTariff = {
           ...item,
-          id: `tar-${Date.now()}`,
+          id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `tar-${Date.now()}`,
           createdAt: new Date().toISOString(),
         };
         set((state) => ({
           tariffItems: [newItem, ...state.tariffItems],
         }));
+        syncTariffToSupabase(newItem);
         return newItem;
       },
       updateTariffItem: (id, updates) => {
+        let updated: ProcedureTariff | null = null;
         set((state) => ({
-          tariffItems: state.tariffItems.map((t) => (t.id === id ? { ...t, ...updates } : t)),
+          tariffItems: state.tariffItems.map((t) => {
+            if (t.id === id) {
+              updated = { ...t, ...updates };
+              return updated;
+            }
+            return t;
+          }),
         }));
+        if (updated) syncTariffToSupabase(updated);
       },
       deleteTariffItem: (id) => {
         set((state) => ({
           tariffItems: state.tariffItems.filter((t) => t.id !== id),
         }));
+        deleteTariffFromSupabase(id);
       },
 
       // VADEMÉCUM
@@ -2473,23 +2632,33 @@ export const useMedicalStore = create<MedicalStoreState>()(
       addVademecumItem: (item) => {
         const newItem: MedicationVademecum = {
           ...item,
-          id: `vad-${Date.now()}`,
+          id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `vad-${Date.now()}`,
           createdAt: new Date().toISOString(),
         };
         set((state) => ({
           vademecumItems: [newItem, ...state.vademecumItems],
         }));
+        syncVademecumToSupabase(newItem);
         return newItem;
       },
       updateVademecumItem: (id, updates) => {
+        let updated: MedicationVademecum | null = null;
         set((state) => ({
-          vademecumItems: state.vademecumItems.map((v) => (v.id === id ? { ...v, ...updates } : v)),
+          vademecumItems: state.vademecumItems.map((v) => {
+            if (v.id === id) {
+              updated = { ...v, ...updates };
+              return updated;
+            }
+            return v;
+          }),
         }));
+        if (updated) syncVademecumToSupabase(updated);
       },
       deleteVademecumItem: (id) => {
         set((state) => ({
           vademecumItems: state.vademecumItems.filter((v) => v.id !== id),
         }));
+        deleteVademecumFromSupabase(id);
       },
 
       // RECETAS MÉDICAS INTELIGENTES
@@ -2532,8 +2701,9 @@ export const useMedicalStore = create<MedicalStoreState>()(
         deletePrescriptionFromSupabase(id);
       },
       getPrescriptionsByPatientId: (patientId) => {
+        const targetUuid = getPatientUuid(patientId);
         const list = get().prescriptions || [];
-        return list.filter((p) => p.patientId === patientId);
+        return list.filter((p) => p.patientId === patientId || getPatientUuid(p.patientId) === targetUuid);
       },
 
       // ÓRDENES DE LABORATORIO CLÍNICO
@@ -2576,8 +2746,9 @@ export const useMedicalStore = create<MedicalStoreState>()(
         deleteLabOrderFromSupabase(id);
       },
       getLabOrdersByPatientId: (patientId) => {
+        const targetUuid = getPatientUuid(patientId);
         const list = get().labOrders || [];
-        return list.filter((ord) => ord.patientId === patientId);
+        return list.filter((ord) => ord.patientId === patientId || getPatientUuid(ord.patientId) === targetUuid);
       },
 
       // CARNET DE CONTROL PRENATAL OFICIAL (MINSA / CLAP)
@@ -2620,23 +2791,28 @@ export const useMedicalStore = create<MedicalStoreState>()(
         deletePrenatalCardFromSupabase(id);
       },
       getPrenatalCardByPatientId: (patientId) => {
+        const targetUuid = getPatientUuid(patientId);
         const list = get().prenatalCards || [];
-        return list.find((c) => c.patientId === patientId);
+        return list.find((c) => c.patientId === patientId || getPatientUuid(c.patientId) === targetUuid);
       },
       addPrenatalVisit: (cardId, visit) => {
+        let updatedCard: PrenatalCard | null = null;
         set((state) => ({
           prenatalCards: (state.prenatalCards || []).map((card) => {
             if (card.id !== cardId) return card;
             const updatedVisits = [...(card.visits || []), visit].slice(0, 9);
-            return {
+            updatedCard = {
               ...card,
               visits: updatedVisits,
               updatedAt: new Date().toISOString(),
             };
+            return updatedCard;
           }),
         }));
+        if (updatedCard) syncPrenatalCardToSupabase(updatedCard);
       },
       updatePrenatalVisit: (cardId, visitIndex, visit) => {
+        let updatedCard: PrenatalCard | null = null;
         set((state) => ({
           prenatalCards: (state.prenatalCards || []).map((card) => {
             if (card.id !== cardId) return card;
@@ -2644,26 +2820,31 @@ export const useMedicalStore = create<MedicalStoreState>()(
             if (visitIndex >= 0 && visitIndex < updatedVisits.length) {
               updatedVisits[visitIndex] = visit;
             }
-            return {
+            updatedCard = {
               ...card,
               visits: updatedVisits,
               updatedAt: new Date().toISOString(),
             };
+            return updatedCard;
           }),
         }));
+        if (updatedCard) syncPrenatalCardToSupabase(updatedCard);
       },
       deletePrenatalVisit: (cardId, visitIndex) => {
+        let updatedCard: PrenatalCard | null = null;
         set((state) => ({
           prenatalCards: (state.prenatalCards || []).map((card) => {
             if (card.id !== cardId) return card;
             const updatedVisits = (card.visits || []).filter((_, idx) => idx !== visitIndex);
-            return {
+            updatedCard = {
               ...card,
               visits: updatedVisits,
               updatedAt: new Date().toISOString(),
             };
+            return updatedCard;
           }),
         }));
+        if (updatedCard) syncPrenatalCardToSupabase(updatedCard);
       },
 
       // REPOSITORIO DE DOCUMENTOS Y EXÁMENES EXTERNOS EN PDF (ETAPA B)
@@ -2682,9 +2863,9 @@ export const useMedicalStore = create<MedicalStoreState>()(
         await deleteDocumentFromSupabase(id, doc?.filePath);
       },
       getDocumentsByPatientId: (patientId) => {
-        return (get().patientDocuments || []).filter((d) => d.patientId === patientId);
+        const targetUuid = getPatientUuid(patientId);
+        return (get().patientDocuments || []).filter((d) => d.patientId === patientId || getPatientUuid(d.patientId) === targetUuid);
       },
-
 
       // CONSULTAS GINECOLÓGICAS ESTRUCTURADAS (ETAPA B - PUNTO 13)
       consultations: INITIAL_CONSULTATIONS,
@@ -2723,7 +2904,8 @@ export const useMedicalStore = create<MedicalStoreState>()(
         deleteConsultationFromSupabase(id);
       },
       getConsultationsByPatientId: (patientId) => {
-        return (get().consultations || []).filter((c) => c.patientId === patientId);
+        const targetUuid = getPatientUuid(patientId);
+        return (get().consultations || []).filter((c) => c.patientId === patientId || getPatientUuid(c.patientId) === targetUuid);
       },
 
       // FORMATOS DE ECOGRAFÍA ESPECIALIZADA (ETAPA B - PUNTO 5)
@@ -2763,7 +2945,8 @@ export const useMedicalStore = create<MedicalStoreState>()(
         deleteUltrasoundFromSupabase(id);
       },
       getUltrasoundsByPatientId: (patientId) => {
-        return (get().ultrasoundReports || []).filter((u) => u.patientId === patientId);
+        const targetUuid = getPatientUuid(patientId);
+        return (get().ultrasoundReports || []).filter((u) => u.patientId === patientId || getPatientUuid(u.patientId) === targetUuid);
       },
 
       // FORMATOS DE PROCEDIMIENTOS MENORES & BIOPSIAS (ETAPA B - PUNTO 6)
@@ -2803,7 +2986,8 @@ export const useMedicalStore = create<MedicalStoreState>()(
         deleteMinorProcedureFromSupabase(id);
       },
       getMinorProceduresByPatientId: (patientId) => {
-        return (get().minorProcedures || []).filter((p) => p.patientId === patientId);
+        const targetUuid = getPatientUuid(patientId);
+        return (get().minorProcedures || []).filter((p) => p.patientId === patientId || getPatientUuid(p.patientId) === targetUuid);
       },
 
       // TARIFAS COTIZADAS & PRESUPUESTOS POR WHATSAPP (ETAPA C - PUNTO 3)
@@ -2828,7 +3012,8 @@ export const useMedicalStore = create<MedicalStoreState>()(
         deleteQuoteFromSupabase(id);
       },
       getQuotesByPatientId: (patientId) => {
-        return (get().procedureQuotes || []).filter((q) => q.patientId === patientId);
+        const targetUuid = getPatientUuid(patientId);
+        return (get().procedureQuotes || []).filter((q) => q.patientId === patientId || getPatientUuid(q.patientId) === targetUuid);
       },
 
       // AGENDA DE CITAS Y DISPONIBILIDAD (ETAPA C - PUNTOS 10 Y 11)
@@ -2871,7 +3056,8 @@ export const useMedicalStore = create<MedicalStoreState>()(
         return (get().appointments || []).filter((a) => a.doctorId === doctorId);
       },
       getAppointmentsByPatientId: (patientId) => {
-        return (get().appointments || []).filter((a) => a.patientId === patientId);
+        const targetUuid = getPatientUuid(patientId);
+        return (get().appointments || []).filter((a) => a.patientId === patientId || getPatientUuid(a.patientId) === targetUuid);
       },
       getAppointmentsByDate: (date) => {
         return (get().appointments || []).filter((a) => a.appointmentDate === date);
@@ -2893,7 +3079,8 @@ export const useMedicalStore = create<MedicalStoreState>()(
         await deleteWordHistoryFromSupabase(id, doc?.fileName);
       },
       getWordHistoriesByPatientId: (patientId) => {
-        return (get().wordHistories || []).filter((w) => w.patientId === patientId);
+        const targetUuid = getPatientUuid(patientId);
+        return (get().wordHistories || []).filter((w) => w.patientId === patientId || getPatientUuid(w.patientId) === targetUuid);
       },
 
       // RESET

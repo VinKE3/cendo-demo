@@ -92,6 +92,7 @@ ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS insurance_info TEXT DEFAULT
 -- Sincronizar dni <-> document_number si alguno estaba nulo:
 UPDATE public.patients SET dni = document_number WHERE dni IS NULL AND document_number IS NOT NULL;
 UPDATE public.patients SET document_number = dni WHERE document_number IS NULL AND dni IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_patients_dni ON public.patients (dni) WHERE dni IS NOT NULL;
 
 -- 4. TABLA: patient_backgrounds (Antecedentes Gineco-Obstétricos & Patológicos)
 CREATE TABLE IF NOT EXISTS public.patient_backgrounds (

@@ -28,6 +28,8 @@ import {
   WordHistoryDocument,
   DoctorProfile,
   DoctorRole,
+  ProcedureTariff,
+  MedicationVademecum,
 } from "@/types/medical";
 
 export function ensureUuid(id: string): string {
@@ -83,6 +85,10 @@ export async function syncPatientToSupabase(patient: Patient): Promise<boolean> 
 
     const uuid = getPatientUuid(patient.id, patient.dni);
 
+    const cleanBirthDate = patient.birthDate
+      ? (patient.birthDate.match(/\d{4}-\d{2}-\d{2}/)?.[0] || null)
+      : null;
+
     const { error } = await supabase.from("patients").upsert(
       {
         id: uuid,
@@ -92,7 +98,7 @@ export async function syncPatientToSupabase(patient: Patient): Promise<boolean> 
         first_name: patient.firstName,
         last_name: patient.lastName,
         full_name: `${(patient.lastName || "").trim().toUpperCase()}, ${(patient.firstName || "").trim().toUpperCase()}`,
-        birth_date: patient.birthDate,
+        birth_date: cleanBirthDate,
         phone: patient.phone || null,
         email: patient.email || null,
         address: patient.address || null,
@@ -105,7 +111,7 @@ export async function syncPatientToSupabase(patient: Patient): Promise<boolean> 
         insurance_info: "Particular",
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "dni" }
+      { onConflict: "id" }
     );
 
     if (error) {
@@ -160,10 +166,14 @@ export async function syncBackgroundToSupabase(bg: PatientBackground): Promise<b
       return false;
     }
 
+    const patientUuid = getPatientUuid(bg.patientId);
+    const bgUuid = ensureUuid(bg.id);
+    const cleanLmp = bg.lastMenstrualPeriod ? (bg.lastMenstrualPeriod.match(/\d{4}-\d{2}-\d{2}/)?.[0] || null) : null;
+
     const { error } = await supabase.from("patient_backgrounds").upsert(
       {
-        id: bg.id,
-        patient_id: bg.patientId,
+        id: bgUuid,
+        patient_id: patientUuid,
         menarche: bg.menarche,
         sexual_debut_age: bg.sexualDebutAge,
         sexual_partners_count: bg.sexualPartnersCount,
@@ -171,7 +181,7 @@ export async function syncBackgroundToSupabase(bg: PatientBackground): Promise<b
         sti_history: bg.stiHistory || null,
         obstetric_formula: bg.obstetricFormula,
         contraceptive_method: bg.contraceptiveMethod,
-        last_menstrual_period: bg.lastMenstrualPeriod || null,
+        last_menstrual_period: cleanLmp,
         pap_history: bg.papHistory,
         vph_test_history: bg.vphTestHistory,
         has_diabetes: bg.hasDiabetes || null,
@@ -204,24 +214,52 @@ export async function syncColposcopyToSupabase(report: ColposcopyReport): Promis
       return false;
     }
 
+    const colpoUuid = ensureUuid(report.id);
+    const patientUuid = getPatientUuid(report.patientId);
+    const cleanDate = report.reportDate ? (report.reportDate.match(/\d{4}-\d{2}-\d{2}/)?.[0] || new Date().toISOString().slice(0, 10)) : new Date().toISOString().slice(0, 10);
+
     const { error } = await supabase.from("colposcopy_reports").upsert(
       {
-        id: report.id,
-        patient_id: report.patientId,
-        report_date: report.reportDate,
+        id: colpoUuid,
+        patient_id: patientUuid,
+        report_date: cleanDate,
         adequate_colposcopy: report.adequateColposcopy,
+        inadequate_reason: report.inadequateReason || null,
         squamocolumnar_junction_visible: report.squamocolumnarJunctionVisible,
         transformation_zone_type: report.transformationZoneType,
         mature_squamous_epithelium: report.matureSquamousEpithelium,
         ectopy: report.ectopy,
+        naboth_cyst: !!report.nabothCyst,
+        crypt_openings: !!report.cryptOpenings,
+        deciduosis: !!report.deciduosis,
         thin_acetowhite_epithelium: report.thinAcetowhiteEpithelium,
         dense_acetowhite_epithelium: report.denseAcetowhiteEpithelium,
+        rapid_acetowhite: !!report.rapidAcetowhite,
+        thickened_glands: !!report.thickenedGlands,
         irregular_border: report.irregularBorder,
         fine_mosaic: report.fineMosaic,
         coarse_mosaic: report.coarseMosaic,
         fine_punctation: report.finePunctation,
         coarse_punctation: report.coarsePunctation,
+        sharp_borders: !!report.sharpBorders,
+        inner_border_sign: !!report.innerBorderSign,
+        ridge_sign: !!report.ridgeSign,
+        leukoplakia: !!report.leukoplakia,
+        erosion: !!report.erosion,
         atypical_vessels: report.atypicalVessels,
+        fragile_vessels: !!report.fragileVessels,
+        irregular_surface: !!report.irregularSurface,
+        exophytic_lesion: !!report.exophyticLesion,
+        necrosis: !!report.necrosis,
+        nodular_tumor: !!report.nodularTumor,
+        congenital_tz: !!report.congenitalTZ,
+        condyloma: !!report.condyloma,
+        polyp: !!report.polyp,
+        inflammation: !!report.inflammation,
+        stenosis: !!report.stenosis,
+        post_treatment_anomaly: !!report.postTreatmentAnomaly,
+        endometriosis_foci: !!report.endometriosisFoci,
+        other_findings: report.otherFindings || null,
         schiller_test: report.schillerTest,
         cervical_biopsy_taken: report.cervicalBiopsyTaken,
         biopsy_clock_hours: report.biopsyClockHours || [],
@@ -239,6 +277,133 @@ export async function syncColposcopyToSupabase(report: ColposcopyReport): Promis
       return false;
     }
     return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteColposcopyFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("colposcopy_reports").delete().eq("id", targetId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncCheckupToSupabase(checkup: ClinicalCheckup): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const patientUuid = getPatientUuid(checkup.patientId);
+    const checkupUuid = ensureUuid(checkup.id);
+    const cleanDate = checkup.checkupDate ? (checkup.checkupDate.match(/\d{4}-\d{2}-\d{2}/)?.[0] || new Date().toISOString().slice(0, 10)) : new Date().toISOString().slice(0, 10);
+
+    const { error } = await supabase.from("clinical_checkups").upsert({
+      id: checkupUuid,
+      patient_id: patientUuid,
+      checkup_date: cleanDate,
+      reason_for_consultation: checkup.reasonForConsultation,
+      breast_ultrasound_findings: checkup.breastUltrasoundFindings,
+      breast_ultrasound_birads: checkup.breastUltrasoundBirads,
+      breast_lesion_measurements: checkup.breastLesionMeasurements,
+      transvaginal_ultrasound_findings: checkup.transvaginalUltrasoundFindings,
+      uterus_measurements: checkup.uterusMeasurements,
+      endometrium_thickness_mm: checkup.endometriumThicknessMm,
+      ovaries_findings: checkup.ovariesFindings,
+      pap_result: checkup.papResult,
+      vph_result: checkup.vphResult,
+      conclusions: checkup.conclusions,
+      medical_prescription: checkup.medicalPrescription,
+    }, { onConflict: "id" });
+
+    if (error) console.warn("Aviso sync chequeo Supabase:", error.message);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteCheckupFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("clinical_checkups").delete().eq("id", targetId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncTariffToSupabase(tariff: ProcedureTariff): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const tariffUuid = ensureUuid(tariff.id);
+
+    const { error } = await supabase.from("procedures_tariff").upsert({
+      id: tariffUuid,
+      code: tariff.code,
+      name: tariff.name,
+      category: tariff.category,
+      description: tariff.description,
+      price: tariff.price,
+      active: tariff.active,
+    }, { onConflict: "code" });
+
+    if (error) console.warn("Aviso sync tarifario Supabase:", error.message);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteTariffFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("procedures_tariff").delete().eq("id", targetId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncVademecumToSupabase(item: MedicationVademecum): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const itemUuid = ensureUuid(item.id);
+
+    const { error } = await supabase.from("medications_vademecum").upsert({
+      id: itemUuid,
+      generic_name: item.genericName,
+      atc_code: item.atcCode || null,
+      therapeutic_group: item.therapeuticGroup,
+      commercial_brands: item.commercialBrands || [],
+      indications: item.indications,
+      contraindications: item.contraindications,
+    }, { onConflict: "id" });
+
+    if (error) console.warn("Aviso sync vademecum Supabase:", error.message);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteVademecumFromSupabase(id: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
+    const targetId = ensureUuid(id);
+    const { error } = await supabase.from("medications_vademecum").delete().eq("id", targetId);
+    return !error;
   } catch {
     return false;
   }
@@ -947,5 +1112,486 @@ export async function authenticateWithSupabase(
   } catch (err: any) {
     console.error("authenticateWithSupabase catch:", err);
     return { success: false, error: err.message || "Error al autenticar." };
+  }
+}
+
+// ============================================================================
+// CARGA Y SINCRONIZACIÓN COMPLETA DESDE LA NUBE (17 TABLAS EN SUPABASE)
+// ============================================================================
+
+export interface AllSupabaseData {
+  doctors?: DoctorProfile[];
+  patients?: Patient[];
+  patientBackgrounds?: Record<string, PatientBackground>;
+  consultations?: MedicalConsultation[];
+  ultrasoundReports?: UltrasoundReport[];
+  colposcopyReports?: ColposcopyReport[];
+  clinicalCheckups?: ClinicalCheckup[];
+  minorProcedures?: MinorProcedureReport[];
+  prescriptions?: MedicalPrescription[];
+  labOrders?: LabOrder[];
+  prenatalCards?: PrenatalCard[];
+  patientDocuments?: PatientDocument[];
+  procedureQuotes?: ProcedureQuote[];
+  appointments?: MedicalAppointment[];
+  wordHistories?: WordHistoryDocument[];
+  proceduresTariff?: ProcedureTariff[];
+  medicationsVademecum?: MedicationVademecum[];
+}
+
+export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null> {
+  try {
+    const supabase = createClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return null;
+    }
+
+    const [
+      doctorsRes,
+      patientsRes,
+      backgroundsRes,
+      consultationsRes,
+      ultrasoundsRes,
+      colposcopyRes,
+      checkupsRes,
+      prescriptionsRes,
+      labOrdersRes,
+      prenatalCardsRes,
+      documentsRes,
+      minorProceduresRes,
+      quotesRes,
+      appointmentsRes,
+      wordHistoriesRes,
+      tariffsRes,
+      vademecumRes,
+    ] = await Promise.allSettled([
+      supabase.from("profiles").select("*").order("created_at", { ascending: true }),
+      supabase.from("patients").select("*").order("created_at", { ascending: false }),
+      supabase.from("patient_backgrounds").select("*"),
+      supabase.from("medical_consultations").select("*").order("consultation_date", { ascending: false }),
+      supabase.from("ultrasound_reports").select("*").order("report_date", { ascending: false }),
+      supabase.from("colposcopy_reports").select("*").order("report_date", { ascending: false }),
+      supabase.from("clinical_checkups").select("*").order("checkup_date", { ascending: false }),
+      supabase.from("medical_prescriptions").select("*").order("prescription_date", { ascending: false }),
+      supabase.from("lab_orders").select("*").order("order_date", { ascending: false }),
+      supabase.from("prenatal_cards").select("*").order("created_at", { ascending: false }),
+      supabase.from("patient_documents").select("*").order("created_at", { ascending: false }),
+      supabase.from("minor_procedures").select("*").order("procedure_date", { ascending: false }),
+      supabase.from("procedure_quotes").select("*").order("quote_date", { ascending: false }),
+      supabase.from("medical_appointments").select("*").order("appointment_date", { ascending: false }),
+      supabase.from("word_history_documents").select("*").order("created_at", { ascending: false }),
+      supabase.from("procedures_tariff").select("*").order("code", { ascending: true }),
+      supabase.from("medications_vademecum").select("*").order("generic_name", { ascending: true }),
+    ]);
+
+    const result: AllSupabaseData = {};
+
+    // 1. Doctors
+    if (doctorsRes.status === "fulfilled" && doctorsRes.value.data && doctorsRes.value.data.length > 0) {
+      result.doctors = doctorsRes.value.data.map(profileRowToDoctorProfile);
+    }
+
+    // 2. Patients
+    const patientLookup = new Map<string, { fullName: string; dni: string; phone: string }>();
+    if (patientsRes.status === "fulfilled" && patientsRes.value.data && patientsRes.value.data.length > 0) {
+      result.patients = patientsRes.value.data.map((row: any) => {
+        const p: Patient = {
+          id: row.id,
+          dni: row.dni || row.document_number || "",
+          firstName: row.first_name || (row.full_name ? row.full_name.split(",")[1]?.trim() : "") || "",
+          lastName: row.last_name || (row.full_name ? row.full_name.split(",")[0]?.trim() : "") || "",
+          birthDate: row.birth_date ? String(row.birth_date).slice(0, 10) : "",
+          age: Number(row.age) || 0,
+          phone: row.phone || "",
+          email: row.email || "",
+          address: row.address || "",
+          civilStatus: row.civil_status || "Soltera",
+          occupation: row.occupation || "",
+          educationLevel: row.education_level || undefined,
+          birthPlace: row.birth_place || undefined,
+          religion: row.religion || undefined,
+          insuranceInfo: row.insurance_info || "Particular",
+          createdAt: row.created_at || new Date().toISOString(),
+          updatedAt: row.updated_at || new Date().toISOString(),
+        };
+        const fullName = `${p.lastName}, ${p.firstName}`.trim();
+        patientLookup.set(p.id, { fullName, dni: p.dni, phone: p.phone });
+        if (p.dni) {
+          patientLookup.set(p.dni, { fullName, dni: p.dni, phone: p.phone });
+        }
+        return p;
+      });
+    }
+
+    // 3. Backgrounds
+    if (backgroundsRes.status === "fulfilled" && backgroundsRes.value.data && backgroundsRes.value.data.length > 0) {
+      const bgs: Record<string, PatientBackground> = {};
+      backgroundsRes.value.data.forEach((row: any) => {
+        const bg: PatientBackground = {
+          id: row.id,
+          patientId: row.patient_id,
+          menarche: row.menarche != null ? Number(row.menarche) : undefined,
+          sexualDebutAge: row.sexual_debut_age != null ? Number(row.sexual_debut_age) : undefined,
+          sexualPartnersCount: row.sexual_partners_count != null ? Number(row.sexual_partners_count) : undefined,
+          catamenialRegimen: row.catamenial_regimen || "28/4",
+          stiHistory: row.sti_history || "Niega ITS",
+          obstetricFormula: row.obstetric_formula || "G0 P0000",
+          contraceptiveMethod: row.contraceptive_method || "Ninguno",
+          lastMenstrualPeriod: row.last_menstrual_period ? String(row.last_menstrual_period).slice(0, 10) : "",
+          papHistory: row.pap_history || "Sin antecedentes",
+          vphTestHistory: row.vph_test_history || "Sin antecedentes",
+          hasDiabetes: row.has_diabetes || "Niega",
+          hasHypertension: row.has_hypertension || "Niega",
+          hasAsthma: row.has_asthma || "Niega",
+          medicalAllergies: row.medical_allergies || "Niega alergias medicamentosas",
+          surgeriesHistory: row.surgeries_history || "Niega cirugías previas",
+          familyHistory: row.family_history || "Sin antecedentes familiares de relevancia",
+          otherPathologies: row.other_pathologies || undefined,
+          notes: row.notes || undefined,
+          updatedAt: row.updated_at || new Date().toISOString(),
+        };
+        bgs[row.patient_id] = bg;
+      });
+      result.patientBackgrounds = bgs;
+    }
+
+    // 4. Consultations
+    if (consultationsRes.status === "fulfilled" && consultationsRes.value.data && consultationsRes.value.data.length > 0) {
+      result.consultations = consultationsRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        doctorId: row.doctor_id || "doc-patrick-jacinto",
+        doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+        doctorCmp: row.doctor_cmp || "61693",
+        doctorRne: row.doctor_rne || undefined,
+        consultationDate: row.consultation_date ? String(row.consultation_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        reasonForVisit: row.reason_for_visit || "",
+        illnessTime: row.illness_time || undefined,
+        symptoms: row.symptoms || undefined,
+        vitalSigns: typeof row.vital_signs === "string" ? JSON.parse(row.vital_signs) : (row.vital_signs || {
+          bloodPressure: "110/70",
+          heartRate: 72,
+          temperature: 36.5,
+          weightKg: 60,
+          heightCm: 160,
+          bmi: 23.4,
+        }),
+        physicalExam: typeof row.physical_exam === "string" ? JSON.parse(row.physical_exam) : (row.physical_exam || {
+          generalExam: "Buen estado general.",
+          breastsExam: "Sin nódulos palpables.",
+          externalGenitalia: "Normal.",
+          speculoscopy: "Cérvix eutrófico.",
+          bimanualPalpation: "Útero de tamaño conservado.",
+        }),
+        diagnosis: row.diagnosis || "",
+        cie10Code: row.cie10_code || undefined,
+        treatmentPlan: row.treatment_plan || "",
+        auxiliaryExams: row.auxiliary_exams || undefined,
+        prescriptionNotes: row.prescription_notes || undefined,
+        nextAppointmentDate: row.next_appointment_date ? String(row.next_appointment_date).slice(0, 10) : undefined,
+        createdAt: row.created_at || new Date().toISOString(),
+        updatedAt: row.updated_at || new Date().toISOString(),
+      }));
+    }
+
+    // 5. Ultrasounds
+    if (ultrasoundsRes.status === "fulfilled" && ultrasoundsRes.value.data && ultrasoundsRes.value.data.length > 0) {
+      result.ultrasoundReports = ultrasoundsRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        doctorId: row.doctor_id || "doc-patrick-jacinto",
+        doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+        doctorCmp: row.doctor_cmp || "61693",
+        doctorRne: row.doctor_rne || undefined,
+        reportDate: row.report_date ? String(row.report_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        ultrasoundType: row.ultrasound_type || "TRANSVAGINAL",
+        indication: row.indication || "",
+        findings: typeof row.findings === "string" ? JSON.parse(row.findings) : (row.findings || {}),
+        conclusion: row.conclusion || "",
+        recommendations: row.recommendations || undefined,
+        images: Array.isArray(row.images) ? row.images : (typeof row.images === "string" ? JSON.parse(row.images) : []),
+        createdAt: row.created_at || new Date().toISOString(),
+        updatedAt: row.updated_at || new Date().toISOString(),
+      }));
+    }
+
+    // 6. Colposcopy
+    if (colposcopyRes.status === "fulfilled" && colposcopyRes.value.data && colposcopyRes.value.data.length > 0) {
+      result.colposcopyReports = colposcopyRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        reportDate: row.report_date ? String(row.report_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        adequateColposcopy: row.adequate_colposcopy !== false,
+        inadequateReason: row.inadequate_reason || undefined,
+        squamocolumnarJunctionVisible: row.squamocolumnar_junction_visible || "Visible",
+        transformationZoneType: row.transformation_zone_type || "Tipo 1",
+        matureSquamousEpithelium: !!row.mature_squamous_epithelium,
+        ectopy: !!row.ectopy,
+        nabothCyst: !!row.naboth_cyst,
+        cryptOpenings: !!row.crypt_openings,
+        deciduosis: !!row.deciduosis,
+        thinAcetowhiteEpithelium: !!row.thin_acetowhite_epithelium,
+        denseAcetowhiteEpithelium: !!row.dense_acetowhite_epithelium,
+        rapidAcetowhite: !!row.rapid_acetowhite,
+        thickenedGlands: !!row.thickened_glands,
+        irregularBorder: !!row.irregular_border,
+        fineMosaic: !!row.fine_mosaic,
+        coarseMosaic: !!row.coarse_mosaic,
+        finePunctation: !!row.fine_punctation,
+        coarsePunctation: !!row.coarse_punctation,
+        sharpBorders: !!row.sharp_borders,
+        innerBorderSign: !!row.inner_border_sign,
+        ridgeSign: !!row.ridge_sign,
+        leukoplakia: !!row.leukoplakia,
+        erosion: !!row.erosion,
+        atypicalVessels: !!row.atypical_vessels,
+        fragileVessels: !!row.fragile_vessels,
+        irregularSurface: !!row.irregular_surface,
+        exophyticLesion: !!row.exophytic_lesion,
+        necrosis: !!row.necrosis,
+        nodularTumor: !!row.nodular_tumor,
+        congenitalTZ: !!row.congenital_tz,
+        condyloma: !!row.condyloma,
+        polyp: !!row.polyp,
+        inflammation: !!row.inflammation,
+        stenosis: !!row.stenosis,
+        postTreatmentAnomaly: !!row.post_treatment_anomaly,
+        endometriosisFoci: !!row.endometriosis_foci,
+        otherFindings: row.other_findings || undefined,
+        schillerTest: row.schiller_test || "Negativo (Lugol Caoba)",
+        cervicalBiopsyTaken: !!row.cervical_biopsy_taken,
+        biopsyClockHours: Array.isArray(row.biopsy_clock_hours) ? row.biopsy_clock_hours : (typeof row.biopsy_clock_hours === "string" ? JSON.parse(row.biopsy_clock_hours) : []),
+        images: Array.isArray(row.images) ? row.images : (typeof row.images === "string" ? JSON.parse(row.images) : []),
+        diagnosis: row.diagnosis || "",
+        planRecommendations: row.plan_recommendations || "",
+        cie10Code: row.cie10_code || "N87.9",
+        doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+        createdAt: row.created_at || new Date().toISOString(),
+      }));
+    }
+
+    // 7. Clinical Checkups
+    if (checkupsRes.status === "fulfilled" && checkupsRes.value.data && checkupsRes.value.data.length > 0) {
+      result.clinicalCheckups = checkupsRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        checkupDate: row.checkup_date ? String(row.checkup_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        reasonForConsultation: row.reason_for_consultation || "",
+        breastUltrasoundFindings: row.breast_ultrasound_findings || "",
+        breastUltrasoundBirads: row.breast_ultrasound_birads || "BI-RADS 1",
+        breastLesionMeasurements: row.breast_lesion_measurements || "Sin lesiones focales",
+        transvaginalUltrasoundFindings: row.transvaginal_ultrasound_findings || "",
+        uterusMeasurements: row.uterus_measurements || "",
+        endometriumThicknessMm: Number(row.endometrium_thickness_mm) || 0,
+        ovariesFindings: row.ovaries_findings || "",
+        papResult: row.pap_result || "",
+        vphResult: row.vph_result || "",
+        conclusions: row.conclusions || "",
+        medicalPrescription: row.medical_prescription || "",
+        createdAt: row.created_at || new Date().toISOString(),
+      }));
+    }
+
+    // 8. Minor Procedures
+    if (minorProceduresRes.status === "fulfilled" && minorProceduresRes.value.data && minorProceduresRes.value.data.length > 0) {
+      result.minorProcedures = minorProceduresRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        doctorId: row.doctor_id || "doc-patrick-jacinto",
+        doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+        doctorCmp: row.doctor_cmp || "61693",
+        doctorRne: row.doctor_rne || undefined,
+        procedureDate: row.procedure_date ? String(row.procedure_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        procedureType: row.procedure_type || "BIOPSIA_CERVICAL",
+        preOpDiagnosis: row.pre_op_diagnosis || "",
+        postOpDiagnosis: row.post_op_diagnosis || "",
+        cie10Code: row.cie10_code || undefined,
+        anesthesiaType: row.anesthesia_type || "Local (Lidocaína 2%)",
+        procedureDetails: typeof row.procedure_details === "string" ? JSON.parse(row.procedure_details) : (row.procedure_details || {
+          asepsisTechnique: "Asepsia y antisepsia con povidona yodada.",
+          specimenSentToPathology: true,
+          bleedingAmount: "Mínimo (< 10 ml)",
+          hemostasisMethod: "Solución de Monsel",
+          complications: "Sin complicaciones.",
+        }),
+        postOpIndications: row.post_op_indications || "",
+        medicationsPrescribed: row.medications_prescribed || undefined,
+        nextControlDate: row.next_control_date ? String(row.next_control_date).slice(0, 10) : undefined,
+        createdAt: row.created_at || new Date().toISOString(),
+        updatedAt: row.updated_at || new Date().toISOString(),
+      }));
+    }
+
+    // 9. Prescriptions
+    if (prescriptionsRes.status === "fulfilled" && prescriptionsRes.value.data && prescriptionsRes.value.data.length > 0) {
+      result.prescriptions = prescriptionsRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        doctorId: row.doctor_id || "doc-patrick-jacinto",
+        doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+        doctorCmp: row.doctor_cmp || "61693",
+        doctorRne: row.doctor_rne || "",
+        prescriptionDate: row.prescription_date ? String(row.prescription_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        diagnosis: row.diagnosis || "",
+        cie10Code: row.cie10_code || undefined,
+        items: Array.isArray(row.items) ? row.items : (typeof row.items === "string" ? JSON.parse(row.items) : []),
+        generalIndications: row.general_indications || undefined,
+        nextAppointmentDate: row.next_appointment_date ? String(row.next_appointment_date).slice(0, 10) : undefined,
+        createdAt: row.created_at || new Date().toISOString(),
+        updatedAt: row.updated_at || new Date().toISOString(),
+      }));
+    }
+
+    // 10. Lab Orders
+    if (labOrdersRes.status === "fulfilled" && labOrdersRes.value.data && labOrdersRes.value.data.length > 0) {
+      result.labOrders = labOrdersRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        doctorId: row.doctor_id || "doc-patrick-jacinto",
+        doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+        doctorCmp: row.doctor_cmp || "61693",
+        doctorRne: row.doctor_rne || "",
+        orderDate: row.order_date ? String(row.order_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        diagnosis: row.diagnosis || "",
+        cie10Code: row.cie10_code || undefined,
+        items: Array.isArray(row.items) ? row.items : (typeof row.items === "string" ? JSON.parse(row.items) : []),
+        customTests: row.custom_tests || undefined,
+        urgency: row.urgency || "Rutina",
+        patientInstructions: row.patient_instructions || undefined,
+        createdAt: row.created_at || new Date().toISOString(),
+        updatedAt: row.updated_at || new Date().toISOString(),
+      }));
+    }
+
+    // 11. Prenatal Cards
+    if (prenatalCardsRes.status === "fulfilled" && prenatalCardsRes.value.data && prenatalCardsRes.value.data.length > 0) {
+      result.prenatalCards = prenatalCardsRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        clinicEstablishment: row.clinic_establishment || "CENDO - Centro de Endometriosis",
+        attendingDoctorId: row.attending_doctor_id || "doc-patrick-jacinto",
+        attendingDoctorName: row.attending_doctor_name || "Dr. Patrick Jacinto Gomero",
+        baseline: typeof row.baseline === "string" ? JSON.parse(row.baseline) : (row.baseline || {}),
+        visits: Array.isArray(row.visits) ? row.visits : (typeof row.visits === "string" ? JSON.parse(row.visits) : []),
+        maternalPathologies: Array.isArray(row.maternal_pathologies) ? row.maternal_pathologies : (typeof row.maternal_pathologies === "string" ? JSON.parse(row.maternal_pathologies) : []),
+        createdAt: row.created_at || new Date().toISOString(),
+        updatedAt: row.updated_at || new Date().toISOString(),
+      }));
+    }
+
+    // 12. Documents
+    if (documentsRes.status === "fulfilled" && documentsRes.value.data && documentsRes.value.data.length > 0) {
+      result.patientDocuments = documentsRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        documentType: row.document_type || "OTRO",
+        title: row.title || "Documento Clínico",
+        fileName: row.file_name || "documento.pdf",
+        fileUrl: row.file_url || "",
+        filePath: row.file_path || undefined,
+        fileSize: row.file_size != null ? Number(row.file_size) : undefined,
+        mimeType: row.mime_type || "application/pdf",
+        notes: row.notes || undefined,
+        uploadedBy: row.uploaded_by || undefined,
+        createdAt: row.created_at || new Date().toISOString(),
+      }));
+    }
+
+    // 13. Procedure Quotes
+    if (quotesRes.status === "fulfilled" && quotesRes.value.data && quotesRes.value.data.length > 0) {
+      result.procedureQuotes = quotesRes.value.data.map((row: any) => {
+        const pat = patientLookup.get(row.patient_id);
+        return {
+          id: row.id,
+          patientId: row.patient_id,
+          patientName: pat?.fullName || "Paciente CENDO",
+          patientPhone: pat?.phone || "",
+          doctorId: row.doctor_id || "doc-patrick-jacinto",
+          doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+          quoteDate: row.quote_date ? String(row.quote_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+          validityDays: Number(row.validity_days) || 15,
+          items: Array.isArray(row.items) ? row.items : (typeof row.items === "string" ? JSON.parse(row.items) : []),
+          subtotal: Number(row.subtotal) || 0,
+          discountTotal: Number(row.discount_total) || 0,
+          total: Number(row.total) || 0,
+          paymentTerms: row.payment_terms || "Al contado o transferencia.",
+          notes: row.notes || undefined,
+          createdAt: row.created_at || new Date().toISOString(),
+        };
+      });
+    }
+
+    // 14. Appointments
+    if (appointmentsRes.status === "fulfilled" && appointmentsRes.value.data && appointmentsRes.value.data.length > 0) {
+      result.appointments = appointmentsRes.value.data.map((row: any) => {
+        const pat = patientLookup.get(row.patient_id);
+        return {
+          id: row.id,
+          patientId: row.patient_id,
+          patientName: pat?.fullName || "Paciente CENDO",
+          patientDni: pat?.dni || "",
+          patientPhone: pat?.phone || "",
+          doctorId: row.doctor_id || "doc-patrick-jacinto",
+          doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+          appointmentDate: row.appointment_date ? String(row.appointment_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+          appointmentTime: row.appointment_time || "10:00",
+          durationMinutes: Number(row.duration_minutes) || 30,
+          appointmentType: row.appointment_type || "CONSULTA_PRIMERA_VEZ",
+          reason: row.reason || "",
+          status: row.status || "CONFIRMADA",
+          notes: row.notes || undefined,
+          reminderSent: !!row.reminder_sent,
+          createdAt: row.created_at || new Date().toISOString(),
+          updatedAt: row.updated_at || new Date().toISOString(),
+        };
+      });
+    }
+
+    // 15. Word Histories
+    if (wordHistoriesRes.status === "fulfilled" && wordHistoriesRes.value.data && wordHistoriesRes.value.data.length > 0) {
+      result.wordHistories = wordHistoriesRes.value.data.map((row: any) => ({
+        id: row.id,
+        patientId: row.patient_id,
+        fileName: row.file_name || "historia.docx",
+        fileSize: Number(row.file_size) || 0,
+        fileUrl: row.file_url || "",
+        extractedText: row.extracted_text || undefined,
+        notes: row.notes || undefined,
+        createdAt: row.created_at || new Date().toISOString(),
+      }));
+    }
+
+    // 16. Tariff
+    if (tariffsRes.status === "fulfilled" && tariffsRes.value.data && tariffsRes.value.data.length > 0) {
+      result.proceduresTariff = tariffsRes.value.data.map((row: any) => ({
+        id: row.id,
+        code: row.code,
+        name: row.name,
+        category: row.category || "Procedimiento",
+        description: row.description || "",
+        price: Number(row.price) || 0,
+        active: row.active !== false,
+        createdAt: row.created_at || new Date().toISOString(),
+      }));
+    }
+
+    // 17. Vademecum
+    if (vademecumRes.status === "fulfilled" && vademecumRes.value.data && vademecumRes.value.data.length > 0) {
+      result.medicationsVademecum = vademecumRes.value.data.map((row: any) => ({
+        id: row.id,
+        genericName: row.generic_name,
+        atcCode: row.atc_code || "",
+        therapeuticGroup: row.therapeutic_group || "",
+        commercialBrands: Array.isArray(row.commercial_brands) ? row.commercial_brands : (typeof row.commercial_brands === "string" ? JSON.parse(row.commercial_brands) : []),
+        indications: row.indications || "",
+        contraindications: row.contraindications || "",
+        createdAt: row.created_at || new Date().toISOString(),
+      }));
+    }
+
+    return result;
+  } catch (err) {
+    console.error("fetchAllDataFromSupabase critical error:", err);
+    return null;
   }
 }

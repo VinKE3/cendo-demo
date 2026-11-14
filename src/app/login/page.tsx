@@ -127,6 +127,9 @@ export default function LoginPage() {
       const doc = result.doctor;
       const roleText = doc.role === "director" ? "Director Médico" : "Médico Especialista";
 
+      // Cargar en segundo plano toda la información médica actualizada desde Supabase Cloud
+      useMedicalStore.getState().loadAllFromDatabase();
+
       await Swal.fire({
         icon: "success",
         title: `¡Bienvenido(a), ${doc.doctorTitle} ${doc.fullName}!`,
