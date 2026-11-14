@@ -3,33 +3,15 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import Swal from "sweetalert2";
 import { X, Receipt, Check, AlertCircle } from "lucide-react";
-import { ProcedureTariff } from "@/types/medical";
+import {
+  ProcedureTariff,
+  tariffSchema,
+  TariffFormData,
+  checkDuplicateTariff,
+} from "@/modules/tarifario";
 import { useMedicalStore } from "@/store/useMedicalStore";
-
-const tariffSchema = z.object({
-  code: z
-    .string()
-    .min(2, "El código debe tener al menos 2 caracteres")
-    .max(15, "El código no debe exceder 15 caracteres")
-    .toUpperCase(),
-  name: z
-    .string()
-    .min(3, "El nombre del procedimiento debe tener al menos 3 caracteres"),
-  category: z.enum(["Consulta", "Procedimiento", "Ecografía", "Laboratorio", "Paquete"], {
-    errorMap: () => ({ message: "Seleccione una categoría válida" }),
-  }),
-  description: z.string().default(""),
-  price: z.coerce
-    .number({ invalid_type_error: "Ingrese un precio numérico válido" })
-    .positive("El precio oficial debe ser mayor a S/ 0.00")
-    .min(1, "El precio mínimo es S/ 1.00"),
-  active: z.boolean().default(true),
-});
-
-type TariffFormData = z.infer<typeof tariffSchema>;
 
 interface TariffModalProps {
   isOpen: boolean;
@@ -38,7 +20,7 @@ interface TariffModalProps {
 }
 
 export function TariffModal({ isOpen, onClose, initialData }: TariffModalProps) {
-  const { addTariffItem, updateTariffItem } = useMedicalStore();
+  const { tariffItems, addTariffItem, updateTariffItem } = useMedicalStore();
   const isEditing = Boolean(initialData);
 
   const {
@@ -98,38 +80,75 @@ export function TariffModal({ isOpen, onClose, initialData }: TariffModalProps) 
 
   const onSubmit = async (data: TariffFormData) => {
     try {
+      // 3-Layer Validation: Validación anti-duplicados a nivel UI / Módulo
+      const dupCheck = checkDuplicateTariff(
+        data.code,
+        data.name,
+        tariffItems,
+        isEditing ? initialData?.id : undefined
+      );
+
+      if (dupCheck.isDuplicate) {
+        const result = await Swal.fire({
+          icon: "warning",
+          title: "Código o Prestación Duplicada",
+          html: `
+            <div class="text-left space-y-2 text-xs">
+              <p class="font-medium text-slate-700">${dupCheck.reason}</p>
+              <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                <strong>Recomendación médica:</strong> Verifique el catálogo para no generar duplicidad en las cotizaciones y facturaciones de los pacientes.
+              </div>
+            </div>
+          `,
+          showCancelButton: true,
+          confirmButtonColor: "#0A4D68",
+          cancelButtonColor: "#64748B",
+          confirmButtonText: "Guardar de todos modos",
+          cancelButtonText: "Cancelar y revisar",
+        });
+
+        if (!result.isConfirmed) {
+          return;
+        }
+      }
+
+      const formattedCode = data.code.trim().toUpperCase();
+      const formattedName = data.name.trim();
+      const formattedDesc = data.description.trim();
+      const formattedPrice = Number(data.price) || 0;
+
       if (isEditing && initialData) {
         updateTariffItem(initialData.id, {
-          code: data.code.trim().toUpperCase(),
-          name: data.name.trim(),
+          code: formattedCode,
+          name: formattedName,
           category: data.category,
-          description: data.description.trim(),
-          price: data.price,
+          description: formattedDesc,
+          price: formattedPrice,
           active: data.active,
         });
 
         await Swal.fire({
           icon: "success",
           title: "Tarifa Actualizada",
-          text: `El procedimiento "${data.name}" se actualizó correctamente en el tarifario.`,
+          text: `El procedimiento "${formattedName}" se actualizó correctamente en el tarifario.`,
           confirmButtonColor: "#0A4D68",
           timer: 1600,
           showConfirmButton: false,
         });
       } else {
         addTariffItem({
-          code: data.code.trim().toUpperCase(),
-          name: data.name.trim(),
+          code: formattedCode,
+          name: formattedName,
           category: data.category,
-          description: data.description.trim(),
-          price: data.price,
+          description: formattedDesc,
+          price: formattedPrice,
           active: data.active,
         });
 
         await Swal.fire({
           icon: "success",
           title: "Procedimiento Registrado",
-          text: `"${data.name}" se agregó exitosamente al tarifario oficial.`,
+          text: `"${formattedName}" se agregó exitosamente al tarifario oficial.`,
           confirmButtonColor: "#0A4D68",
           timer: 1600,
           showConfirmButton: false,
@@ -345,4 +364,3 @@ export function TariffModal({ isOpen, onClose, initialData }: TariffModalProps) 
     </div>
   );
 }
-

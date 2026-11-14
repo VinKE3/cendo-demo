@@ -148,17 +148,7 @@ export interface ClinicalCheckup {
   createdAt: string;
 }
 
-export interface ProcedureTariff {
-  id: string;
-  code: string;
-  name: string;
-  category: "Consulta" | "Procedimiento" | "Ecografía" | "Laboratorio" | "Paquete";
-  description: string;
-  price: number;
-  active: boolean;
-  createdAt: string;
-}
-
+export type { ProcedureTariff, TariffCategory } from "@/modules/tarifario";
 export type { CommercialBrand, MedicationVademecum } from "@/modules/vademecum";
 
 export type PrescriptionRoute =

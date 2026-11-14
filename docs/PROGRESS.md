@@ -23,8 +23,8 @@ Cada módulo contendrá su propio cuarteto estándar:
 ```mermaid
 flowchart LR
     Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Mod1["Módulo 1: Vademécum\n(100% Certificado)"]
-    Mod1 --> Mod2["Módulo 2: Tarifario\n(Siguiente Paso)"]
-    Mod2 --> Mod3["Módulo 3: Directorio Médico\n(Pendiente)"]
+    Mod1 --> Mod2["Módulo 2: Tarifario\n(100% Certificado)"]
+    Mod2 --> Mod3["Módulo 3: Directorio Médico\n(Siguiente Paso)"]
     Mod3 --> Fase2["Fase 2: Pacientes & Fichas\n(Pendiente)"]
     Fase2 --> Fase3["Fase 3: Actos Transaccionales\n(Pendiente)"]
 ```
@@ -69,25 +69,26 @@ flowchart LR
 ---
 
 #### 🏷️ Módulo 2: Tarifario Institucional y Procedimientos (`src/modules/tarifario/`)
-- [ ] **Estructura Modular:**
-  - [ ] `src/modules/tarifario/tarifario.types.ts`: Tipos de tarifas, categorías (Consulta, Ecografía, Procedimiento, Paquete) y precios.
-  - [ ] `src/modules/tarifario/tarifario.validator.ts`:
-    - [ ] Validación de código único (ej. `PROC-001`).
-    - [ ] Detección de nombre de procedimiento duplicado.
-    - [ ] Precio obligatorio y mayor a 0 PEN.
-  - [ ] `src/modules/tarifario/tarifario.service.ts`:
-    - [ ] `getTariffItems()`
-    - [ ] `createTariffItem()`
-    - [ ] `updateTariffItem()`
-    - [ ] `deleteTariffItem()`
-- [ ] **Base de Datos (Supabase):**
-  - [ ] Garantizar índice único en `procedures_tariff (code)` y `procedures_tariff (LOWER(TRIM(name)))`.
-- [ ] **Interfaz Gráfica (`/tarifario`):**
-  - [ ] Conexión de `/tarifario` y `TariffModal` al nuevo servicio modular.
-  - [ ] Mensaje de prevención de código o procedimiento repetido.
-- [ ] **Certificación:**
-  - [ ] Script automatizado `scripts/test-tarifario-crud.mjs` (`npm run test:tarifario`).
-  - [ ] Prueba visual en web: Crear tarifas de Consulta (S/ 180) y Colposcopía (S/ 350).
+- [x] **Estructura Modular:**
+  - [x] `src/modules/tarifario/tarifario.types.ts`: Tipos de tarifas, categorías (Consulta, Ecografía, Procedimiento, Paquete) y precios.
+  - [x] `src/modules/tarifario/tarifario.validator.ts`:
+    - [x] Validación de código único (ej. `PROC-001`).
+    - [x] Detección de nombre de procedimiento duplicado.
+    - [x] Precio obligatorio y mayor a 0 PEN.
+  - [x] `src/modules/tarifario/tarifario.service.ts`:
+    - [x] `fetchTariff()`: Consulta en vivo de tarifas.
+    - [x] `createTariffItem()`: Creación con validación en Supabase.
+    - [x] `updateTariffItem()`: Edición de precio, descripción y estado activo.
+    - [x] `deleteTariffItem()`: Eliminación segura.
+- [x] **Base de Datos (Supabase):**
+  - [x] Garantizar índice único en `procedures_tariff (code)` y `procedures_tariff (LOWER(TRIM(name)))`.
+- [x] **Interfaz Gráfica (`/tarifario`):**
+  - [x] Conexión de `/tarifario` y `TariffModal` al nuevo servicio y validador modular.
+  - [x] Mensaje de prevención de código o procedimiento repetido.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-tarifario-crud.mjs` (`npm run test:tarifario`) con 4/4 PASS (100%).
+  - [x] Inyección de 10 tarifas oficiales CENDO con `npm run seed:tarifario`.
+  - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 ---
 

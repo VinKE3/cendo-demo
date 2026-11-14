@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "test:vademecum": "node scripts/test-vademecum-crud.mjs",
-    "seed:vademecum": "node scripts/seed-vademecum.mjs"
+    "seed:vademecum": "node scripts/seed-vademecum.mjs",
+    "test:tarifario": "node scripts/test-tarifario-crud.mjs",
+    "seed:tarifario": "node scripts/seed-tarifario.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -16,7 +16,7 @@ import Swal from "sweetalert2";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { formatCurrency } from "@/lib/utils";
 import { TariffModal } from "@/components/tarifario/TariffModal";
-import { ProcedureTariff } from "@/types/medical";
+import { ProcedureTariff } from "@/modules/tarifario";
 
 export default function TarifarioPage() {
   const [filterCategory, setFilterCategory] = useState<string>("all");

@@ -403,6 +403,7 @@ CREATE TABLE IF NOT EXISTS public.procedures_tariff (
     active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_procedures_tariff_unique_name ON public.procedures_tariff (LOWER(TRIM(name)));
 
 -- 18. TABLA: medications_vademecum (Vademécum Farmacológico)
 CREATE TABLE IF NOT EXISTS public.medications_vademecum (
