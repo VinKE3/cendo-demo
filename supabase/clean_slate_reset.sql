@@ -119,6 +119,9 @@ ALTER TABLE public.word_history_documents DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.procedures_tariff DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.medications_vademecum DISABLE ROW LEVEL SECURITY;
 
+-- 4.1 ÍNDICES DE UNICIDAD E INTEGRIDAD
+CREATE UNIQUE INDEX IF NOT EXISTS idx_vademecum_unique_name ON public.medications_vademecum (LOWER(TRIM(generic_name)));
+
 -- 5. REPORTE DE CONFIRMACIÓN DE LIMPIEZA
 SELECT 
     'public.patients' as tabla, count(*) as registros_actuales FROM public.patients

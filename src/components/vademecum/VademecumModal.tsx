@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import Swal from "sweetalert2";
 import {
   X,
@@ -13,36 +12,14 @@ import {
   Check,
   AlertCircle,
   Building2,
-  Tag,
 } from "lucide-react";
-import { MedicationVademecum } from "@/types/medical";
+import {
+  MedicationVademecum,
+  vademecumSchema,
+  VademecumFormData,
+  checkDuplicateMedication,
+} from "@/modules/vademecum";
 import { useMedicalStore } from "@/store/useMedicalStore";
-
-const brandSchema = z.object({
-  brandName: z.string().min(1, "Nombre de marca requerido"),
-  laboratory: z.string().min(1, "Laboratorio requerido"),
-  presentation: z.string().min(1, "Presentación requerida"),
-  referencePricePen: z.coerce
-    .number({ invalid_type_error: "Precio numérico requerido" })
-    .min(0, "El precio no puede ser negativo"),
-});
-
-const vademecumSchema = z.object({
-  genericName: z
-    .string()
-    .min(2, "El nombre genérico o principio activo es requerido"),
-  atcCode: z.string().min(2, "El código ATC es requerido").toUpperCase(),
-  therapeuticGroup: z
-    .string()
-    .min(3, "El grupo terapéutico / indicación es requerido"),
-  indications: z.string().min(3, "Las indicaciones clínicas son requeridas"),
-  contraindications: z.string().default(""),
-  commercialBrands: z
-    .array(brandSchema)
-    .min(1, "Debe registrar al menos una marca comercial disponible en Perú"),
-});
-
-type VademecumFormData = z.infer<typeof vademecumSchema>;
 
 interface VademecumModalProps {
   isOpen: boolean;
@@ -55,7 +32,7 @@ export function VademecumModal({
   onClose,
   initialData,
 }: VademecumModalProps) {
-  const { addVademecumItem, updateVademecumItem } = useMedicalStore();
+  const { vademecumItems, addVademecumItem, updateVademecumItem } = useMedicalStore();
   const isEditing = Boolean(initialData);
 
   const {
@@ -141,6 +118,45 @@ export function VademecumModal({
 
   const onSubmit = async (data: VademecumFormData) => {
     try {
+      // 3-Layer Validation: Validación anti-duplicados a nivel UI / Módulo
+      const dupCheck = checkDuplicateMedication(
+        data.genericName,
+        data.atcCode,
+        vademecumItems,
+        isEditing ? initialData?.id : undefined
+      );
+
+      if (dupCheck.isDuplicate) {
+        const result = await Swal.fire({
+          icon: "warning",
+          title: "Principio Activo Duplicado",
+          html: `
+            <div class="text-left space-y-2 text-xs">
+              <p class="font-medium text-slate-700">${dupCheck.reason}</p>
+              <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                <strong>Recomendación médica:</strong> Para evitar duplicados, edite el registro existente y añada la nueva marca comercial con su respectivo precio referencial.
+              </div>
+            </div>
+          `,
+          showCancelButton: true,
+          confirmButtonColor: "#0A4D68",
+          cancelButtonColor: "#64748B",
+          confirmButtonText: "Guardar de todos modos",
+          cancelButtonText: "Cancelar y revisar",
+        });
+
+        if (!result.isConfirmed) {
+          return;
+        }
+      }
+
+      const formattedBrands = data.commercialBrands.map((b) => ({
+        brandName: b.brandName.trim(),
+        laboratory: b.laboratory.trim(),
+        presentation: b.presentation.trim(),
+        referencePricePen: Number(b.referencePricePen) || 0,
+      }));
+
       if (isEditing && initialData) {
         updateVademecumItem(initialData.id, {
           genericName: data.genericName.trim(),
@@ -148,18 +164,13 @@ export function VademecumModal({
           therapeuticGroup: data.therapeuticGroup.trim(),
           indications: data.indications.trim(),
           contraindications: data.contraindications.trim(),
-          commercialBrands: data.commercialBrands.map((b) => ({
-            brandName: b.brandName.trim(),
-            laboratory: b.laboratory.trim(),
-            presentation: b.presentation.trim(),
-            referencePricePen: b.referencePricePen,
-          })),
+          commercialBrands: formattedBrands,
         });
 
         await Swal.fire({
           icon: "success",
           title: "Vademécum Actualizado",
-          text: `"${data.genericName}" y sus ${data.commercialBrands.length} marcas se actualizaron correctamente.`,
+          text: `"${data.genericName}" y sus ${formattedBrands.length} marcas se actualizaron correctamente.`,
           confirmButtonColor: "#0A4D68",
           timer: 1600,
           showConfirmButton: false,
@@ -171,12 +182,7 @@ export function VademecumModal({
           therapeuticGroup: data.therapeuticGroup.trim(),
           indications: data.indications.trim(),
           contraindications: data.contraindications.trim(),
-          commercialBrands: data.commercialBrands.map((b) => ({
-            brandName: b.brandName.trim(),
-            laboratory: b.laboratory.trim(),
-            presentation: b.presentation.trim(),
-            referencePricePen: b.referencePricePen,
-          })),
+          commercialBrands: formattedBrands,
         });
 
         await Swal.fire({
@@ -476,4 +482,3 @@ export function VademecumModal({
     </div>
   );
 }
-

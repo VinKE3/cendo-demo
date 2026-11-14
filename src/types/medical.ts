@@ -159,23 +159,7 @@ export interface ProcedureTariff {
   createdAt: string;
 }
 
-export interface CommercialBrand {
-  brandName: string;
-  laboratory: string;
-  presentation: string;
-  referencePricePen: number;
-}
-
-export interface MedicationVademecum {
-  id: string;
-  genericName: string;
-  atcCode: string;
-  therapeuticGroup: string;
-  commercialBrands: CommercialBrand[];
-  indications: string;
-  contraindications: string;
-  createdAt: string;
-}
+export type { CommercialBrand, MedicationVademecum } from "@/modules/vademecum";
 
 export type PrescriptionRoute =
   | "Vía Vaginal"

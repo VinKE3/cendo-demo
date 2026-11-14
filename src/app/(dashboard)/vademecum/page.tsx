@@ -16,7 +16,7 @@ import Swal from "sweetalert2";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { formatCurrency } from "@/lib/utils";
 import { VademecumModal } from "@/components/vademecum/VademecumModal";
-import { MedicationVademecum } from "@/types/medical";
+import { MedicationVademecum } from "@/modules/vademecum";
 
 export default function VademecumPage() {
   const [search, setSearch] = useState("");

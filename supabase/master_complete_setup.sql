@@ -415,6 +415,7 @@ CREATE TABLE IF NOT EXISTS public.medications_vademecum (
     contraindications TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_vademecum_unique_name ON public.medications_vademecum (LOWER(TRIM(generic_name)));
 
 -- ============================================================================
 -- PERMISOS Y SEGURIDAD (RLS DESHABILITADO PARA ACCESO DIRECTO CON ANON KEY)

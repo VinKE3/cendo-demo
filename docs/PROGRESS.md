@@ -22,11 +22,11 @@ Cada módulo contendrá su propio cuarteto estándar:
 
 ```mermaid
 flowchart LR
-    Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Fase1["Fase 1: Catálogos Maestros\n(En curso: Vademécum)"]
-    Fase1 --> Fase2["Fase 2: Pacientes & Antecedentes\n(Pendiente)"]
-    Fase2 --> Fase3["Fase 3: Clínica Transaccional\n(Pendiente)"]
-    Fase3 --> Fase4["Fase 4: Alta Especialidad\n(Pendiente)"]
-    Fase4 --> Fase5["Fase 5: Certificación Final\n(Pendiente)"]
+    Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Mod1["Módulo 1: Vademécum\n(100% Certificado)"]
+    Mod1 --> Mod2["Módulo 2: Tarifario\n(Siguiente Paso)"]
+    Mod2 --> Mod3["Módulo 3: Directorio Médico\n(Pendiente)"]
+    Mod3 --> Fase2["Fase 2: Pacientes & Fichas\n(Pendiente)"]
+    Fase2 --> Fase3["Fase 3: Actos Transaccionales\n(Pendiente)"]
 ```
 
 ---
@@ -46,24 +46,25 @@ flowchart LR
 ### 📦 FASE 1: Catálogos Maestros (Sin dependencias externas)
 
 #### 💊 Módulo 1: Vademécum Farmacológico (`src/modules/vademecum/`)
-- [ ] **Estructura Modular:**
-  - [ ] `src/modules/vademecum/vademecum.types.ts`: Tipos dedicados de fármacos, marcas y precios.
-  - [ ] `src/modules/vademecum/vademecum.validator.ts`:
-    - [ ] Detección preventiva de fármaco duplicado por nombre genérico (insensible a mayúsculas/espacios).
-    - [ ] Detección preventiva de colisión de código ATC.
-    - [ ] Validación de marcas comerciales con precio de referencia > 0.
-  - [ ] `src/modules/vademecum/vademecum.service.ts`:
-    - [ ] `getVademecumItems()`: Consulta en vivo de fármacos.
-    - [ ] `createVademecumItem()`: Creación con validación y upsert en Supabase.
-    - [ ] `updateVademecumItem()`: Edición de marcas, posología e indicaciones.
-    - [ ] `deleteVademecumItem()`: Eliminación segura.
-- [ ] **Base de Datos (Supabase):**
-  - [ ] Índice único case-insensitive en PostgreSQL: `CREATE UNIQUE INDEX IF NOT EXISTS idx_vademecum_unique_name ON public.medications_vademecum (LOWER(TRIM(generic_name)));`
-- [ ] **Interfaz Gráfica (`/vademecum`):**
-  - [ ] Alerta interactiva amigable en `VademecumModal` si el doctor escribe un nombre que ya existe, invitándolo a editar o agregar una nueva marca comercial.
-  - [ ] Empty state visual limpio cuando la tabla está vacía.
-- [ ] **Certificación:**
-  - [ ] Ejecutar `npm run test:vademecum` y certificar creación, lectura, edición y eliminación.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/vademecum/vademecum.types.ts`: Tipos dedicados de fármacos, marcas y precios.
+  - [x] `src/modules/vademecum/vademecum.validator.ts`:
+    - [x] Detección preventiva de fármaco duplicado por nombre genérico (insensible a mayúsculas/espacios).
+    - [x] Detección preventiva de colisión de código ATC.
+    - [x] Validación de marcas comerciales con precio de referencia > 0.
+  - [x] `src/modules/vademecum/vademecum.service.ts`:
+    - [x] `fetchVademecum()`: Consulta en vivo de fármacos.
+    - [x] `createMedication()`: Creación con validación y upsert en Supabase.
+    - [x] `updateMedication()`: Edición de marcas, posología e indicaciones.
+    - [x] `deleteMedication()`: Eliminación segura.
+- [x] **Base de Datos (Supabase):**
+  - [x] Índice único case-insensitive en PostgreSQL: `CREATE UNIQUE INDEX IF NOT EXISTS idx_vademecum_unique_name ON public.medications_vademecum (LOWER(TRIM(generic_name)));`
+- [x] **Interfaz Gráfica (`/vademecum`):**
+  - [x] Alerta interactiva amigable en `VademecumModal` si el doctor escribe un nombre que ya existe, invitándolo a editar o agregar una nueva marca comercial.
+  - [x] Empty state visual limpio cuando la tabla está vacía.
+- [x] **Certificación:**
+  - [x] Ejecutar `npm run test:vademecum` y certificar creación, lectura, edición y eliminación (4/4 PASS, 100%).
+  - [x] Build de producción Next.js 14 exitoso (14/14 rutas generadas con 0 errores).
 
 ---
 
