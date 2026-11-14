@@ -17,57 +17,14 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
-import { PatientBackground } from "@/types/medical";
+import {
+  PatientBackground,
+  backgroundSchema,
+  BackgroundFormData,
+  STANDARD_CONTRACEPTIVE_OPTIONS,
+  calculateGestationalAgeFromFur,
+} from "@/modules/antecedentes";
 import { useMedicalStore } from "@/store/useMedicalStore";
-
-export const STANDARD_CONTRACEPTIVE_OPTIONS = [
-  "Ninguno (Embarazo deseado y planificado)",
-  "Ninguno (Sin vida sexual activa)",
-  "Ninguno",
-  "Preservativo de barrera",
-  "Preservativo / Condón masculino",
-  "Anticonceptivos orales combinados",
-  "Anticonceptivos de progestágeno solo (Minipíldora)",
-  "Inyectable mensual",
-  "Inyectable trimestral (Depo-Provera)",
-  "Implante subdérmico (Jadelle / Implanon)",
-  "DIU T de Cobre (TCu 380A)",
-  "DIU Hormonal (Mirena / Kyleena)",
-  "Parche transdérmico",
-  "Anillo vaginal",
-  "Ligadura de trompas",
-  "Quirúrgico / Salpingoclasia bilateral previa",
-  "Vasectomía (pareja)",
-  "Método del ritmo / Abstinencia periódica",
-  "Método de lactancia y amenorrea (MELA)",
-  "Anticoncepción oral de emergencia (AOE)",
-];
-
-const backgroundSchema = z.object({
-  obstetricFormula: z
-    .string()
-    .min(1, "La fórmula obstétrica es requerida (ej. G0 P0000)")
-    .toUpperCase(),
-  menarche: z.coerce.number().min(8, "Mínimo 8 años").max(20, "Máximo 20 años").optional(),
-  sexualDebutAge: z.coerce.number().min(10, "Mínimo 10 años").max(40, "Máximo 40 años").optional(),
-  sexualPartnersCount: z.coerce.number().min(0, "Mínimo 0").optional(),
-  catamenialRegimen: z.string().default("28/4"),
-  stiHistory: z.string().default("Niega ITS"),
-  contraceptiveMethod: z.string().default("Ninguno"),
-  lastMenstrualPeriod: z.string().default(""),
-  papHistory: z.string().default("No refiere"),
-  vphTestHistory: z.string().default("No realizado"),
-  hasDiabetes: z.string().default("Niega"),
-  hasHypertension: z.string().default("Niega"),
-  hasAsthma: z.string().default("Niega"),
-  medicalAllergies: z.string().default("Niega"),
-  surgeriesHistory: z.string().default("Niega"),
-  familyHistory: z.string().default("No refiere"),
-  otherPathologies: z.string().default("Niega"),
-  notes: z.string().default(""),
-});
-
-type BackgroundFormData = z.infer<typeof backgroundSchema>;
 
 interface PatientBackgroundModalProps {
   isOpen: boolean;
@@ -131,24 +88,7 @@ export function PatientBackgroundModal({
   // Calculadora Automática de Semanas / Días por FUR
   const watchedFur = watch("lastMenstrualPeriod");
   const furCalculation = useMemo(() => {
-    if (!watchedFur) return null;
-    const furDate = new Date(watchedFur + "T00:00:00");
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const diffTime = today.getTime() - furDate.getTime();
-    if (diffTime < 0) return { error: "La FUR no puede ser una fecha futura" };
-
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const weeks = Math.floor(diffDays / 7);
-    const remainingDays = diffDays % 7;
-
-    return {
-      days: diffDays,
-      weeks,
-      remainingDays,
-      text: `${weeks} sem ${remainingDays} d (${diffDays} días de amenorrea)`,
-    };
+    return calculateGestationalAgeFromFur(watchedFur);
   }, [watchedFur]);
 
   useEffect(() => {

@@ -23,9 +23,10 @@ Cada módulo contendrá su propio cuarteto estándar:
 ```mermaid
 flowchart LR
     Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Fase1["Fase 1: Catálogos Maestros\n(100% Certificada:\nVademécum, Tarifario, Médicos)"]
-    Fase1 --> Mod4["Módulo 4: Pacientes & Fichas\n(100% Certificado)"]
-    Mod4 --> Mod5["Módulo 5: Antecedentes Gineco-Obstétricos\n(Siguiente Paso)"]
-    Mod5 --> Fase3["Fase 3: Actos Transaccionales\n(Pendiente)"]
+    Fase1 --> Fase2["Fase 2: Pacientes & Antecedentes\n(100% Certificada:\nFichas + Historial Gineco-Obstétrico)"]
+    Fase2 --> Mod6["Fase 3 / Módulo 6: Agenda de Citas\n(Siguiente Gran Paso)"]
+    Mod6 --> Mod7["Módulo 7: Consultas & Examen Físico\n(Pendiente)"]
+    Mod7 --> Mod8["Módulo 8: Recetas Médicas Inteligentes\n(Pendiente)"]
 ```
 
 ---
@@ -137,19 +138,30 @@ flowchart LR
   - [x] Alerta de prevención de DNI duplicado para preservar trazabilidad legal.
 - [x] **Certificación:**
   - [x] Script automatizado `scripts/test-pacientes-crud.mjs` (`npm run test:pacientes`) con 4/4 PASS (100%).
+  - [x] Inyección de las 5 pacientes oficiales con `npm run seed:pacientes`.
   - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 ---
 
 #### 📜 Módulo 5: Antecedentes Gineco-Obstétricos (`src/modules/antecedentes/`)
-- [ ] **Estructura Modular:**
-  - [ ] `src/modules/antecedentes/antecedentes.types.ts`: Menarquia, FUR, R/C (ej. 28/4), Fórmula Obstétrica (G_ P____), ITS, alergias, patologías familiares.
-  - [ ] `src/modules/antecedentes/antecedentes.validator.ts`: Formato de fecha FUR y consistencia obstétrica.
-  - [ ] `src/modules/antecedentes/antecedentes.service.ts`: Upsert y consulta en `public.patient_backgrounds`.
-- [ ] **Interfaz Gráfica:**
-  - [ ] `PatientBackgroundModal` conectado al servicio modular.
-- [ ] **Certificación:**
-  - [ ] Validar guardado y persistencia en Supabase vinculado al UUID del paciente.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/antecedentes/antecedentes.types.ts`: Menarquia, FUR, R/C (ej. 28/4), Fórmula Obstétrica (G_ P____), ITS, alergias, patologías familiares.
+  - [x] `src/modules/antecedentes/antecedentes.validator.ts`:
+    - [x] Validación de formato de fecha FUR (`YYYY-MM-DD`).
+    - [x] Calculadora de semanas y días de amenorrea obstétrica (`calculateGestationalAgeFromFur`).
+    - [x] Catálogo unificado de métodos anticonceptivos (`STANDARD_CONTRACEPTIVE_OPTIONS`).
+  - [x] `src/modules/antecedentes/antecedentes.service.ts`:
+    - [x] `fetchBackgroundByPatientId()`: Consulta directa por UUID del paciente.
+    - [x] `saveBackground()`: Upsert seguro en `public.patient_backgrounds` con constraint `patient_id`.
+    - [x] `deleteBackgroundByPatientId()`: Eliminación limpia.
+- [x] **Base de Datos (Supabase):**
+  - [x] Índice único `uq_patient_backgrounds_patient_id` en `public.patient_backgrounds (patient_id)`.
+- [x] **Interfaz Gráfica:**
+  - [x] Conexión de `PatientBackgroundModal` al nuevo servicio y validador modular.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-antecedentes-crud.mjs` (`npm run test:antecedentes`) con 4/4 PASS (100%).
+  - [x] Inyección de los antecedentes clínicos de las 5 pacientes oficiales con `npm run seed:antecedentes`.
+  - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 ---
 

@@ -1,29 +1,6 @@
 export type { DoctorRole, DoctorProfile, DoctorTitle } from "@/modules/usuarios";
 export type { Patient } from "@/modules/pacientes";
-
-export interface PatientBackground {
-  id: string;
-  patientId: string;
-  menarche?: number;
-  sexualDebutAge?: number;
-  sexualPartnersCount?: number;
-  catamenialRegimen?: string; // R/C (Régimen Catamenial, ej. "28/4")
-  stiHistory?: string; // ITS (Infecciones de transmisión sexual)
-  obstetricFormula: string; // G_ P____
-  contraceptiveMethod: string;
-  lastMenstrualPeriod: string; // FUR (YYYY-MM-DD)
-  papHistory: string;
-  vphTestHistory: string;
-  hasDiabetes?: string; // "Niega" | "Sí"
-  hasHypertension?: string; // "Niega" | "Sí"
-  hasAsthma?: string; // "Niega" | "Sí"
-  medicalAllergies: string;
-  surgeriesHistory: string;
-  familyHistory: string;
-  otherPathologies?: string; // Otros antecedentes generales
-  notes?: string;
-  updatedAt: string;
-}
+export type { PatientBackground } from "@/modules/antecedentes";
 
 export interface ColposcopyImage {
   url: string;
