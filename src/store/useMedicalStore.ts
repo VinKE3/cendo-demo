@@ -2040,6 +2040,7 @@ interface MedicalStoreState {
 
   // Reset a datos iniciales
   resetToSeedData: () => void;
+  clearAllLocalData: () => void;
 
   // Sincronización Total con Base de Datos Supabase Cloud (17 Tablas)
   isCloudSyncing: boolean;
@@ -2055,6 +2056,27 @@ export const useMedicalStore = create<MedicalStoreState>()(
       isAuthenticated: false,
       userRole: "admin",
       isCloudSyncing: false,
+
+      clearAllLocalData: () => {
+        set({
+          patients: [],
+          backgrounds: {},
+          consultations: [],
+          ultrasoundReports: [],
+          colposcopyReports: [],
+          clinicalCheckups: [],
+          minorProcedures: [],
+          prescriptions: [],
+          labOrders: [],
+          prenatalCards: [],
+          patientDocuments: [],
+          procedureQuotes: [],
+          appointments: [],
+          wordHistories: [],
+          tariffItems: [],
+          vademecumItems: [],
+        });
+      },
 
       loadAllFromDatabase: async () => {
         set({ isCloudSyncing: true });
@@ -2078,67 +2100,67 @@ export const useMedicalStore = create<MedicalStoreState>()(
               }
             }
 
-            if (cloudData.patients && cloudData.patients.length > 0) {
+            if (cloudData.patients !== undefined) {
               updates.patients = cloudData.patients;
             }
 
-            if (cloudData.patientBackgrounds && Object.keys(cloudData.patientBackgrounds).length > 0) {
-              updates.backgrounds = { ...state.backgrounds, ...cloudData.patientBackgrounds };
+            if (cloudData.patientBackgrounds !== undefined) {
+              updates.backgrounds = cloudData.patientBackgrounds;
             }
 
-            if (cloudData.consultations && cloudData.consultations.length > 0) {
+            if (cloudData.consultations !== undefined) {
               updates.consultations = cloudData.consultations;
             }
 
-            if (cloudData.ultrasoundReports && cloudData.ultrasoundReports.length > 0) {
+            if (cloudData.ultrasoundReports !== undefined) {
               updates.ultrasoundReports = cloudData.ultrasoundReports;
             }
 
-            if (cloudData.colposcopyReports && cloudData.colposcopyReports.length > 0) {
+            if (cloudData.colposcopyReports !== undefined) {
               updates.colposcopyReports = cloudData.colposcopyReports;
             }
 
-            if (cloudData.clinicalCheckups && cloudData.clinicalCheckups.length > 0) {
+            if (cloudData.clinicalCheckups !== undefined) {
               updates.clinicalCheckups = cloudData.clinicalCheckups;
             }
 
-            if (cloudData.minorProcedures && cloudData.minorProcedures.length > 0) {
+            if (cloudData.minorProcedures !== undefined) {
               updates.minorProcedures = cloudData.minorProcedures;
             }
 
-            if (cloudData.prescriptions && cloudData.prescriptions.length > 0) {
+            if (cloudData.prescriptions !== undefined) {
               updates.prescriptions = cloudData.prescriptions;
             }
 
-            if (cloudData.labOrders && cloudData.labOrders.length > 0) {
+            if (cloudData.labOrders !== undefined) {
               updates.labOrders = cloudData.labOrders;
             }
 
-            if (cloudData.prenatalCards && cloudData.prenatalCards.length > 0) {
+            if (cloudData.prenatalCards !== undefined) {
               updates.prenatalCards = cloudData.prenatalCards;
             }
 
-            if (cloudData.patientDocuments && cloudData.patientDocuments.length > 0) {
+            if (cloudData.patientDocuments !== undefined) {
               updates.patientDocuments = cloudData.patientDocuments;
             }
 
-            if (cloudData.procedureQuotes && cloudData.procedureQuotes.length > 0) {
+            if (cloudData.procedureQuotes !== undefined) {
               updates.procedureQuotes = cloudData.procedureQuotes;
             }
 
-            if (cloudData.appointments && cloudData.appointments.length > 0) {
+            if (cloudData.appointments !== undefined) {
               updates.appointments = cloudData.appointments;
             }
 
-            if (cloudData.wordHistories && cloudData.wordHistories.length > 0) {
+            if (cloudData.wordHistories !== undefined) {
               updates.wordHistories = cloudData.wordHistories;
             }
 
-            if (cloudData.proceduresTariff && cloudData.proceduresTariff.length > 0) {
+            if (cloudData.proceduresTariff !== undefined) {
               updates.tariffItems = cloudData.proceduresTariff;
             }
 
-            if (cloudData.medicationsVademecum && cloudData.medicationsVademecum.length > 0) {
+            if (cloudData.medicationsVademecum !== undefined) {
               updates.vademecumItems = cloudData.medicationsVademecum;
             }
 

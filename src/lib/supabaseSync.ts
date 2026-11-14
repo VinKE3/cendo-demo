@@ -1193,7 +1193,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
 
     // 2. Patients
     const patientLookup = new Map<string, { fullName: string; dni: string; phone: string }>();
-    if (patientsRes.status === "fulfilled" && patientsRes.value.data && patientsRes.value.data.length > 0) {
+    if (patientsRes.status === "fulfilled" && patientsRes.value.data) {
       result.patients = patientsRes.value.data.map((row: any) => {
         const p: Patient = {
           id: row.id,
@@ -1224,7 +1224,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 3. Backgrounds
-    if (backgroundsRes.status === "fulfilled" && backgroundsRes.value.data && backgroundsRes.value.data.length > 0) {
+    if (backgroundsRes.status === "fulfilled" && backgroundsRes.value.data) {
       const bgs: Record<string, PatientBackground> = {};
       backgroundsRes.value.data.forEach((row: any) => {
         const bg: PatientBackground = {
@@ -1256,7 +1256,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 4. Consultations
-    if (consultationsRes.status === "fulfilled" && consultationsRes.value.data && consultationsRes.value.data.length > 0) {
+    if (consultationsRes.status === "fulfilled" && consultationsRes.value.data) {
       result.consultations = consultationsRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1295,7 +1295,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 5. Ultrasounds
-    if (ultrasoundsRes.status === "fulfilled" && ultrasoundsRes.value.data && ultrasoundsRes.value.data.length > 0) {
+    if (ultrasoundsRes.status === "fulfilled" && ultrasoundsRes.value.data) {
       result.ultrasoundReports = ultrasoundsRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1316,7 +1316,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 6. Colposcopy
-    if (colposcopyRes.status === "fulfilled" && colposcopyRes.value.data && colposcopyRes.value.data.length > 0) {
+    if (colposcopyRes.status === "fulfilled" && colposcopyRes.value.data) {
       result.colposcopyReports = colposcopyRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1371,7 +1371,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 7. Clinical Checkups
-    if (checkupsRes.status === "fulfilled" && checkupsRes.value.data && checkupsRes.value.data.length > 0) {
+    if (checkupsRes.status === "fulfilled" && checkupsRes.value.data) {
       result.clinicalCheckups = checkupsRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1393,7 +1393,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 8. Minor Procedures
-    if (minorProceduresRes.status === "fulfilled" && minorProceduresRes.value.data && minorProceduresRes.value.data.length > 0) {
+    if (minorProceduresRes.status === "fulfilled" && minorProceduresRes.value.data) {
       result.minorProcedures = minorProceduresRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1423,7 +1423,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 9. Prescriptions
-    if (prescriptionsRes.status === "fulfilled" && prescriptionsRes.value.data && prescriptionsRes.value.data.length > 0) {
+    if (prescriptionsRes.status === "fulfilled" && prescriptionsRes.value.data) {
       result.prescriptions = prescriptionsRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1443,7 +1443,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 10. Lab Orders
-    if (labOrdersRes.status === "fulfilled" && labOrdersRes.value.data && labOrdersRes.value.data.length > 0) {
+    if (labOrdersRes.status === "fulfilled" && labOrdersRes.value.data) {
       result.labOrders = labOrdersRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1464,7 +1464,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 11. Prenatal Cards
-    if (prenatalCardsRes.status === "fulfilled" && prenatalCardsRes.value.data && prenatalCardsRes.value.data.length > 0) {
+    if (prenatalCardsRes.status === "fulfilled" && prenatalCardsRes.value.data) {
       result.prenatalCards = prenatalCardsRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1480,7 +1480,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 12. Documents
-    if (documentsRes.status === "fulfilled" && documentsRes.value.data && documentsRes.value.data.length > 0) {
+    if (documentsRes.status === "fulfilled" && documentsRes.value.data) {
       result.patientDocuments = documentsRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1498,7 +1498,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 13. Procedure Quotes
-    if (quotesRes.status === "fulfilled" && quotesRes.value.data && quotesRes.value.data.length > 0) {
+    if (quotesRes.status === "fulfilled" && quotesRes.value.data) {
       result.procedureQuotes = quotesRes.value.data.map((row: any) => {
         const pat = patientLookup.get(row.patient_id);
         return {
@@ -1522,7 +1522,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 14. Appointments
-    if (appointmentsRes.status === "fulfilled" && appointmentsRes.value.data && appointmentsRes.value.data.length > 0) {
+    if (appointmentsRes.status === "fulfilled" && appointmentsRes.value.data) {
       result.appointments = appointmentsRes.value.data.map((row: any) => {
         const pat = patientLookup.get(row.patient_id);
         return {
@@ -1548,7 +1548,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 15. Word Histories
-    if (wordHistoriesRes.status === "fulfilled" && wordHistoriesRes.value.data && wordHistoriesRes.value.data.length > 0) {
+    if (wordHistoriesRes.status === "fulfilled" && wordHistoriesRes.value.data) {
       result.wordHistories = wordHistoriesRes.value.data.map((row: any) => ({
         id: row.id,
         patientId: row.patient_id,
@@ -1562,7 +1562,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 16. Tariff
-    if (tariffsRes.status === "fulfilled" && tariffsRes.value.data && tariffsRes.value.data.length > 0) {
+    if (tariffsRes.status === "fulfilled" && tariffsRes.value.data) {
       result.proceduresTariff = tariffsRes.value.data.map((row: any) => ({
         id: row.id,
         code: row.code,
@@ -1576,7 +1576,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     }
 
     // 17. Vademecum
-    if (vademecumRes.status === "fulfilled" && vademecumRes.value.data && vademecumRes.value.data.length > 0) {
+    if (vademecumRes.status === "fulfilled" && vademecumRes.value.data) {
       result.medicationsVademecum = vademecumRes.value.data.map((row: any) => ({
         id: row.id,
         genericName: row.generic_name,
