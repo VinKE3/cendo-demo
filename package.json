@@ -10,7 +10,8 @@
     "test:vademecum": "node scripts/test-vademecum-crud.mjs",
     "seed:vademecum": "node scripts/seed-vademecum.mjs",
     "test:tarifario": "node scripts/test-tarifario-crud.mjs",
-    "seed:tarifario": "node scripts/seed-tarifario.mjs"
+    "seed:tarifario": "node scripts/seed-tarifario.mjs",
+    "test:usuarios": "node scripts/test-usuarios-crud.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

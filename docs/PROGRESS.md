@@ -22,11 +22,10 @@ Cada módulo contendrá su propio cuarteto estándar:
 
 ```mermaid
 flowchart LR
-    Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Mod1["Módulo 1: Vademécum\n(100% Certificado)"]
-    Mod1 --> Mod2["Módulo 2: Tarifario\n(100% Certificado)"]
-    Mod2 --> Mod3["Módulo 3: Directorio Médico\n(Siguiente Paso)"]
-    Mod3 --> Fase2["Fase 2: Pacientes & Fichas\n(Pendiente)"]
-    Fase2 --> Fase3["Fase 3: Actos Transaccionales\n(Pendiente)"]
+    Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Fase1["Fase 1: Catálogos Maestros\n(100% Certificada:\nVademécum, Tarifario, Médicos)"]
+    Fase1 --> Mod4["Fase 2 / Módulo 4: Pacientes & Fichas\n(Siguiente Gran Paso)"]
+    Mod4 --> Mod5["Módulo 5: Antecedentes Gineco-Obstétricos\n(Pendiente)"]
+    Mod5 --> Fase3["Fase 3: Actos Transaccionales\n(Pendiente)"]
 ```
 
 ---
@@ -93,21 +92,26 @@ flowchart LR
 ---
 
 #### 👨‍⚕️ Módulo 3: Directorio Médico, Roles y Accesos (`src/modules/usuarios/`)
-- [ ] **Estructura Modular:**
-  - [ ] `src/modules/usuarios/usuarios.types.ts`: Perfil médico, roles (`director`, `doctor`, `assistant`), credenciales CMP/RNE.
-  - [ ] `src/modules/usuarios/usuarios.validator.ts`:
-    - [ ] Correo institucional único y con formato válido.
-    - [ ] CMP de 5 a 6 dígitos numéricos.
-    - [ ] Contraseña médica mínima de 6 caracteres.
-  - [ ] `src/modules/usuarios/usuarios.service.ts`:
-    - [ ] `getDoctors()`: Carga de lista médica de `public.profiles`.
-    - [ ] `updateDoctorPassword()`: Actualización directa de contraseña en la nube.
-    - [ ] `updateDoctorProfile()`: Edición de CMP, RNE, especialidad y firma.
-    - [ ] `toggleDoctorActive()`: Bloqueo/activación de acceso institucional.
-- [ ] **Interfaz Gráfica (`/usuarios`):**
-  - [ ] Conectar `/usuarios` y `DoctorModal` al servicio modular.
-- [ ] **Certificación:**
-  - [ ] Prueba de cambio de clave del Dr. Patrick y verificación de reingreso en PC y móvil.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/usuarios/usuarios.types.ts`: Perfil médico, roles (`director`, `doctor`, `assistant`), credenciales CMP/RNE.
+  - [x] `src/modules/usuarios/usuarios.validator.ts`:
+    - [x] Correo institucional único y con formato válido.
+    - [x] CMP numérico y validación de RNE.
+    - [x] Detección preventiva de cuenta duplicada por correo o CMP.
+  - [x] `src/modules/usuarios/usuarios.service.ts`:
+    - [x] `fetchDoctors()`: Carga de lista médica de `public.profiles`.
+    - [x] `createDoctor()`: Alta de especialista y generación de bienvenida.
+    - [x] `updateDoctorProfile()`: Edición de CMP, RNE, especialidad y firma.
+    - [x] `updateDoctorPassword()`: Actualización directa de contraseña en la nube.
+    - [x] `deleteDoctor()`: Eliminación segura con protección de cuenta del Director Médico.
+- [x] **Base de Datos (Supabase):**
+  - [x] Índice único condicional en PostgreSQL para `public.profiles (cmp)`.
+- [x] **Interfaz Gráfica (`/usuarios`):**
+  - [x] Conexión de `/usuarios` y `DoctorModal` al validador y servicio modular.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-usuarios-crud.mjs` (`npm run test:usuarios`) con 4/4 PASS (100%).
+  - [x] Verificación de los 3 médicos oficiales (Dr. Patrick, Dr. Carlos, Dra. Andrea).
+  - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 ---
 

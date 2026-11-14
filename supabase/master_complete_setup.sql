@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_unique_cmp ON public.profiles (TRIM(cmp)) WHERE cmp IS NOT NULL AND cmp <> '';
 
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS doctor_title TEXT DEFAULT 'Dr.';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS specialty TEXT DEFAULT 'Ginecología y Obstetricia';

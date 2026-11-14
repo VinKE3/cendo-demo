@@ -22,31 +22,15 @@ import {
   Sparkles,
   MessageCircle,
 } from "lucide-react";
-import { DoctorProfile, DoctorRole } from "@/types/medical";
+import {
+  DoctorProfile,
+  DoctorRole,
+  DoctorFormData,
+  doctorSchema,
+  checkDuplicateDoctor,
+  COMMON_SPECIALTIES,
+} from "@/modules/usuarios";
 import { useMedicalStore } from "@/store/useMedicalStore";
-
-const doctorSchema = z.object({
-  fullName: z.string().min(3, "El nombre completo es requerido"),
-  doctorTitle: z.enum(["Dr.", "Dra.", "Lic."]),
-  specialty: z.string().min(3, "La especialidad médica es requerida"),
-  cmp: z
-    .string()
-    .min(4, "El CMP debe tener al menos 4 dígitos")
-    .regex(/^\d+$/, "El CMP debe contener solo números"),
-  rne: z
-    .string()
-    .min(4, "El RNE debe tener al menos 4 dígitos")
-    .regex(/^\d+$/, "El RNE debe contener solo números"),
-  role: z.enum(["director", "doctor", "assistant"]),
-  email: z.string().email("Ingrese un correo electrónico válido"),
-  password: z.string().min(4, "La contraseña debe tener al menos 4 caracteres"),
-  phone: z.string().min(6, "El teléfono de contacto es requerido"),
-  clinicAddress: z.string().min(5, "La dirección de atención es requerida"),
-  isActive: z.boolean(),
-  signatureUrl: z.string().optional(),
-});
-
-type DoctorFormData = z.infer<typeof doctorSchema>;
 
 interface DoctorModalProps {
   isOpen: boolean;
@@ -54,18 +38,8 @@ interface DoctorModalProps {
   doctorToEdit?: DoctorProfile | null;
 }
 
-const COMMON_SPECIALTIES = [
-  "Ginecología y Obstetricia - Endometriosis y Colposcopía",
-  "Ginecología Oncológica y Patología Cervical",
-  "Cirugía Ginecológica Mínimamente Invasiva y Fertilidad",
-  "Ecografía Doppler Ginecológica y Obstétrica",
-  "Medicina Materno Fetal y Alto Riesgo Obstétrico",
-  "Urología Ginecológica y Piso Pélvico",
-  "Endocrinología Ginecológica y Reproducción Asistida",
-];
-
 export function DoctorModal({ isOpen, onClose, doctorToEdit }: DoctorModalProps) {
-  const { addDoctor, updateDoctor } = useMedicalStore();
+  const { doctorsList, addDoctor, updateDoctor } = useMedicalStore();
   const [showPassword, setShowPassword] = useState(false);
   const isEditing = Boolean(doctorToEdit);
 
@@ -138,6 +112,32 @@ export function DoctorModal({ isOpen, onClose, doctorToEdit }: DoctorModalProps)
 
   const onSubmit = async (data: DoctorFormData) => {
     try {
+      // 3-Layer Validation: Validación anti-duplicados a nivel UI / Módulo
+      const dupCheck = checkDuplicateDoctor(
+        data.email,
+        data.cmp,
+        doctorsList,
+        isEditing ? doctorToEdit?.id : undefined
+      );
+
+      if (dupCheck.isDuplicate) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Especialista o Cuenta Duplicada",
+          html: `
+            <div class="text-left space-y-2 text-xs">
+              <p class="font-medium text-slate-700">${dupCheck.reason}</p>
+              <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                <strong>Validación Institucional:</strong> No se permite registrar dos cuentas con el mismo correo institucional ni con el mismo número de colegiatura médica (CMP).
+              </div>
+            </div>
+          `,
+          confirmButtonColor: "#0A4D68",
+          confirmButtonText: "Entendido, verificar datos",
+        });
+        return;
+      }
+
       if (isEditing && doctorToEdit) {
         await updateDoctor(doctorToEdit.id, {
           fullName: data.fullName.trim(),

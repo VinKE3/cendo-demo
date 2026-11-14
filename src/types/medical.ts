@@ -1,24 +1,4 @@
-export type DoctorRole = "director" | "doctor" | "assistant";
-
-export interface DoctorProfile {
-  id: string;
-  email: string;
-  password?: string;
-  fullName: string;
-  doctorTitle: string; // "Dr." | "Dra." | "Lic."
-  specialty: string;
-  cmp: string;
-  rne: string;
-  clinicName: string;
-  clinicAddress: string;
-  phone: string;
-  contactEmail: string;
-  avatarUrl?: string;
-  signatureUrl?: string;
-  role: DoctorRole;
-  isActive: boolean;
-  createdAt?: string;
-}
+export type { DoctorRole, DoctorProfile, DoctorTitle } from "@/modules/usuarios";
 
 export interface Patient {
   id: string;

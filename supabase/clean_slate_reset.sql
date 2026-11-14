@@ -122,6 +122,7 @@ ALTER TABLE public.medications_vademecum DISABLE ROW LEVEL SECURITY;
 -- 4.1 ÍNDICES DE UNICIDAD E INTEGRIDAD
 CREATE UNIQUE INDEX IF NOT EXISTS idx_vademecum_unique_name ON public.medications_vademecum (LOWER(TRIM(generic_name)));
 CREATE UNIQUE INDEX IF NOT EXISTS idx_procedures_tariff_unique_name ON public.procedures_tariff (LOWER(TRIM(name)));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_unique_cmp ON public.profiles (TRIM(cmp)) WHERE cmp IS NOT NULL AND cmp <> '';
 
 -- 5. REPORTE DE CONFIRMACIÓN DE LIMPIEZA
 SELECT 

@@ -24,7 +24,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useMedicalStore } from "@/store/useMedicalStore";
-import { DoctorProfile } from "@/types/medical";
+import { DoctorProfile } from "@/modules/usuarios";
 import { DoctorModal } from "@/components/usuarios/DoctorModal";
 
 export default function UsuariosPage() {
