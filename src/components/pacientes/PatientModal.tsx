@@ -20,42 +20,14 @@ import {
   GraduationCap,
   Globe,
 } from "lucide-react";
-import { Patient } from "@/types/medical";
+import {
+  Patient,
+  patientSchema,
+  PatientFormData,
+  calculateAge,
+  checkDuplicatePatient,
+} from "@/modules/pacientes";
 import { useMedicalStore } from "@/store/useMedicalStore";
-import { calculateAge } from "@/lib/utils";
-
-const patientSchema = z.object({
-  dni: z
-    .string()
-    .min(8, "El DNI o documento debe tener al menos 8 caracteres")
-    .max(12, "El documento no debe exceder 12 caracteres")
-    .regex(/^[0-9A-Za-z]+$/, "El documento solo debe contener letras o números"),
-  firstName: z
-    .string()
-    .min(2, "Los nombres de la paciente son requeridos")
-    .transform((val) => val.trim().toUpperCase()),
-  lastName: z
-    .string()
-    .min(2, "Los apellidos de la paciente son requeridos")
-    .transform((val) => val.trim().toUpperCase()),
-  birthDate: z
-    .string()
-    .min(10, "Seleccione una fecha de nacimiento válida")
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Formato inválido (YYYY-MM-DD)"),
-  phone: z.string().min(6, "Ingrese un teléfono de contacto válido (mínimo 6 dígitos)"),
-  email: z
-    .string()
-    .email("Ingrese un correo electrónico válido")
-    .or(z.literal("")),
-  address: z.string().default(""),
-  civilStatus: z.string().default("Soltera"),
-  occupation: z.string().default(""),
-  educationLevel: z.string().default("Superior Universitaria"),
-  birthPlace: z.string().default(""),
-  religion: z.string().default("Católica"),
-});
-
-type PatientFormData = z.infer<typeof patientSchema>;
 
 interface PatientModalProps {
   isOpen: boolean;
@@ -70,7 +42,7 @@ export function PatientModal({
   initialData,
   onSuccess,
 }: PatientModalProps) {
-  const { addPatient, updatePatient, getPatientByDni } = useMedicalStore();
+  const { patients, addPatient, updatePatient } = useMedicalStore();
   const isEditing = Boolean(initialData);
 
   const {
@@ -156,22 +128,25 @@ export function PatientModal({
   const onSubmit = async (data: PatientFormData) => {
     const cleanDni = data.dni.trim();
 
-    // 1. Validar bloqueo de DNI duplicado
-    const existingPatient = getPatientByDni(cleanDni);
-    if (existingPatient && (!isEditing || existingPatient.id !== initialData?.id)) {
+    // 1. Validar bloqueo de DNI duplicado a nivel UI / Módulo
+    const dupCheck = checkDuplicatePatient(
+      cleanDni,
+      patients,
+      isEditing ? initialData?.id : undefined
+    );
+
+    if (dupCheck.isDuplicate) {
       await Swal.fire({
         icon: "warning",
         title: "DNI Ya Registrado",
         html: `
           <div class="text-left text-xs space-y-1">
-            <p>El documento <strong>${cleanDni}</strong> ya pertenece a:</p>
-            <p class="font-bold text-sm text-[#0A4D68] mt-1">${existingPatient.lastName}, ${existingPatient.firstName}</p>
-            <p class="text-slate-500">Edad: ${existingPatient.age} años &bull; Tel: ${existingPatient.phone}</p>
-            <p class="text-[11px] text-red-600 font-semibold mt-2">Por seguridad clínica, no se permiten duplicados en el directorio de CENDO.</p>
+            <p>${dupCheck.reason}</p>
+            <p class="text-[11px] text-red-600 font-semibold mt-2">Por seguridad clínica y trazabilidad legal, no se permiten duplicados en el directorio de CENDO.</p>
           </div>
         `,
         confirmButtonColor: "#0A4D68",
-        confirmButtonText: "Entendido",
+        confirmButtonText: "Entendido, revisar documento",
       });
       return;
     }

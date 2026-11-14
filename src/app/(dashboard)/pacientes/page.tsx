@@ -19,7 +19,7 @@ import {
 import Swal from "sweetalert2";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { PatientModal } from "@/components/pacientes/PatientModal";
-import { Patient } from "@/types/medical";
+import { Patient } from "@/modules/pacientes";
 
 export default function PacientesPage() {
   const [search, setSearch] = useState("");

@@ -1,24 +1,5 @@
 export type { DoctorRole, DoctorProfile, DoctorTitle } from "@/modules/usuarios";
-
-export interface Patient {
-  id: string;
-  dni: string;
-  firstName: string;
-  lastName: string;
-  birthDate: string; // YYYY-MM-DD
-  age: number;
-  phone: string;
-  email: string;
-  address: string;
-  civilStatus: string;
-  occupation: string;
-  educationLevel?: string; // Grado de instrucción
-  birthPlace?: string; // Lugar de nacimiento
-  religion?: string; // Religión
-  insuranceInfo?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Patient } from "@/modules/pacientes";
 
 export interface PatientBackground {
   id: string;

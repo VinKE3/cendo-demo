@@ -23,8 +23,8 @@ Cada módulo contendrá su propio cuarteto estándar:
 ```mermaid
 flowchart LR
     Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Fase1["Fase 1: Catálogos Maestros\n(100% Certificada:\nVademécum, Tarifario, Médicos)"]
-    Fase1 --> Mod4["Fase 2 / Módulo 4: Pacientes & Fichas\n(Siguiente Gran Paso)"]
-    Mod4 --> Mod5["Módulo 5: Antecedentes Gineco-Obstétricos\n(Pendiente)"]
+    Fase1 --> Mod4["Módulo 4: Pacientes & Fichas\n(100% Certificado)"]
+    Mod4 --> Mod5["Módulo 5: Antecedentes Gineco-Obstétricos\n(Siguiente Paso)"]
     Mod5 --> Fase3["Fase 3: Actos Transaccionales\n(Pendiente)"]
 ```
 
@@ -118,25 +118,26 @@ flowchart LR
 ### 🏥 FASE 2: Núcleo de Pacientes e Historia Patronímica
 
 #### 👤 Módulo 4: Directorio de Pacientes (`src/modules/pacientes/`)
-- [ ] **Estructura Modular:**
-  - [ ] `src/modules/pacientes/pacientes.types.ts`: Ficha patronímica del paciente.
-  - [ ] `src/modules/pacientes/pacientes.validator.ts`:
-    - [ ] Validación de DNI peruano de 8 dígitos numéricos.
-    - [ ] Detección preventiva de DNI duplicado antes de enviar.
-    - [ ] Cálculo automático de edad según fecha de nacimiento.
-  - [ ] `src/modules/pacientes/pacientes.service.ts`:
-    - [ ] `getPatients()`
-    - [ ] `getPatientById()`
-    - [ ] `createPatient()`
-    - [ ] `updatePatient()`
-    - [ ] `deletePatient()` (con cascada controlada)
-- [ ] **Base de Datos (Supabase):**
-  - [ ] Garantizar índice único `idx_patients_dni` en `public.patients (dni)`.
-- [ ] **Interfaz Gráfica (`/pacientes`):**
-  - [ ] Conectar `/pacientes` y `PatientModal` al nuevo servicio modular.
-  - [ ] Búsqueda reactiva por DNI o Apellidos.
-- [ ] **Certificación:**
-  - [ ] Script de prueba automatizado `scripts/test-pacientes-crud.mjs`.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/pacientes/pacientes.types.ts`: Ficha patronímica del paciente (`Patient`, `CreatePatientInput`, `UpdatePatientInput`).
+  - [x] `src/modules/pacientes/pacientes.validator.ts`:
+    - [x] Validación de DNI peruano (8 a 12 caracteres, alfanumérico).
+    - [x] Detección preventiva de DNI duplicado antes de enviar (`checkDuplicatePatient`).
+    - [x] Cálculo automático de edad cronológica según fecha de nacimiento (`calculateAge`).
+  - [x] `src/modules/pacientes/pacientes.service.ts`:
+    - [x] `fetchPatients()`: Consulta ordenada por fecha de registro en Supabase.
+    - [x] `fetchPatientById()`: Búsqueda unificada por UUID o por DNI.
+    - [x] `createPatient()`: Creación con mayúsculas estándar y persistencia.
+    - [x] `updatePatient()`: Modificación de teléfono, correo, estado civil y ocupación.
+    - [x] `deletePatient()`: Borrado seguro en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Garantizar índice único `idx_patients_dni` en `public.patients (dni)`.
+- [x] **Interfaz Gráfica (`/pacientes`):**
+  - [x] Conexión de `/pacientes` y `PatientModal` al nuevo servicio y validador modular.
+  - [x] Alerta de prevención de DNI duplicado para preservar trazabilidad legal.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-pacientes-crud.mjs` (`npm run test:pacientes`) con 4/4 PASS (100%).
+  - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 ---
 
