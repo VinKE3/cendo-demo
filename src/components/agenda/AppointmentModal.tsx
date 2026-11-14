@@ -21,6 +21,7 @@ import {
 } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateAppointmentReminderWhatsAppUrl } from "@/lib/whatsappShare";
+import { validateAppointmentInput, checkScheduleConflict } from "@/modules/agenda";
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -56,6 +57,7 @@ export function AppointmentModal({
 }: AppointmentModalProps) {
   const {
     patients,
+    appointments,
     doctorsList,
     doctorProfile,
     addAppointment,
@@ -144,6 +146,7 @@ export function AppointmentModal({
     const assignedDoctor = doctorsList.find((d) => d.id === selectedDoctorId) || doctorProfile;
 
     const payload = {
+      id: appointmentToEdit ? appointmentToEdit.id : undefined,
       patientId: selectedPatientId || "pat-manual",
       patientName: patientName.trim(),
       patientDni: patientDni.trim(),
@@ -159,6 +162,18 @@ export function AppointmentModal({
       notes: notes.trim() || undefined,
       reminderSent: appointmentToEdit ? appointmentToEdit.reminderSent : false,
     };
+
+    // Validación preventiva modular y detección de solapamiento de horarios
+    const validation = validateAppointmentInput(payload, appointments || []);
+    if (!validation.success) {
+      Swal.fire({
+        icon: "warning",
+        title: "Conflicto en la Agenda",
+        text: validation.error,
+        confirmButtonColor: "#0A4D68",
+      });
+      return;
+    }
 
     if (appointmentToEdit) {
       updateAppointment(appointmentToEdit.id, payload);

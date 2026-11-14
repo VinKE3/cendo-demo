@@ -487,45 +487,14 @@ export interface ProcedureQuote {
 }
 
 // ============================================================================
-// ETAPA C: AGENDA DE CITAS Y DISPONIBILIDAD (PUNTOS 10 Y 11)
+// ETAPA C: AGENDA DE CITAS Y DISPONIBILIDAD (PUNTOS 10 Y 11) - MODULARIZADO
 // ============================================================================
 
-export type AppointmentStatus =
-  | "PENDIENTE"
-  | "CONFIRMADA"
-  | "EN_ESPERA"
-  | "ATENDIDA"
-  | "CANCELADA"
-  | "NO_ASISTIO";
-
-export type AppointmentType =
-  | "CONSULTA_PRIMERA_VEZ"
-  | "CONTROL_GINECOLOGICO"
-  | "CHEQUEO_INTEGRAL"
-  | "CONTROL_PRENATAL"
-  | "COLPOSCOPIA"
-  | "ECOGRAFIA"
-  | "PROCEDIMIENTO_MENOR";
-
-export interface MedicalAppointment {
-  id: string;
-  patientId: string;
-  patientName: string;
-  patientDni: string;
-  patientPhone: string;
-  doctorId: string;
-  doctorName: string;
-  appointmentDate: string;
-  appointmentTime: string;
-  durationMinutes: number;
-  appointmentType: AppointmentType;
-  reason: string;
-  status: AppointmentStatus;
-  notes?: string;
-  reminderSent: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+export type {
+  AppointmentStatus,
+  AppointmentType,
+  MedicalAppointment,
+} from "@/modules/agenda";
 
 // ============================================================================
 // ETAPA C: HISTORIAS CLÍNICAS EN WORD (PUNTO 12)

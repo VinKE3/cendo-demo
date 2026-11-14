@@ -24,8 +24,8 @@ Cada módulo contendrá su propio cuarteto estándar:
 flowchart LR
     Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Fase1["Fase 1: Catálogos Maestros\n(100% Certificada:\nVademécum, Tarifario, Médicos)"]
     Fase1 --> Fase2["Fase 2: Pacientes & Antecedentes\n(100% Certificada:\nFichas + Historial Gineco-Obstétrico)"]
-    Fase2 --> Mod6["Fase 3 / Módulo 6: Agenda de Citas\n(Siguiente Gran Paso)"]
-    Mod6 --> Mod7["Módulo 7: Consultas & Examen Físico\n(Pendiente)"]
+    Fase2 --> Mod6["Fase 3 / Módulo 6: Agenda de Citas\n(100% Certificado con Anti-Solapamiento)"]
+    Mod6 --> Mod7["Módulo 7: Consultas & Examen Físico\n(Siguiente Gran Paso)"]
     Mod7 --> Mod8["Módulo 8: Recetas Médicas Inteligentes\n(Pendiente)"]
 ```
 
@@ -168,9 +168,25 @@ flowchart LR
 ### 🩺 FASE 3: El Acto Médico Transaccional
 
 #### 📅 Módulo 6: Agenda de Citas Médicas (`src/modules/agenda/`)
-- [ ] `agenda.types.ts`, `agenda.validator.ts` (prevención de solapamiento de horario por doctor), `agenda.service.ts`.
-- [ ] Conexión de `/agenda` y `AppointmentModal`.
-- [ ] Validación de estados: Pendiente, Confirmada, En Espera, Atendida, Cancelada.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/agenda/agenda.types.ts`: `MedicalAppointment`, `AppointmentStatus`, `AppointmentType`, `CreateAppointmentInput`.
+  - [x] `src/modules/agenda/agenda.validator.ts`:
+    - [x] Validación Zod de fecha `YYYY-MM-DD`, hora `HH:mm` y duración.
+    - [x] Prevención y detección matemática de solapamiento de horario por especialista (`checkScheduleConflict`).
+    - [x] Validación de estados clínicos (Pendiente, Confirmada, En Espera, Atendida, Cancelada, No Asistió).
+  - [x] `src/modules/agenda/agenda.service.ts`:
+    - [x] `fetchAppointmentsFromSupabase()`: Lectura en vivo ordenada por fecha y hora con join a datos de paciente.
+    - [x] `saveAppointmentToSupabase()`: Creación/edición segura con validación previa de colisión de turnos.
+    - [x] `deleteAppointmentFromSupabase()`: Cancelación y borrado seguro en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Tabla `public.medical_appointments` vinculada con clave foránea a `public.patients(id)`.
+- [x] **Interfaz Gráfica (`/agenda`):**
+  - [x] Integración de `AppointmentModal` con validación y alerta preventiva SweetAlert2 ante cruce de turnos.
+  - [x] Dashboard de la agenda con métricas KPI (Confirmadas, En Espera, Atendidas).
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-agenda-crud.mjs` (`npm run test:agenda`) con 4/4 PASS (100%).
+  - [x] Inyección de 5 citas clínicas oficiales con `npm run seed:agenda`.
+  - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 #### 🩺 Módulo 7: Consulta Ginecológica Estructurada (`src/modules/consultas/`)
 - [ ] `consultas.types.ts`, `consultas.validator.ts` (signos vitales: PA, FC, IMC), `consultas.service.ts`.

@@ -15,7 +15,9 @@
     "test:pacientes": "node scripts/test-pacientes-crud.mjs",
     "seed:pacientes": "node scripts/seed-pacientes.mjs",
     "test:antecedentes": "node scripts/test-antecedentes-crud.mjs",
-    "seed:antecedentes": "node scripts/seed-antecedentes.mjs"
+    "seed:antecedentes": "node scripts/seed-antecedentes.mjs",
+    "test:agenda": "node scripts/test-agenda-crud.mjs",
+    "seed:agenda": "node scripts/seed-agenda.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
