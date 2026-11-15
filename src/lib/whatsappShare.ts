@@ -18,6 +18,7 @@ import {
   ProcedureQuote,
   MedicalAppointment,
 } from "@/types/medical";
+import { INITIAL_DOCTOR } from "@/store/useMedicalStore";
 
 export function cleanPhoneForWhatsApp(phone: string): string {
   // Quitar espacios, guiones y caracteres no numéricos
@@ -32,14 +33,15 @@ export function cleanPhoneForWhatsApp(phone: string): string {
 export function generateColposcopyWhatsAppUrl(
   patient: Patient,
   report: ColposcopyReport,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
 
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el consultorio del *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `📄 Le compartimos el resumen de su *Informe de Colposcopía Especializada*:`,
     `🗓 *Fecha de atención:* ${report.reportDate}`,
@@ -50,8 +52,8 @@ export function generateColposcopyWhatsAppUrl(
       ? `🔬 *Biopsia Dirigida:* Realizada (Horas: ${report.biopsyClockHours.map((h) => `${h}:00`).join(", ")}) - Pendiente resultado de anatomía patológica.`
       : `✅ *Biopsia:* No requerida.`,
     ``,
-    `🏥 *Sede de Atención:* ${doctor.clinicAddress}`,
-    `📞 *Central de Citas:* ${doctor.phone}`,
+    `🏥 *Sede de Atención:* ${doc.clinicAddress}`,
+    `📞 *Central de Citas:* ${doc.phone}`,
     ``,
     `_Conserve este mensaje para su control ginecológico preventivo._`,
   ]
@@ -65,14 +67,15 @@ export function generateColposcopyWhatsAppUrl(
 export function generateCheckupWhatsAppUrl(
   patient: Patient,
   checkup: ClinicalCheckup,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
 
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el consultorio del *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `📋 Le compartimos las conclusiones de su *Chequeo Ginecológico Preventivo Integral*:`,
     `🗓 *Fecha:* ${checkup.checkupDate}`,
@@ -84,8 +87,8 @@ export function generateCheckupWhatsAppUrl(
       ? `💊 *Receta / Indicaciones:* ${checkup.medicalPrescription}`
       : "",
     ``,
-    `🏥 *Sede:* ${doctor.clinicAddress}`,
-    `📞 *Consultas:* ${doctor.phone}`,
+    `🏥 *Sede:* ${doc.clinicAddress}`,
+    `📞 *Consultas:* ${doc.phone}`,
     ``,
     `_CENDO - Especialistas en Endometriosis y Cirugía Ginecológica de Alta Precisión._`,
   ]
@@ -99,8 +102,9 @@ export function generateCheckupWhatsAppUrl(
 export function generatePrescriptionWhatsAppUrl(
   patient: Patient,
   prescription: MedicalPrescription,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
 
   const itemsFormatted = prescription.items
@@ -121,7 +125,7 @@ export function generatePrescriptionWhatsAppUrl(
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `📋 Le enviamos su *RECETA MÉDICA OFICIAL* emitida el ${prescription.prescriptionDate}:`,
     prescription.diagnosis ? `🩺 *Diagnóstico:* ${prescription.diagnosis}` : null,
@@ -135,10 +139,10 @@ export function generatePrescriptionWhatsAppUrl(
     prescription.nextAppointmentDate
       ? `🗓 *Próximo Control:* ${prescription.nextAppointmentDate}\n`
       : null,
-    `👨‍⚕️ *Médico Evaluador:* ${doctor.doctorTitle} ${doctor.fullName}`,
-    `📜 *Colegiatura:* CMP ${doctor.cmp} | RNE ${doctor.rne}`,
-    `🏥 *Sede:* ${doctor.clinicAddress}`,
-    `📞 *Central:* ${doctor.phone}`,
+    `👨‍⚕️ *Médico Evaluador:* ${doc.doctorTitle} ${doc.fullName}`,
+    `📜 *Colegiatura:* CMP ${doc.cmp} | RNE ${doc.rne}`,
+    `🏥 *Sede:* ${doc.clinicAddress}`,
+    `📞 *Central:* ${doc.phone}`,
     ``,
     `_Conserve este mensaje para su farmacia o tratamiento médico._`,
   ]
@@ -152,8 +156,9 @@ export function generatePrescriptionWhatsAppUrl(
 export function generateLabOrderWhatsAppUrl(
   patient: Patient,
   labOrder: LabOrder,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
 
   const itemsFormatted = labOrder.items
@@ -168,7 +173,7 @@ export function generateLabOrderWhatsAppUrl(
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `🧪 Le compartimos su *ORDEN DE ANÁLISIS DE LABORATORIO CLÍNICO* (Fecha: ${labOrder.orderDate}):`,
     labOrder.diagnosis ? `🩺 *Indicación / Diagnóstico:* ${labOrder.diagnosis}` : null,
@@ -182,9 +187,9 @@ export function generateLabOrderWhatsAppUrl(
     labOrder.patientInstructions ||
       "Ayuno de 8 a 10 horas. Abstinencia sexual y no aplicar óvulos 48 horas previas.",
     ``,
-    `👨‍⚕️ *Médico Solicitante:* ${doctor.doctorTitle} ${doctor.fullName} (CMP ${doctor.cmp} - RNE ${doctor.rne})`,
-    `🏥 *Sede CENDO:* ${doctor.clinicAddress}`,
-    `📞 *Consultas:* ${doctor.phone}`,
+    `👨‍⚕️ *Médico Solicitante:* ${doc.doctorTitle} ${doc.fullName} (CMP ${doc.cmp} - RNE ${doc.rne})`,
+    `🏥 *Sede CENDO:* ${doc.clinicAddress}`,
+    `📞 *Consultas:* ${doc.phone}`,
     ``,
     `_Puede presentar este mensaje o la orden impresa en el laboratorio de su preferencia (ej. Biolaq, Laboratorios Roe, Suiza Lab)._`,
   ]
@@ -198,8 +203,9 @@ export function generateLabOrderWhatsAppUrl(
 export function generatePrenatalWhatsAppUrl(
   patient: Patient,
   card: PrenatalCard,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
   const lastVisit =
     card.visits && card.visits.length > 0
@@ -209,7 +215,7 @@ export function generatePrenatalWhatsAppUrl(
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el consultorio del *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `🤰 Le compartimos el resumen de su *Control Prenatal (MINSA / CLAP)*:`,
     `🗓 *FUM:* ${card.baseline.fum} | *FPP (Fecha Probable de Parto):* ${card.baseline.fpp}`,
@@ -235,8 +241,8 @@ export function generatePrenatalWhatsAppUrl(
     `• Fiebre, dolor de cabeza severo o hinchazón de cara/manos`,
     `• Disminución de los movimientos del bebé`,
     ``,
-    `🏥 *Sede de Atención:* ${doctor.clinicAddress}`,
-    `📞 *Central de Emergencias / Citas:* ${doctor.phone}`,
+    `🏥 *Sede de Atención:* ${doc.clinicAddress}`,
+    `📞 *Central de Emergencias / Citas:* ${doc.phone}`,
     ``,
     `_CENDO - Cuidando la salud de mamá y bebé con los más altos estándares clínicos._`,
   ]
@@ -249,27 +255,28 @@ export function generatePrenatalWhatsAppUrl(
 
 export function generateDocumentWhatsAppUrl(
   patient: Patient,
-  doc: PatientDocument,
-  doctor: DoctorProfile
+  documentObj: PatientDocument,
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
 
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el consultorio del *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `📂 Le compartimos el documento / informe médico registrado en su expediente clínico:`,
-    `📋 *Documento:* ${doc.title}`,
-    `🏷 *Tipo:* ${doc.documentType}`,
-    `🗓 *Fecha:* ${doc.createdAt.split("T")[0]}`,
-    doc.notes ? `📝 *Observación / Resumen:* ${doc.notes}` : null,
+    `📋 *Documento:* ${documentObj.title}`,
+    `🏷 *Tipo:* ${documentObj.documentType}`,
+    `🗓 *Fecha:* ${documentObj.createdAt.split("T")[0]}`,
+    documentObj.notes ? `📝 *Observación / Resumen:* ${documentObj.notes}` : null,
     ``,
     `🔗 *Puede visualizar o descargar su documento en el siguiente enlace oficial:*`,
-    `${doc.fileUrl}`,
+    `${documentObj.fileUrl}`,
     ``,
-    `🏥 *Sede de Atención:* ${doctor.clinicAddress}`,
-    `📞 *Central de Consultas:* ${doctor.phone}`,
+    `🏥 *Sede de Atención:* ${doc.clinicAddress}`,
+    `📞 *Central de Consultas:* ${doc.phone}`,
     ``,
     `_CENDO - Archivo Digital Clínico Seguro._`,
   ]
@@ -283,14 +290,15 @@ export function generateDocumentWhatsAppUrl(
 export function generateConsultationWhatsAppUrl(
   patient: Patient,
   cons: MedicalConsultation,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
 
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el consultorio del *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `🩺 Le compartimos el resumen de su *Consulta Médica Ginecológica*:`,
     `🗓 *Fecha de Atención:* ${cons.consultationDate}`,
@@ -301,8 +309,8 @@ export function generateConsultationWhatsAppUrl(
     `${cons.treatmentPlan}`,
     ``,
     cons.nextAppointmentDate ? `🗓 *Próximo Control Recomendado:* ${cons.nextAppointmentDate}` : null,
-    `🏥 *Sede:* ${doctor.clinicAddress}`,
-    `📞 *Citas y Consultas:* ${doctor.phone}`,
+    `🏥 *Sede:* ${doc.clinicAddress}`,
+    `📞 *Citas y Consultas:* ${doc.phone}`,
     ``,
     `_CENDO - Centro Especializado de Endometriosis y Ginecología._`,
   ].filter(Boolean).join("\n");
@@ -313,8 +321,9 @@ export function generateConsultationWhatsAppUrl(
 export function generateUltrasoundWhatsAppUrl(
   patient: Patient,
   echo: UltrasoundReport,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
 
   const typeLabels: Record<string, string> = {
@@ -329,7 +338,7 @@ export function generateUltrasoundWhatsAppUrl(
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el consultorio del *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `📡 Le compartimos las conclusiones de su *${typeLabels[echo.ultrasoundType] || "Ecografía"}*:`,
     `🗓 *Fecha:* ${echo.reportDate}`,
@@ -338,8 +347,8 @@ export function generateUltrasoundWhatsAppUrl(
     echo.findings.biradsCategory ? `🏷 *Clasificación:* ${echo.findings.biradsCategory}` : null,
     echo.recommendations ? `📌 *Sugerencia / Plan:* ${echo.recommendations}` : null,
     ``,
-    `🏥 *Sede:* ${doctor.clinicAddress}`,
-    `📞 *Citas:* ${doctor.phone}`,
+    `🏥 *Sede:* ${doc.clinicAddress}`,
+    `📞 *Citas:* ${doc.phone}`,
     ``,
     `_Conserve este reporte para su control ecográfico._`,
   ].filter(Boolean).join("\n");
@@ -350,14 +359,15 @@ export function generateUltrasoundWhatsAppUrl(
 export function generateMinorProcedureWhatsAppUrl(
   patient: Patient,
   proc: MinorProcedureReport,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(patient.phone);
 
   const message = [
     `👋 *Estimada ${patient.firstName} ${patient.lastName}*,`,
     ``,
-    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el consultorio del *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `🩺 Le compartimos el reporte e indicaciones post-procedimiento:`,
     `📋 *Procedimiento Realizado:* ${proc.procedureType.replace(/_/g, " ")}`,
@@ -370,8 +380,8 @@ export function generateMinorProcedureWhatsAppUrl(
     proc.medicationsPrescribed ? `\n💊 *Medicamentos Indicados:*\n${proc.medicationsPrescribed}` : null,
     proc.nextControlDate ? `\n🗓 *Próximo Control en Consultorio:* ${proc.nextControlDate}` : null,
     ``,
-    `🏥 *Sede de Atención:* ${doctor.clinicAddress}`,
-    `📞 *Emergencias / Consultas:* ${doctor.phone}`,
+    `🏥 *Sede de Atención:* ${doc.clinicAddress}`,
+    `📞 *Emergencias / Consultas:* ${doc.phone}`,
     ``,
     `_CENDO - Compromiso con su bienestar y pronta recuperación._`,
   ].filter(Boolean).join("\n");
@@ -381,8 +391,9 @@ export function generateMinorProcedureWhatsAppUrl(
 
 export function generateQuoteWhatsAppUrl(
   quote: ProcedureQuote,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(quote.patientPhone);
 
   const itemsLines = quote.items.map(
@@ -392,7 +403,7 @@ export function generateQuoteWhatsAppUrl(
   const message = [
     `👋 *Estimada ${quote.patientName}*,`,
     ``,
-    `Le saluda el consultorio del *${doctor.doctorTitle} ${doctor.fullName}* (${doctor.clinicName}).`,
+    `Le saluda el consultorio del *${doc.doctorTitle} ${doc.fullName}* (${doc.clinicName}).`,
     ``,
     `📑 Le compartimos el *Presupuesto Oficial* solicitado para su atención:`,
     `🗓 *Fecha de Emisión:* ${quote.quoteDate} (Vigencia: ${quote.validityDays} días)`,
@@ -406,8 +417,8 @@ export function generateQuoteWhatsAppUrl(
     `💳 *Formas de Pago:* ${quote.paymentTerms}`,
     quote.notes ? `📝 *Observaciones:* ${quote.notes}` : null,
     ``,
-    `🏥 *Sede:* ${doctor.clinicAddress}`,
-    `📞 *Para agendar o resolver consultas:* ${doctor.phone}`,
+    `🏥 *Sede:* ${doc.clinicAddress}`,
+    `📞 *Para agendar o resolver consultas:* ${doc.phone}`,
     ``,
     `_CENDO - Presupuesto institucional garantizado._`,
   ].filter(Boolean).join("\n");
@@ -417,8 +428,9 @@ export function generateQuoteWhatsAppUrl(
 
 export function generateAppointmentReminderWhatsAppUrl(
   appt: MedicalAppointment,
-  doctor: DoctorProfile
+  doctor?: DoctorProfile | null
 ): string {
+  const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(appt.patientPhone);
 
   const typeLabels: Record<string, string> = {
@@ -434,19 +446,19 @@ export function generateAppointmentReminderWhatsAppUrl(
   const message = [
     `👋 *Recordatorio de Cita Médica en CENDO*`,
     ``,
-    `Estimada *${appt.patientName}*, le recordamos su próxima cita médica con el *${doctor.doctorTitle} ${doctor.fullName}*:`,
+    `Estimada *${appt.patientName}*, le recordamos su próxima cita médica con el *${doc.doctorTitle} ${doc.fullName}*:`,
     ``,
     `🗓 *Fecha:* *${appt.appointmentDate}*`,
     `⏰ *Hora:* *${appt.appointmentTime}* (Duración aprox: ${appt.durationMinutes} min)`,
     `🩺 *Motivo / Especialidad:* ${typeLabels[appt.appointmentType] || appt.reason}`,
-    `🏥 *Sede:* ${doctor.clinicAddress}`,
+    `🏥 *Sede:* ${doc.clinicAddress}`,
     ``,
     `💡 *Recomendaciones para su atención:*`,
     `• Llegar con 10 minutos de anticipación.`,
     `• Portar DNI físico y exámenes médicos previos.`,
     `• Si no puede asistir, por favor avisar con 24h de anticipación.`,
     ``,
-    `📞 *Confirmación o cambios:* ${doctor.phone}`,
+    `📞 *Confirmación o cambios:* ${doc.phone}`,
     ``,
     `_¡Le esperamos en CENDO para brindarle la mejor atención!_`,
   ].filter(Boolean).join("\n");

@@ -23,7 +23,7 @@ import { generateDocumentWhatsAppUrl } from "@/lib/whatsappShare";
 
 interface PatientDocumentsSectionProps {
   patient: Patient;
-  doctor: DoctorProfile;
+  doctor?: DoctorProfile | null;
   onOpenUploadModal: () => void;
   onViewDocument: (doc: PatientDocument) => void;
 }

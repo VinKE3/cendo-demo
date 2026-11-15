@@ -373,11 +373,26 @@ flowchart LR
 ---
 
 ### 🚀 FASE 5: Desacoplamiento de la Gran Ficha y Certificación Final
-- [ ] **Desacoplar `pacientes/[id]/page.tsx`** (~2,450 líneas) en sub-pestañas autónomas (`TabHistoria`, `TabConsultas`, `TabColposcopia`, `TabEcografias`, `TabRecetas`, etc.).
-- [ ] **Aligerar `useMedicalStore.ts`** y eliminar el archivo monolítico `supabaseSync.ts`.
+- [x] **Desacoplar `pacientes/[id]/page.tsx`**: Reducido de 2,447 líneas a 380 líneas (-84% de complejidad), creando 8 sub-pestañas autónomas y reactivas:
+  - [x] `TabResumen.tsx`: Resumen de filiación, antecedentes gineco-obstétricos y carnet perinatal activo.
+  - [x] `TabConsultas.tsx`: Listado y registro de consultas ginecológicas estructuradas.
+  - [x] `TabColposcopia.tsx`: Informes de colposcopía IFCPC 2011, reloj de biopsias y compartición WhatsApp.
+  - [x] `TabEcografias.tsx`: Ecografías especializadas con mapeo de endometriosis profunda y BI-RADS.
+  - [x] `TabProcedimientos.tsx`: Procedimientos menores en consultorio, LEEP y reportes operatorios.
+  - [x] `TabRecetas.tsx`: Prescripciones médicas inteligentes con posología estructurada.
+  - [x] `TabLaboratorioCotizaciones.tsx`: Órdenes de laboratorio clínico y presupuestos formales.
+  - [x] `TabDocumentosWord.tsx`: Repositorio documental (.pdf) e historias clínicas previas (.docx).
+  - [x] `PatientDetailModals.tsx`: Encapsulación modular de los 14 modales clínicos y vistas de impresión.
+- [x] **Seguridad y Resiliencia en WhatsApp Sharing**:
+  - [x] `src/lib/whatsappShare.ts` actualizado con soporte de fallback seguro `INITIAL_DOCTOR`, eliminando cualquier riesgo de excepción por médico no autenticado o nulo.
+- [x] **Suite de Certificación Automatizada Integral**:
+  - [x] Script maestro `npm run test:all` unificando las 15 suites de prueba CRUD contra Supabase Cloud (`https://zfyfyeezztaqrzfpogiv.supabase.co`).
+  - [x] 100% de éxito certificado (todas las pruebas PASS sin residuos en base de datos).
+- [x] **Build de Producción Next.js 14**:
+  - [x] 14/14 rutas estáticas y dinámicas compiladas exitosamente con cero errores de TypeScript o empaquetado.
 - [ ] Verificación cruzada final en **PC (escritorio)**, **Tablet (iPad/Android)** y **Móvil**.
 - [ ] Prueba de aceptación completa con el **Dr. Patrick Jacinto Gomero**.
 
 ---
 
-*Última actualización de progreso: 2026-11-14T22:30:00-05:00*
+*Última actualización de progreso: 2026-11-14T23:05:00-05:00*

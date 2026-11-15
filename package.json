@@ -35,7 +35,8 @@
     "test:prenatal": "node scripts/test-prenatal-crud.mjs",
     "seed:prenatal": "node scripts/seed-prenatal.mjs",
     "test:documentos": "node scripts/test-documentos-crud.mjs",
-    "seed:documentos": "node scripts/seed-documentos.mjs"
+    "seed:documentos": "node scripts/seed-documentos.mjs",
+    "test:all": "node scripts/test-vademecum-crud.mjs && node scripts/test-tarifario-crud.mjs && node scripts/test-usuarios-crud.mjs && node scripts/test-pacientes-crud.mjs && node scripts/test-antecedentes-crud.mjs && node scripts/test-agenda-crud.mjs && node scripts/test-consultas-crud.mjs && node scripts/test-recetas-crud.mjs && node scripts/test-laboratorio-crud.mjs && node scripts/test-cotizaciones-crud.mjs && node scripts/test-colposcopia-crud.mjs && node scripts/test-ecografias-crud.mjs && node scripts/test-procedimientos-crud.mjs && node scripts/test-prenatal-crud.mjs && node scripts/test-documentos-crud.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
