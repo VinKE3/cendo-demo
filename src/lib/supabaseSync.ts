@@ -31,6 +31,10 @@ import {
   ProcedureTariff,
   MedicationVademecum,
 } from "@/types/medical";
+import {
+  saveColposcopyReportToSupabase,
+  deleteColposcopyReportFromSupabase,
+} from "@/modules/colposcopia";
 
 export function ensureUuid(id: string): string {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -209,86 +213,24 @@ export async function syncBackgroundToSupabase(bg: PatientBackground): Promise<b
 
 export async function syncColposcopyToSupabase(report: ColposcopyReport): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
       return false;
     }
-
-    const colpoUuid = ensureUuid(report.id);
-    const patientUuid = getPatientUuid(report.patientId);
-    const cleanDate = report.reportDate ? (report.reportDate.match(/\d{4}-\d{2}-\d{2}/)?.[0] || new Date().toISOString().slice(0, 10)) : new Date().toISOString().slice(0, 10);
-
-    const { error } = await supabase.from("colposcopy_reports").upsert(
-      {
-        id: colpoUuid,
-        patient_id: patientUuid,
-        report_date: cleanDate,
-        adequate_colposcopy: report.adequateColposcopy,
-        inadequate_reason: report.inadequateReason || null,
-        squamocolumnar_junction_visible: report.squamocolumnarJunctionVisible,
-        transformation_zone_type: report.transformationZoneType,
-        mature_squamous_epithelium: report.matureSquamousEpithelium,
-        ectopy: report.ectopy,
-        naboth_cyst: !!report.nabothCyst,
-        crypt_openings: !!report.cryptOpenings,
-        deciduosis: !!report.deciduosis,
-        thin_acetowhite_epithelium: report.thinAcetowhiteEpithelium,
-        dense_acetowhite_epithelium: report.denseAcetowhiteEpithelium,
-        rapid_acetowhite: !!report.rapidAcetowhite,
-        thickened_glands: !!report.thickenedGlands,
-        irregular_border: report.irregularBorder,
-        fine_mosaic: report.fineMosaic,
-        coarse_mosaic: report.coarseMosaic,
-        fine_punctation: report.finePunctation,
-        coarse_punctation: report.coarsePunctation,
-        sharp_borders: !!report.sharpBorders,
-        inner_border_sign: !!report.innerBorderSign,
-        ridge_sign: !!report.ridgeSign,
-        leukoplakia: !!report.leukoplakia,
-        erosion: !!report.erosion,
-        atypical_vessels: report.atypicalVessels,
-        fragile_vessels: !!report.fragileVessels,
-        irregular_surface: !!report.irregularSurface,
-        exophytic_lesion: !!report.exophyticLesion,
-        necrosis: !!report.necrosis,
-        nodular_tumor: !!report.nodularTumor,
-        congenital_tz: !!report.congenitalTZ,
-        condyloma: !!report.condyloma,
-        polyp: !!report.polyp,
-        inflammation: !!report.inflammation,
-        stenosis: !!report.stenosis,
-        post_treatment_anomaly: !!report.postTreatmentAnomaly,
-        endometriosis_foci: !!report.endometriosisFoci,
-        other_findings: report.otherFindings || null,
-        schiller_test: report.schillerTest,
-        cervical_biopsy_taken: report.cervicalBiopsyTaken,
-        biopsy_clock_hours: report.biopsyClockHours || [],
-        images: report.images || [],
-        diagnosis: report.diagnosis,
-        plan_recommendations: report.planRecommendations,
-        cie10_code: report.cie10Code,
-        doctor_name: report.doctorName,
-      },
-      { onConflict: "id" }
-    );
-
-    if (error) {
-      console.warn("Aviso sync colposcopía Supabase:", error.message);
-      return false;
-    }
-    return true;
-  } catch {
+    const res = await saveColposcopyReportToSupabase(report);
+    return res.success;
+  } catch (err) {
+    console.warn("Aviso sync colposcopía Supabase:", err);
     return false;
   }
 }
 
 export async function deleteColposcopyFromSupabase(id: string): Promise<boolean> {
   try {
-    const supabase = createClient();
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
-    const targetId = ensureUuid(id);
-    const { error } = await supabase.from("colposcopy_reports").delete().eq("id", targetId);
-    return !error;
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
+      return false;
+    }
+    const res = await deleteColposcopyReportFromSupabase(id);
+    return res.success;
   } catch {
     return false;
   }

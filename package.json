@@ -25,7 +25,9 @@
     "test:laboratorio": "node scripts/test-laboratorio-crud.mjs",
     "seed:laboratorio": "node scripts/seed-laboratorio.mjs",
     "test:cotizaciones": "node scripts/test-cotizaciones-crud.mjs",
-    "seed:cotizaciones": "node scripts/seed-cotizaciones.mjs"
+    "seed:cotizaciones": "node scripts/seed-cotizaciones.mjs",
+    "test:colposcopia": "node scripts/test-colposcopia-crud.mjs",
+    "seed:colposcopia": "node scripts/seed-colposcopia.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

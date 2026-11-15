@@ -2,70 +2,15 @@ export type { DoctorRole, DoctorProfile, DoctorTitle } from "@/modules/usuarios"
 export type { Patient } from "@/modules/pacientes";
 export type { PatientBackground } from "@/modules/antecedentes";
 
-export interface ColposcopyImage {
-  url: string;
-  caption: string;
-  timestamp: string;
-}
-
-export interface ColposcopyReport {
-  id: string;
-  patientId: string;
-  reportDate: string; // YYYY-MM-DD
-  adequateColposcopy: boolean;
-  inadequateReason?: string;
-  squamocolumnarJunctionVisible: "Visible" | "No visible" | "Parcialmente visible";
-  transformationZoneType: "Tipo 1" | "Tipo 2" | "Tipo 3";
-  matureSquamousEpithelium: boolean;
-  ectopy: boolean;
-  // Criterios IFCPC adicionales normales
-  nabothCyst?: boolean;
-  cryptOpenings?: boolean;
-  deciduosis?: boolean;
-  // Hallazgos Grado 1 (menor)
-  thinAcetowhiteEpithelium: boolean;
-  irregularBorder: boolean;
-  fineMosaic: boolean;
-  finePunctation: boolean;
-  // Hallazgos Grado 2 (mayor)
-  denseAcetowhiteEpithelium: boolean;
-  rapidAcetowhite?: boolean;
-  thickenedGlands?: boolean;
-  coarseMosaic: boolean;
-  coarsePunctation: boolean;
-  sharpBorders?: boolean;
-  innerBorderSign?: boolean;
-  ridgeSign?: boolean;
-  // No específicos
-  leukoplakia?: boolean;
-  erosion?: boolean;
-  schillerTest: string; // "Negativo (Lugol Caoba)", "Positivo (Yodo negativo)", etc.
-  // Sospecha de Invasión
-  atypicalVessels: boolean;
-  fragileVessels?: boolean;
-  irregularSurface?: boolean;
-  exophyticLesion?: boolean;
-  necrosis?: boolean;
-  nodularTumor?: boolean;
-  // Hallazgos Varios
-  congenitalTZ?: boolean;
-  condyloma?: boolean;
-  polyp?: boolean;
-  inflammation?: boolean;
-  stenosis?: boolean;
-  postTreatmentAnomaly?: boolean;
-  endometriosisFoci?: boolean;
-  otherFindings?: string;
-  // Biopsia y Diagnóstico
-  cervicalBiopsyTaken: boolean;
-  biopsyClockHours: string[]; // ["1", "2", ..., "12"]
-  images: ColposcopyImage[];
-  diagnosis: string;
-  planRecommendations: string;
-  cie10Code: string;
-  doctorName: string;
-  createdAt: string;
-}
+export type {
+  ColposcopyReport,
+  ColposcopyImage,
+  SCJVisibility,
+  TZType,
+  CervicalClockHour,
+  CreateColposcopyInput,
+  UpdateColposcopyInput,
+} from "@/modules/colposcopia";
 
 export interface ClinicalCheckup {
   id: string;

@@ -254,9 +254,26 @@ flowchart LR
 ### 🔬 FASE 4: Módulos de Alta Especialidad Ginecológica
 
 #### 🔬 Módulo 10: Colposcopía IFCPC 2011 (`src/modules/colposcopia/`)
-- [ ] Mapeo cervical con criterios IFCPC (Unión escamocolumnar, zona de transformación, acetoblanco grado 1 y 2, Schiller).
-- [ ] Registro de reloj horario de biopsia cervical (1 a 12 horas).
-- [ ] Persistencia en `public.colposcopy_reports`.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/colposcopia/colposcopia.types.ts`: `ColposcopyReport`, `ColposcopyImage`, `SCJVisibility`, `TZType`, `CervicalClockHour`, `CreateColposcopyInput`.
+  - [x] `src/modules/colposcopia/colposcopia.validator.ts`:
+    - [x] Nomenclatura oficial IFCPC Río de Janeiro 2011 (UEC, Zona de Transformación Tipo 1/2/3, Acetoblanco Grado 1/2, Schiller).
+    - [x] Clasificador de severidad colposcópica (`classifyIFCPCSeverity`).
+    - [x] Validación Zod de horas del reloj cervical (1 a 12 horas) y obligatoriedad de marcar reloj si se tomó biopsia.
+  - [x] `src/modules/colposcopia/colposcopia.service.ts`:
+    - [x] `fetchColposcopyReportsFromSupabase()`: Lectura en vivo ordenada cronológicamente con filtro por paciente.
+    - [x] `saveColposcopyReportToSupabase()`: Upsert seguro con 24 columnas nativas PostgreSQL sin desbordes.
+    - [x] `deleteColposcopyReportFromSupabase()`: Eliminación certificada en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Tabla `public.colposcopy_reports` sincronizada con soporte de array JSONB para 4 fotos cuadrantes y reloj cervical.
+- [x] **Interfaz Gráfica (`/colposcopia`):**
+  - [x] Conexión de `/colposcopia`, `ColposcopyModal` y `CervicalClock` interactivo (1h - 12h) con pines marcados.
+  - [x] Visualización sinóptica de hallazgos positivos en chips de color (evitando huecos en blanco según pedido del Dr. Patrick).
+  - [x] Galería fotográfica de 4 cuadrantes con visor ampliado.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-colposcopia-crud.mjs` (`npm run test:colposcopia`) con 5/5 PASS (100%).
+  - [x] Inyección de informes oficiales CENDO con `npm run seed:colposcopia` (Luciana Ramos, Daniela Castro LIE-AG, Camila Valdivia).
+  - [x] Re-exportación completa de tipos en `src/types/medical.ts`.
 
 #### 📺 Módulo 11: Ecografías Ginecológicas y Obstétricas (`src/modules/ecografias/`)
 - [ ] Formatos especializados para Ecografía Transvaginal, Pélvica, Mama Bilateral (BI-RADS 1-5) y Obstétrica.
