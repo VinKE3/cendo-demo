@@ -26,7 +26,8 @@ flowchart LR
     Fase1 --> Fase2["Fase 2: Pacientes & Antecedentes\n(100% Certificada:\nFichas + Historial Gineco-Obstétrico)"]
     Fase2 --> Mod6["Fase 3 / Módulo 6: Agenda de Citas\n(100% Certificado con Anti-Solapamiento)"]
     Mod6 --> Mod7["Módulo 7: Consultas & Examen Físico\n(100% Certificado con IMC y CIE-10)"]
-    Mod7 --> Mod8["Módulo 8: Recetas Médicas Inteligentes\n(Siguiente Gran Paso)"]
+    Mod7 --> Mod8["Módulo 8: Recetas Médicas Inteligentes\n(100% Certificado con Anti-Duplicados)"]
+    Mod8 --> Mod9["Módulo 9: Órdenes de Laboratorio\n(Siguiente Gran Paso)"]
 ```
 
 ---
@@ -209,9 +210,24 @@ flowchart LR
   - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 #### 💊 Módulo 8: Recetario Médico Inteligente (`src/modules/recetas/`)
-- [ ] Integración con el Vademécum de la Fase 1 (autocompletado al escribir).
-- [ ] Emisión de receta con posología, instrucciones y sello médico.
-- [ ] Generación de PDF oficial e integración con envío por WhatsApp.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/recetas/recetas.types.ts`: `MedicalPrescription`, `PrescriptionItem`, `PrescriptionRoute`, `ClinicalDosagePreset`.
+  - [x] `src/modules/recetas/recetas.validator.ts`:
+    - [x] Validación Zod de fármaco, posología, vía de administración y duración.
+    - [x] Prevención y detección de fármaco duplicado en la misma receta (`checkDuplicateMedicationInPrescription`).
+    - [x] Catálogo de plantillas clínicas de dosificación ginecológica en 1 clic (`CLINICAL_DOSAGE_PRESETS`).
+  - [x] `src/modules/recetas/recetas.service.ts`:
+    - [x] `fetchPrescriptionsFromSupabase()`: Lectura de recetas estructuradas por paciente.
+    - [x] `savePrescriptionToSupabase()`: Upsert en `public.medical_prescriptions` con array JSONB de medicamentos.
+    - [x] `deletePrescriptionFromSupabase()`: Borrado seguro en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Tabla `public.medical_prescriptions` con columna `items JSONB` y vínculo de integridad a `public.patients(id)`.
+- [x] **Interfaz Gráfica:**
+  - [x] Integración de `PrescriptionModal` con autocompletado desde Vademécum, alerta de fármaco repetido y envío por WhatsApp.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-recetas-crud.mjs` (`npm run test:recetas`) con 4/4 PASS (100%).
+  - [x] Inyección de 5 recetas médicas clínicas oficiales con `npm run seed:recetas`.
+  - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 #### 🧪 Módulo 9: Órdenes de Laboratorio y Cotizaciones (`src/modules/laboratorio/` & `src/modules/cotizaciones/`)
 - [ ] Integración con el Tarifario de la Fase 1.

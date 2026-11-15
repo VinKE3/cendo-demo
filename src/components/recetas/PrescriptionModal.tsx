@@ -30,6 +30,10 @@ import {
 } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generatePrescriptionWhatsAppUrl } from "@/lib/whatsappShare";
+import {
+  checkDuplicateMedicationInPrescription,
+  validatePrescriptionInput,
+} from "@/modules/recetas";
 
 interface PrescriptionModalProps {
   isOpen: boolean;
@@ -249,6 +253,16 @@ export function PrescriptionModal({
       return;
     }
 
+    if (checkDuplicateMedicationInPrescription(items, selectedMedication)) {
+      Swal.fire({
+        icon: "info",
+        title: "Medicamento ya Agregado",
+        text: `"${selectedMedication}" ya forma parte de esta receta. Si desea ajustar la posología, elimine el ítem anterior o ajuste sus indicaciones.`,
+        confirmButtonColor: "#0A4D68",
+      });
+      return;
+    }
+
     const newItem: PrescriptionItem = {
       id: `item-${Date.now()}`,
       medicationName: selectedMedication.trim(),
@@ -276,11 +290,26 @@ export function PrescriptionModal({
 
   // Guardar receta
   const handleSave = (andPrint = false) => {
-    if (items.length === 0) {
+    const payload = {
+      patientId: patient.id,
+      doctorId: doctorProfile.id,
+      doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
+      doctorCmp: doctorProfile.cmp,
+      doctorRne: doctorProfile.rne,
+      prescriptionDate,
+      diagnosis: diagnosis.trim(),
+      cie10Code: cie10Code.trim() || undefined,
+      items,
+      generalIndications: generalIndications.trim() || undefined,
+      nextAppointmentDate: nextAppointmentDate || undefined,
+    };
+
+    const validation = validatePrescriptionInput(payload);
+    if (!validation.success) {
       Swal.fire({
         icon: "warning",
-        title: "Receta Vacía",
-        text: "Debe agregar al menos un medicamento a la receta médica.",
+        title: "Receta Incompleta",
+        text: validation.error,
         confirmButtonColor: "#0A4D68",
       });
       return;
