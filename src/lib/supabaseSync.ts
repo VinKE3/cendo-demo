@@ -39,6 +39,10 @@ import {
   saveUltrasoundReportToSupabase,
   deleteUltrasoundReportFromSupabase,
 } from "@/modules/ecografias";
+import {
+  saveMinorProcedureToSupabase,
+  deleteMinorProcedureFromSupabase as deleteMinorProcedureService,
+} from "@/modules/procedimientos";
 
 export function ensureUuid(id: string): string {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -703,44 +707,23 @@ export async function deleteUltrasoundFromSupabase(id: string): Promise<boolean>
 
 export async function syncMinorProcedureToSupabase(proc: MinorProcedureReport): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
-    const patientUuid = getPatientUuid(proc.patientId);
-    const procUuid = ensureUuid(proc.id);
-
-    const { error } = await supabase.from("minor_procedures").upsert({
-      id: procUuid,
-      patient_id: patientUuid,
-      doctor_id: proc.doctorId,
-      doctor_name: proc.doctorName,
-      doctor_cmp: proc.doctorCmp,
-      doctor_rne: proc.doctorRne || null,
-      procedure_date: proc.procedureDate,
-      procedure_type: proc.procedureType,
-      pre_op_diagnosis: proc.preOpDiagnosis,
-      post_op_diagnosis: proc.postOpDiagnosis,
-      cie10_code: proc.cie10Code || null,
-      anesthesia_type: proc.anesthesiaType,
-      procedure_details: proc.procedureDetails,
-      post_op_indications: proc.postOpIndications,
-      medications_prescribed: proc.medicationsPrescribed || null,
-      next_control_date: proc.nextControlDate || null,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "id" });
-
-    if (error) console.warn("Aviso sync procedimiento Supabase:", error.message);
-    return !error;
-  } catch { return false; }
+    const res = await saveMinorProcedureToSupabase(proc);
+    return res.success;
+  } catch (err) {
+    console.warn("Aviso sync procedimiento Supabase:", err);
+    return false;
+  }
 }
 
 export async function deleteMinorProcedureFromSupabase(id: string): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
-    const targetId = ensureUuid(id);
-    const { error } = await supabase.from("minor_procedures").delete().eq("id", targetId);
-    return !error;
-  } catch { return false; }
+    const res = await deleteMinorProcedureService(id);
+    return res.success;
+  } catch {
+    return false;
+  }
 }
 
 export async function syncAppointmentToSupabase(appt: MedicalAppointment): Promise<boolean> {

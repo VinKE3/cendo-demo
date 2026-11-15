@@ -228,50 +228,19 @@ export type {
 } from "@/modules/ecografias";
 
 // ============================================================================
-// ETAPA B: FORMATOS DE PROCEDIMIENTOS MENORES & BIOPSIAS (PUNTO 6)
+// ETAPA B: FORMATOS DE PROCEDIMIENTOS MENORES & BIOPSIAS (PUNTO 6) - MODULARIZADO
 // ============================================================================
 
-export type ProcedureType =
-  | "BIOPSIA_CERVICAL"
-  | "BIOPSIA_ENDOMETRIAL"
-  | "CONO_LEEP"
-  | "POLIPECTOMIA"
-  | "INSERCION_DIU"
-  | "RETIRO_DIU"
-  | "INSERCION_IMPLANTE"
-  | "RETIRO_IMPLANTE"
-  | "OTRO";
-
-export interface ProcedureDetails {
-  asepsisTechnique: string;
-  biopsySites?: string;
-  specimenSentToPathology: boolean;
-  specimenDescription?: string;
-  bleedingAmount: "Mínimo (< 10 ml)" | "Escaso" | "Moderado";
-  hemostasisMethod: "Solución de Monsel" | "Electrocoagulación" | "Compresión" | "Sutura";
-  complications: string;
-}
-
-export interface MinorProcedureReport {
-  id: string;
-  patientId: string;
-  doctorId: string;
-  doctorName: string;
-  doctorCmp: string;
-  doctorRne?: string;
-  procedureDate: string;
-  procedureType: ProcedureType;
-  preOpDiagnosis: string;
-  postOpDiagnosis: string;
-  cie10Code?: string;
-  anesthesiaType: "Local (Lidocaína 2%)" | "Sedación" | "Sin Anestesia" | "Tópica";
-  procedureDetails: ProcedureDetails;
-  postOpIndications: string;
-  medicationsPrescribed?: string;
-  nextControlDate?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type {
+  ProcedureType,
+  AnesthesiaType,
+  BleedingAmount,
+  HemostasisMethod,
+  ProcedureDetails,
+  MinorProcedureReport,
+  CreateMinorProcedureInput,
+  UpdateMinorProcedureInput,
+} from "@/modules/procedimientos";
 
 // ============================================================================
 // ETAPA C: TARIFAS COTIZADAS Y PRESUPUESTOS POR WHATSAPP (PUNTO 3) - MODULARIZADO

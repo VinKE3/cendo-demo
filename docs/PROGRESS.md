@@ -299,9 +299,26 @@ flowchart LR
   - [x] Re-exportación completa de tipos en `src/types/medical.ts`.
 
 #### ✂️ Módulo 12: Procedimientos Menores & Biopsias LEEP (`src/modules/procedimientos/`)
-- [ ] Reporte operatorio de cono LEEP, polipectomía, inserción/retiro de DIU o implante Jadelle.
-- [ ] Registro de patología, sangrado y hemostasia (Solución de Monsel).
-- [ ] Persistencia en `public.minor_procedures`.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/procedimientos/procedimientos.types.ts`: `MinorProcedureReport`, `ProcedureType` (Cono LEEP, DIU, Jadelle, Biopsias, etc.), `ProcedureDetails`, `AnesthesiaType`, `HemostasisMethod`.
+  - [x] `src/modules/procedimientos/procedimientos.validator.ts`:
+    - [x] Catálogo de 9 procedimientos ambulatorios ginecológicos (`PROCEDURE_TYPE_LABELS`).
+    - [x] Esquema de detalles operatorios: técnica de asepsia, descripción de muestra, envío a patología, sangrado y hemostasia (`Solución de Monsel`, `Compresión`, `Electrocoagulación`, `Sutura`).
+    - [x] Validación Zod de diagnósticos pre y post-operatorios, CIE-10 y prescripción post-quirúrgica.
+  - [x] `src/modules/procedimientos/procedimientos.service.ts`:
+    - [x] `fetchMinorProceduresFromSupabase()`: Lectura cronológica con filtro por paciente.
+    - [x] `saveMinorProcedureToSupabase()`: Upsert en `public.minor_procedures` con columnas nativas PostgreSQL y detalles JSONB.
+    - [x] `deleteMinorProcedureFromSupabase()`: Eliminación certificada en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Tabla `public.minor_procedures` sincronizada con soporte nativo para reportes operatorios ambulatorios con valor médico-legal.
+- [x] **Interfaz Gráfica:**
+  - [x] Integración de `MinorProcedureModal` en la ficha clínica del paciente (`/pacientes/[id]`).
+  - [x] Plantillas de indicaciones post-operatorias automáticas (`PRESET_INDICATIONS`) y envío del reporte por WhatsApp.
+  - [x] Vista de impresión formal de reporte operatorio ambulatorio (`MinorProcedurePrintView`).
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-procedimientos-crud.mjs` (`npm run test:procedimientos`) con 5/5 PASS (100%).
+  - [x] Inyección de 4 procedimientos oficiales CENDO con `npm run seed:procedimientos` (Jadelle Luciana Ramos, Biopsia cervical Daniela Castro, Biopsia Pipelle Rosa Huamán, Polipectomía Camila Valdivia).
+  - [x] Re-exportación completa de tipos en `src/types/medical.ts`.
 
 #### 👶 Módulo 13: Carnet de Control Prenatal MINSA / CLAP (`src/modules/prenatal/`)
 - [ ] Registro de datos basales, cálculo de Naegele / FPP, visitas de control gestacional (1 a 9).
