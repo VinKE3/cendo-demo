@@ -21,6 +21,7 @@ import {
 } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateAppointmentReminderWhatsAppUrl } from "@/lib/whatsappShare";
+import { generateGoogleCalendarUrl, downloadIcsForAppleCalendar } from "@/lib/calendarExport";
 import { validateAppointmentInput, checkScheduleConflict } from "@/modules/agenda";
 
 interface AppointmentModalProps {
@@ -177,23 +178,37 @@ export function AppointmentModal({
 
     if (appointmentToEdit) {
       updateAppointment(appointmentToEdit.id, payload);
-      Swal.fire({
-        icon: "success",
-        title: "Cita Actualizada",
-        text: "La cita ha sido modificada y sincronizada.",
-        timer: 1500,
-        showConfirmButton: false,
-      });
     } else {
       addAppointment(payload);
-      Swal.fire({
-        icon: "success",
-        title: "Cita Agendada",
-        text: `Cita programada para ${payload.patientName} a las ${payload.appointmentTime}.`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
     }
+
+    const gcalUrl = generateGoogleCalendarUrl(payload, assignedDoctor);
+
+    Swal.fire({
+      icon: "success",
+      title: appointmentToEdit ? "Cita Modificada" : "Cita Agendada",
+      html: `
+        <div style="font-size: 13px; color: #475569; margin-bottom: 12px; text-align: left;">
+          Paciente: <b>${payload.patientName}</b><br/>
+          Fecha: <b>${payload.appointmentDate}</b> &bull; Hora: <b>${payload.appointmentTime}</b> (${payload.durationMinutes} min)<br/>
+          Motivo: <b>${payload.reason}</b>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          <a href="${gcalUrl}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; background: #0284c7; color: white; border-radius: 10px; font-weight: bold; text-decoration: none; font-size: 12px;">
+            📅 Añadir a Google Calendar
+          </a>
+        </div>
+      `,
+      showCancelButton: true,
+      cancelButtonText: "Listo / Cerrar",
+      showConfirmButton: true,
+      confirmButtonText: "🍎 Descargar para iPhone (.ics)",
+      confirmButtonColor: "#1e293b",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        downloadIcsForAppleCalendar(payload, assignedDoctor);
+      }
+    });
 
     onClose();
   };

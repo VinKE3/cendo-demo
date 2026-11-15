@@ -19,6 +19,7 @@ import {
   MedicalAppointment,
 } from "@/types/medical";
 import { INITIAL_DOCTOR } from "@/store/useMedicalStore";
+import { generateGoogleCalendarUrl } from "./calendarExport";
 
 export function cleanPhoneForWhatsApp(phone: string): string {
   // Quitar espacios, guiones y caracteres no numéricos
@@ -452,6 +453,9 @@ export function generateAppointmentReminderWhatsAppUrl(
     `⏰ *Hora:* *${appt.appointmentTime}* (Duración aprox: ${appt.durationMinutes} min)`,
     `🩺 *Motivo / Especialidad:* ${typeLabels[appt.appointmentType] || appt.reason}`,
     `🏥 *Sede:* ${doc.clinicAddress}`,
+    ``,
+    `📅 *Añadir a su Calendario (Google / iPhone):*`,
+    generateGoogleCalendarUrl(appt, doc),
     ``,
     `💡 *Recomendaciones para su atención:*`,
     `• Llegar con 10 minutos de anticipación.`,

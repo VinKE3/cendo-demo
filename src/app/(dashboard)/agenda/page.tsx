@@ -31,6 +31,7 @@ import {
 } from "@/types/medical";
 import { AppointmentModal } from "@/components/agenda/AppointmentModal";
 import { generateAppointmentReminderWhatsAppUrl } from "@/lib/whatsappShare";
+import { generateGoogleCalendarUrl, downloadIcsForAppleCalendar } from "@/lib/calendarExport";
 
 const TYPE_COLORS: Record<AppointmentType, { bg: string; text: string; border: string }> = {
   CONSULTA_PRIMERA_VEZ: { bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
@@ -388,10 +389,32 @@ export default function AgendaPage() {
                         ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         : "bg-emerald-600 text-white hover:bg-emerald-700"
                     }`}
-                    title="Enviar recordatorio por WhatsApp"
+                    title="Enviar recordatorio por WhatsApp con enlace a Calendario"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
-                    <span>{appt.reminderSent ? "Reenviar WhatsApp" : "Recordatorio WA"}</span>
+                    <span>{appt.reminderSent ? "Reenviar WA" : "Recordatorio WA"}</span>
+                  </button>
+
+                  {/* Botón Google Calendar */}
+                  <a
+                    href={generateGoogleCalendarUrl(appt, doctorProfile)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 flex items-center gap-1 transition-colors cursor-pointer"
+                    title="Añadir a Google Calendar"
+                  >
+                    <CalendarIcon className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="hidden sm:inline">Google</span>
+                  </a>
+
+                  {/* Botón Apple Calendar / iPhone (.ics) */}
+                  <button
+                    onClick={() => downloadIcsForAppleCalendar(appt, doctorProfile)}
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center gap-1 transition-colors cursor-pointer"
+                    title="Añadir a Apple Calendar (iPhone / iPad / Mac / Outlook)"
+                  >
+                    <span className="text-xs">🍎</span>
+                    <span className="hidden sm:inline">Apple</span>
                   </button>
 
                   {/* Enlace a Historia Clínica */}
