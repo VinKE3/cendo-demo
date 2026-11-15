@@ -47,6 +47,12 @@ import {
   savePrenatalCard,
   deletePrenatalCard as deletePrenatalCardService,
 } from "@/modules/prenatal";
+import {
+  saveDocumentToSupabase as saveDocumentService,
+  deleteDocumentFromSupabase as deleteDocumentService,
+  saveWordHistoryToSupabase as saveWordHistoryService,
+  deleteWordHistoryFromSupabase as deleteWordHistoryService,
+} from "@/modules/documentos";
 
 export function ensureUuid(id: string): string {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -554,36 +560,17 @@ export async function uploadDocumentFileToStorage(
 
 export async function syncDocumentToSupabase(doc: PatientDocument): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
       return false;
     }
-
     const patientUuid = getPatientUuid(doc.patientId);
-    const docUuid = ensureUuid(doc.id);
-
-    const { error } = await supabase.from("patient_documents").upsert(
-      {
-        id: docUuid,
-        patient_id: patientUuid,
-        document_type: doc.documentType,
-        title: doc.title,
-        file_url: doc.fileUrl,
-        file_name: doc.fileName,
-        file_size: doc.fileSize || null,
-        mime_type: doc.mimeType || "application/pdf",
-        notes: doc.notes || null,
-        created_at: doc.createdAt || new Date().toISOString(),
-      },
-      { onConflict: "id" }
-    );
-
-    if (error) {
-      console.warn("Aviso sync patient document Supabase:", error.message);
-      return false;
-    }
+    await saveDocumentService({
+      ...doc,
+      patientId: patientUuid,
+    });
     return true;
-  } catch {
+  } catch (error: any) {
+    console.warn("Aviso sync patient document Supabase:", error?.message);
     return false;
   }
 }
@@ -593,23 +580,10 @@ export async function deleteDocumentFromSupabase(
   filePath?: string
 ): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
       return false;
     }
-
-    const targetId = ensureUuid(id);
-
-    if (filePath) {
-      await supabase.storage.from("lab-reports").remove([filePath]);
-    }
-
-    const { error } = await supabase.from("patient_documents").delete().eq("id", targetId);
-    if (error) {
-      console.warn("Aviso delete patient document Supabase:", error.message);
-      return false;
-    }
-    return true;
+    return await deleteDocumentService(id, filePath);
   } catch {
     return false;
   }
@@ -782,38 +756,26 @@ export async function deleteQuoteFromSupabase(id: string): Promise<boolean> {
 
 export async function syncWordHistoryToSupabase(doc: WordHistoryDocument): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
     const patientUuid = getPatientUuid(doc.patientId);
-    const docUuid = ensureUuid(doc.id);
-
-    const { error } = await supabase.from("word_history_documents").upsert({
-      id: docUuid,
-      patient_id: patientUuid,
-      file_name: doc.fileName,
-      file_size: doc.fileSize,
-      file_url: doc.fileUrl,
-      extracted_text: doc.extractedText || null,
-      notes: doc.notes || null,
-      created_at: doc.createdAt,
-    }, { onConflict: "id" });
-
-    if (error) console.warn("Aviso sync word doc Supabase:", error.message);
-    return !error;
-  } catch { return false; }
+    await saveWordHistoryService({
+      ...doc,
+      patientId: patientUuid,
+    });
+    return true;
+  } catch (error: any) {
+    console.warn("Aviso sync word doc Supabase:", error?.message);
+    return false;
+  }
 }
 
 export async function deleteWordHistoryFromSupabase(id: string, filePath?: string): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
-    const targetId = ensureUuid(id);
-    if (filePath) {
-      await supabase.storage.from("lab-reports").remove([filePath]);
-    }
-    const { error } = await supabase.from("word_history_documents").delete().eq("id", targetId);
-    return !error;
-  } catch { return false; }
+    return await deleteWordHistoryService(id, filePath);
+  } catch {
+    return false;
+  }
 }
 
 // ============================================================================

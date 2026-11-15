@@ -33,7 +33,9 @@
     "test:procedimientos": "node scripts/test-procedimientos-crud.mjs",
     "seed:procedimientos": "node scripts/seed-procedimientos.mjs",
     "test:prenatal": "node scripts/test-prenatal-crud.mjs",
-    "seed:prenatal": "node scripts/seed-prenatal.mjs"
+    "seed:prenatal": "node scripts/seed-prenatal.mjs",
+    "test:documentos": "node scripts/test-documentos-crud.mjs",
+    "seed:documentos": "node scripts/seed-documentos.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

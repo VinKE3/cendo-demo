@@ -71,33 +71,16 @@ export type {
 } from "@/modules/prenatal";
 
 // ============================================================================
-// ETAPA B: REPOSITORIO DE DOCUMENTOS Y EXÁMENES EXTERNOS (PDF)
+// REPOSITORIO DE DOCUMENTOS Y EXÁMENES EXTERNOS (MÓDULO 14) - MODULARIZADO
 // ============================================================================
-
-export type DocumentCategory =
-  | "PAP"
-  | "VPH"
-  | "PATOLOGIA"
-  | "LABORATORIO"
-  | "ECOGRAFIA"
-  | "INFORME_MEDICO"
-  | "CONSENTIMIENTO"
-  | "OTRO";
-
-export interface PatientDocument {
-  id: string;
-  patientId: string;
-  documentType: DocumentCategory;
-  title: string;
-  fileName: string;
-  fileUrl: string;
-  filePath?: string; // Path en Supabase storage (ej: 'pat-1/123-doc.pdf')
-  fileSize?: number; // bytes
-  mimeType?: string; // 'application/pdf', 'image/jpeg', etc.
-  notes?: string;
-  createdAt: string;
-  uploadedBy?: string;
-}
+export type {
+  DocumentCategory,
+  PatientDocument,
+  CreatePatientDocumentInput,
+  WordHistoryDocument,
+  CreateWordHistoryInput,
+  DocumentUploadResult,
+} from "@/modules/documentos";
 
 // ============================================================================
 // ETAPA B: NUEVA CONSULTA GINECOLÓGICA ESTRUCTURADA (PUNTO 13) - MODULARIZADO
@@ -159,20 +142,7 @@ export type {
   MedicalAppointment,
 } from "@/modules/agenda";
 
-// ============================================================================
-// ETAPA C: HISTORIAS CLÍNICAS EN WORD (PUNTO 12)
-// ============================================================================
 
-export interface WordHistoryDocument {
-  id: string;
-  patientId: string;
-  fileName: string;
-  fileSize: number;
-  fileUrl: string;
-  extractedText?: string;
-  notes?: string;
-  createdAt: string;
-}
 
 
 

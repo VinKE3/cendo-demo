@@ -344,8 +344,31 @@ flowchart LR
   - [x] Re-exportación completa de tipos en `src/types/medical.ts` y calculadoras en `src/lib/prenatalCalculators.ts`.
 
 #### 📁 Módulo 14: Repositorio Documental (.pdf & .docx) (`src/modules/documentos/`)
-- [ ] Subida a Supabase Storage (bucket `lab-reports`).
-- [ ] Registro en `patient_documents` y visualización en modal.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/documentos/documentos.types.ts`: `DocumentCategory` (PAP, VPH, Patología, Laboratorio, Ecografía, etc.), `PatientDocument`, `CreatePatientDocumentInput`, `WordHistoryDocument`, `CreateWordHistoryInput`.
+  - [x] `src/modules/documentos/documentos.validator.ts`:
+    - [x] Esquemas Zod para documentos externos (`patientDocumentSchema`) e historias Word (`wordHistorySchema`).
+    - [x] Catálogo de categorías con badges de color (`DOCUMENT_CATEGORIES`).
+    - [x] Títulos sugeridos rápidos para agilizar la carga clínica (`QUICK_DOCUMENT_TITLES`).
+    - [x] Validación de seguridad de archivo: límite de 25 MB y validación de tipos MIME autorizados (`validateDocumentFile`).
+  - [x] `src/modules/documentos/documentos.service.ts`:
+    - [x] `fetchDocumentsByPatientId()`: Consulta de exámenes externos por paciente.
+    - [x] `saveDocumentToSupabase()`: Upsert en `public.patient_documents`.
+    - [x] `deleteDocumentFromSupabase()`: Eliminación de base de datos y de Supabase Storage.
+    - [x] `fetchWordHistoriesByPatientId()`: Consulta de historias clínicas Word migradas.
+    - [x] `saveWordHistoryToSupabase()`: Upsert en `public.word_history_documents`.
+    - [x] `deleteWordHistoryFromSupabase()`: Eliminación limpia en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Tablas `public.patient_documents` y `public.word_history_documents` 100% sincronizadas.
+  - [x] Bucket de Supabase Storage `lab-reports` activo para almacenamiento persistente de archivos binarios.
+- [x] **Interfaz Gráfica:**
+  - [x] Integración de `PatientDocumentsSection` y `UploadDocumentModal` en la ficha clínica del paciente (`/pacientes/[id]`).
+  - [x] Modal de previsualización documental directa `DocumentViewerModal`.
+  - [x] Modal para consulta y visualización de historias clínicas previas en Word `WordHistoryModal`.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-documentos-crud.mjs` (`npm run test:documentos`) con 5/5 PASS (100%).
+  - [x] Inyección de documentos oficiales CENDO con `npm run seed:documentos` (4 documentos PDF especializados y 1 historia Word migrada).
+  - [x] Re-exportación completa de tipos en `src/types/medical.ts`.
 
 ---
 
@@ -357,4 +380,4 @@ flowchart LR
 
 ---
 
-*Última actualización de progreso: 2026-11-14T22:20:00-05:00*
+*Última actualización de progreso: 2026-11-14T22:30:00-05:00*
