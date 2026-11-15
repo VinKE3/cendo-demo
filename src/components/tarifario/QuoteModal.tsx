@@ -17,6 +17,7 @@ import {
 import { Patient, ProcedureQuote, QuoteItem, ProcedureTariff } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateQuoteWhatsAppUrl } from "@/lib/whatsappShare";
+import { calculateQuoteTotals, validateQuoteInput } from "@/modules/cotizaciones";
 
 interface QuoteModalProps {
   isOpen: boolean;
@@ -57,18 +58,10 @@ export function QuoteModal({
     setSelectedItems([]);
   }, [patient, isOpen]);
 
-  // Cálculos automáticos
-  const subtotal = useMemo(() => {
-    return selectedItems.reduce((acc, it) => acc + it.regularPrice, 0);
+  // Cálculos automáticos modulares
+  const { subtotal, discountTotal, total } = useMemo(() => {
+    return calculateQuoteTotals(selectedItems);
   }, [selectedItems]);
-
-  const total = useMemo(() => {
-    return selectedItems.reduce((acc, it) => acc + it.finalPrice, 0);
-  }, [selectedItems]);
-
-  const discountTotal = useMemo(() => {
-    return Math.max(0, subtotal - total);
-  }, [subtotal, total]);
 
   // Búsqueda en tarifario
   const filteredTariff = useMemo(() => {
@@ -113,21 +106,22 @@ export function QuoteModal({
   };
 
   const handleSave = (shouldPrint = false) => {
-    if (!patientName.trim()) {
-      Swal.fire({
-        icon: "warning",
-        title: "Nombre Requerido",
-        text: "Por favor ingrese el nombre de la paciente o titular del presupuesto.",
-        confirmButtonColor: "#0A4D68",
-      });
-      return;
-    }
+    const quotePayload = {
+      patientId: patient ? patient.id : "pat-custom",
+      patientName: patientName.trim(),
+      patientPhone: patientPhone.trim(),
+      doctorId: doctorProfile.id,
+      doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
+      validityDays,
+      items: selectedItems,
+    };
 
-    if (selectedItems.length === 0) {
+    const validation = validateQuoteInput(quotePayload);
+    if (!validation.success) {
       Swal.fire({
         icon: "warning",
-        title: "Agregue Procedimientos",
-        text: "Por favor seleccione al menos un procedimiento del tarifario.",
+        title: "Presupuesto Incompleto",
+        text: validation.error,
         confirmButtonColor: "#0A4D68",
       });
       return;

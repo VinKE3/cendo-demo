@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { LabOrder, LabOrderItem, LabCategory, Patient } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
+import { validateLabOrderInput } from "@/modules/laboratorio";
 
 const labOrderSchema = z.object({
   patientId: z.string().min(1, "Debe seleccionar una paciente"),
@@ -318,6 +319,17 @@ export function LabOrderModal({
       customTests: data.customTests || "",
       patientInstructions: data.patientInstructions || "",
     };
+
+    const validation = validateLabOrderInput(payload);
+    if (!validation.success) {
+      Swal.fire({
+        icon: "warning",
+        title: "Orden Incompleta",
+        text: validation.error,
+        confirmButtonColor: "#0A4D68",
+      });
+      return;
+    }
 
     let saved: LabOrder;
     if (initialData) {

@@ -24,10 +24,8 @@ Cada módulo contendrá su propio cuarteto estándar:
 flowchart LR
     Fase0["Fase 0: Clean Slate\n(100% Completa)"] --> Fase1["Fase 1: Catálogos Maestros\n(100% Certificada:\nVademécum, Tarifario, Médicos)"]
     Fase1 --> Fase2["Fase 2: Pacientes & Antecedentes\n(100% Certificada:\nFichas + Historial Gineco-Obstétrico)"]
-    Fase2 --> Mod6["Fase 3 / Módulo 6: Agenda de Citas\n(100% Certificado con Anti-Solapamiento)"]
-    Mod6 --> Mod7["Módulo 7: Consultas & Examen Físico\n(100% Certificado con IMC y CIE-10)"]
-    Mod7 --> Mod8["Módulo 8: Recetas Médicas Inteligentes\n(100% Certificado con Anti-Duplicados)"]
-    Mod8 --> Mod9["Módulo 9: Órdenes de Laboratorio\n(Siguiente Gran Paso)"]
+    Fase2 --> Fase3["Fase 3: Acto Transaccional\n(100% Certificada:\nAgenda + Consultas + Recetas + Lab + Cotizaciones)"]
+    Fase3 --> Mod10["Fase 4 / Módulo 10: Colposcopía IFCPC\n(Siguiente Gran Paso de Alta Especialidad)"]
 ```
 
 ---
@@ -230,9 +228,26 @@ flowchart LR
   - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 #### 🧪 Módulo 9: Órdenes de Laboratorio y Cotizaciones (`src/modules/laboratorio/` & `src/modules/cotizaciones/`)
-- [ ] Integración con el Tarifario de la Fase 1.
-- [ ] Cálculo de cotizaciones con descuentos y formato WhatsApp para la paciente.
-- [ ] Solicitud de exámenes auxiliares (PAP, VPH, CA-125, perfil hormonal).
+- [x] **Módulo de Órdenes de Laboratorio (`src/modules/laboratorio/`):**
+  - [x] `laboratorio.types.ts`: `LabOrder`, `LabOrderItem`, `LabCategory`, `CatalogLabTest`.
+  - [x] `laboratorio.validator.ts`:
+    - [x] Catálogo maestro `LAB_TESTS_CATALOG` (Marcadores CA-125, HE-4, ThinPrep, VPH 23 Genotipos, AMH, perfil prenatal).
+    - [x] Validación Zod de orden clínica y prevención de análisis duplicados (`checkDuplicateTestInOrder`).
+  - [x] `laboratorio.service.ts`: CRUD contra `public.lab_orders` de Supabase.
+  - [x] `LabOrderModal.tsx` integrado con validación modular y control de urgencias (Rutina, Prioritario, Urgente).
+  - [x] Script automatizado `scripts/test-laboratorio-crud.mjs` (`npm run test:laboratorio`) con 4/4 PASS (100%).
+  - [x] Inyección de 5 órdenes oficiales de laboratorio con `npm run seed:laboratorio`.
+- [x] **Módulo de Cotizaciones y Presupuestos (`src/modules/cotizaciones/`):**
+  - [x] `cotizaciones.types.ts`: `ProcedureQuote`, `QuoteItem`, `QuoteTotals`.
+  - [x] `cotizaciones.validator.ts`:
+    - [x] Calculadora de subtotales, descuentos y precios finales (`calculateQuoteTotals`).
+    - [x] Validación Zod de procedimientos y porcentajes de descuento (0 a 100%).
+  - [x] `cotizaciones.service.ts`: CRUD contra `public.procedure_quotes` de Supabase.
+  - [x] `QuoteModal.tsx` integrado con el Tarifario de la Fase 1, cálculo dinámico y formato WhatsApp.
+  - [x] Script automatizado `scripts/test-cotizaciones-crud.mjs` (`npm run test:cotizaciones`) con 4/4 PASS (100%).
+  - [x] Inyección de 5 presupuestos quirúrgicos oficiales con `npm run seed:cotizaciones`.
+- [x] **Certificación y Producción:**
+  - [x] Build de producción Next.js 14 verificado (14/14 rutas con 0 errores).
 
 ---
 

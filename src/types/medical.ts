@@ -100,40 +100,17 @@ export type {
   ClinicalDosagePreset,
 } from "@/modules/recetas";
 
-export type LabCategory =
-  | "Hematología & Bioquímica"
-  | "Ginecología & Marcadores"
-  | "Perfil Hormonal & Ovárico"
-  | "Perfil Prenatal / Gestacional"
-  | "Infeccioso & Microbiología"
-  | "Orina & Función Renal"
-  | "Otro";
-
-export interface LabOrderItem {
-  id: string;
-  category: LabCategory | string;
-  testName: string; // ej. "CA-125 (Marcador Ovárico / Endometriosis)"
-  sampleType?: string; // ej. "Sangre venosa", "Orina", "Secreción endocervical"
-  notes?: string;
-}
-
-export interface LabOrder {
-  id: string;
-  patientId: string;
-  doctorId: string;
-  doctorName: string;
-  doctorCmp: string;
-  doctorRne: string;
-  orderDate: string; // YYYY-MM-DD
-  diagnosis: string;
-  cie10Code?: string;
-  items: LabOrderItem[];
-  customTests?: string; // Campo libre para exámenes adicionales
-  urgency: "Rutina" | "Prioritario" | "Urgente";
-  patientInstructions?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// ============================================================================
+// ETAPA A: ÓRDENES DE LABORATORIO CLÍNICO (PUNTO 8) - MODULARIZADO
+// ============================================================================
+export type {
+  LabCategory,
+  LabOrderItem,
+  LabOrder,
+  CreateLabOrderInput,
+  CatalogLabTest,
+  LabOrderUrgency,
+} from "@/modules/laboratorio";
 
 export interface PrenatalVisitItem {
   visitNumber: number; // 1 to 9
@@ -394,36 +371,14 @@ export interface MinorProcedureReport {
 }
 
 // ============================================================================
-// ETAPA C: TARIFAS COTIZADAS Y PRESUPUESTOS POR WHATSAPP (PUNTO 3)
+// ETAPA C: TARIFAS COTIZADAS Y PRESUPUESTOS POR WHATSAPP (PUNTO 3) - MODULARIZADO
 // ============================================================================
-
-export interface QuoteItem {
-  procedureId: string;
-  code: string;
-  name: string;
-  category: string;
-  regularPrice: number;
-  discountPercent?: number;
-  finalPrice: number;
-}
-
-export interface ProcedureQuote {
-  id: string;
-  patientId: string;
-  patientName: string;
-  patientPhone: string;
-  doctorId: string;
-  doctorName: string;
-  quoteDate: string;
-  validityDays: number;
-  items: QuoteItem[];
-  subtotal: number;
-  discountTotal: number;
-  total: number;
-  paymentTerms: string;
-  notes?: string;
-  createdAt: string;
-}
+export type {
+  QuoteItem,
+  ProcedureQuote,
+  CreateQuoteInput,
+  QuoteTotals,
+} from "@/modules/cotizaciones";
 
 // ============================================================================
 // ETAPA C: AGENDA DE CITAS Y DISPONIBILIDAD (PUNTOS 10 Y 11) - MODULARIZADO
