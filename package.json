@@ -31,7 +31,9 @@
     "test:ecografias": "node scripts/test-ecografias-crud.mjs",
     "seed:ecografias": "node scripts/seed-ecografias.mjs",
     "test:procedimientos": "node scripts/test-procedimientos-crud.mjs",
-    "seed:procedimientos": "node scripts/seed-procedimientos.mjs"
+    "seed:procedimientos": "node scripts/seed-procedimientos.mjs",
+    "test:prenatal": "node scripts/test-prenatal-crud.mjs",
+    "seed:prenatal": "node scripts/seed-prenatal.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

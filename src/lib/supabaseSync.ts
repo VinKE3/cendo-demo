@@ -43,6 +43,10 @@ import {
   saveMinorProcedureToSupabase,
   deleteMinorProcedureFromSupabase as deleteMinorProcedureService,
 } from "@/modules/procedimientos";
+import {
+  savePrenatalCard,
+  deletePrenatalCard as deletePrenatalCardService,
+} from "@/modules/prenatal";
 
 export function ensureUuid(id: string): string {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -476,52 +480,27 @@ export async function deleteLabOrderFromSupabase(id: string): Promise<boolean> {
 
 export async function syncPrenatalCardToSupabase(card: PrenatalCard): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
       return false;
     }
-
     const patientUuid = getPatientUuid(card.patientId);
-    const cardUuid = ensureUuid(card.id);
-
-    const { error } = await supabase.from("prenatal_cards").upsert(
-      {
-        id: cardUuid,
-        patient_id: patientUuid,
-        clinic_establishment: card.clinicEstablishment,
-        attending_doctor_id: card.attendingDoctorId,
-        attending_doctor_name: card.attendingDoctorName,
-        baseline: card.baseline,
-        visits: card.visits,
-        maternal_pathologies: card.maternalPathologies,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "id" }
-    );
-
-    if (error) {
-      console.warn("Aviso sync carnet prenatal Supabase:", error.message);
-      return false;
-    }
+    await savePrenatalCard({
+      ...card,
+      patientId: patientUuid,
+    });
     return true;
-  } catch {
+  } catch (error: any) {
+    console.warn("Aviso sync carnet prenatal Supabase:", error?.message);
     return false;
   }
 }
 
 export async function deletePrenatalCardFromSupabase(id: string): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") {
       return false;
     }
-    const targetId = ensureUuid(id);
-    const { error } = await supabase.from("prenatal_cards").delete().eq("id", targetId);
-    if (error) {
-      console.warn("Aviso delete carnet prenatal Supabase:", error.message);
-      return false;
-    }
-    return true;
+    return await deletePrenatalCardService(id);
   } catch {
     return false;
   }

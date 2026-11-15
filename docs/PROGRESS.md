@@ -321,8 +321,27 @@ flowchart LR
   - [x] Re-exportación completa de tipos en `src/types/medical.ts`.
 
 #### 👶 Módulo 13: Carnet de Control Prenatal MINSA / CLAP (`src/modules/prenatal/`)
-- [ ] Registro de datos basales, cálculo de Naegele / FPP, visitas de control gestacional (1 a 9).
-- [ ] Persistencia en `public.prenatal_cards`.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/prenatal/prenatal.types.ts`: `PrenatalVisitItem` (1 a 9 atenciones), `PrenatalBaselineData`, `MaternalPathologyItem`, `PrenatalCard`, `PrenatalRiskReport`, `CreatePrenatalCardInput`.
+  - [x] `src/modules/prenatal/prenatal.validator.ts`:
+    - [x] Regla de Naegele oficial: $\text{FPP} = \text{FUM} + 7\text{ días} - 3\text{ meses} + 1\text{ año}$ (`calculateNaegeleFPP`).
+    - [x] Calculadora precisa de edad gestacional en semanas y días desde la FUM (`calculateGestationalAge`).
+    - [x] Evaluador de factores de riesgo obstétrico y preeclampsia ($\text{PA} \ge 140/90\text{ mmHg}$, proteinuria, extremos de edad, paridad, etc.) (`evaluatePrenatalRisks`).
+    - [x] Esquema de validación Zod de ficha basal y visitas (`prenatalCardSchema`).
+  - [x] `src/modules/prenatal/prenatal.service.ts`:
+    - [x] `fetchPrenatalCardByPatientId()`: Consulta del carnet prenatal activo por paciente.
+    - [x] `savePrenatalCard()`: Upsert en `public.prenatal_cards` con persistencia en PostgreSQL (baseline, visits y patologías JSONB).
+    - [x] `deletePrenatalCard()`: Eliminación certificada en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Tabla `public.prenatal_cards` sincronizada con soporte nativo para seguimiento longitudinal gestacional.
+- [x] **Interfaz Gráfica:**
+  - [x] Integración de `PrenatalCardModal` en la ficha clínica de la paciente (`/pacientes/[id]`).
+  - [x] Cálculo automático de FPP al ingresar la FUM, selector de semanas y días de amenorrea y alertas visuales ARO.
+  - [x] Vista de impresión oficial de carnet perinatal (`PrenatalPrintView`).
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-prenatal-crud.mjs` (`npm run test:prenatal`) con 5/5 PASS (100%).
+  - [x] Inyección de carnet prenatal oficial CENDO con `npm run seed:prenatal` (María José Contreras Solís, gestación semana 9 con 2 atenciones estructuradas).
+  - [x] Re-exportación completa de tipos en `src/types/medical.ts` y calculadoras en `src/lib/prenatalCalculators.ts`.
 
 #### 📁 Módulo 14: Repositorio Documental (.pdf & .docx) (`src/modules/documentos/`)
 - [ ] Subida a Supabase Storage (bucket `lab-reports`).
@@ -338,4 +357,4 @@ flowchart LR
 
 ---
 
-*Última actualización de progreso: 2026-11-14T11:25:00-05:00*
+*Última actualización de progreso: 2026-11-14T22:20:00-05:00*
