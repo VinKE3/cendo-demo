@@ -35,6 +35,10 @@ import {
   saveColposcopyReportToSupabase,
   deleteColposcopyReportFromSupabase,
 } from "@/modules/colposcopia";
+import {
+  saveUltrasoundReportToSupabase,
+  deleteUltrasoundReportFromSupabase,
+} from "@/modules/ecografias";
 
 export function ensureUuid(id: string): string {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -678,41 +682,23 @@ export async function deleteConsultationFromSupabase(id: string): Promise<boolea
 
 export async function syncUltrasoundToSupabase(rep: UltrasoundReport): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
-    const patientUuid = getPatientUuid(rep.patientId);
-    const repUuid = ensureUuid(rep.id);
-
-    const { error } = await supabase.from("ultrasound_reports").upsert({
-      id: repUuid,
-      patient_id: patientUuid,
-      doctor_id: rep.doctorId,
-      doctor_name: rep.doctorName,
-      doctor_cmp: rep.doctorCmp,
-      doctor_rne: rep.doctorRne || null,
-      report_date: rep.reportDate,
-      ultrasound_type: rep.ultrasoundType,
-      indication: rep.indication,
-      findings: rep.findings,
-      conclusion: rep.conclusion,
-      recommendations: rep.recommendations || null,
-      images: rep.images,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "id" });
-
-    if (error) console.warn("Aviso sync ecografia Supabase:", error.message);
-    return !error;
-  } catch { return false; }
+    const res = await saveUltrasoundReportToSupabase(rep);
+    return res.success;
+  } catch (err) {
+    console.warn("Aviso sync ecografia Supabase:", err);
+    return false;
+  }
 }
 
 export async function deleteUltrasoundFromSupabase(id: string): Promise<boolean> {
   try {
-    const supabase = createClient();
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "xxxx") return false;
-    const targetId = ensureUuid(id);
-    const { error } = await supabase.from("ultrasound_reports").delete().eq("id", targetId);
-    return !error;
-  } catch { return false; }
+    const res = await deleteUltrasoundReportFromSupabase(id);
+    return res.success;
+  } catch {
+    return false;
+  }
 }
 
 export async function syncMinorProcedureToSupabase(proc: MinorProcedureReport): Promise<boolean> {

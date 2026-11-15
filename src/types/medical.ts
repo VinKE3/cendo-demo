@@ -214,60 +214,18 @@ export type {
 } from "@/modules/consultas";
 
 // ============================================================================
-// ETAPA B: FORMATOS DE ECOGRAFÍA ESPECIALIZADA (PUNTO 5)
+// ETAPA B: FORMATOS DE ECOGRAFÍA ESPECIALIZADA (PUNTO 5) - MODULARIZADO
 // ============================================================================
 
-export type UltrasoundType =
-  | "TRANSVAGINAL"
-  | "PELVICA"
-  | "MAMA_BILATERAL"
-  | "OBSTETRICA_1T"
-  | "OBSTETRICA_2T_3T"
-  | "DOPPLER";
-
-export interface UltrasoundFindings {
-  // Ginecológica
-  uterusPosition?: "AVF" | "RVF" | "Indiferente";
-  uterusDimensions?: string;
-  uterusVolumeCc?: number;
-  myometriumStatus?: string;
-  endometriumThicknessMm?: number;
-  endometriumPattern?: "Trilaminar" | "Secretor" | "Atrófico" | "Engrosado irregular";
-  rightOvaryDimensions?: string;
-  leftOvaryDimensions?: string;
-  ovariesNotes?: string;
-  douglasPouch?: string;
-  // Mama Bilateral
-  breastPattern?: string;
-  rightBreastFindings?: string;
-  leftBreastFindings?: string;
-  biradsCategory?: "BI-RADS 1" | "BI-RADS 2" | "BI-RADS 3" | "BI-RADS 4" | "BI-RADS 5";
-  // Obstétrica
-  gestationalSacsCount?: number;
-  embryoCrownRumpLengthMm?: number;
-  gestationalAgeByEcho?: string;
-  fetalHeartRate?: number;
-  placentaLocation?: string;
-  amnioticFluidIndex?: string;
-}
-
-export interface UltrasoundReport {
-  id: string;
-  patientId: string;
-  doctorId: string;
-  doctorName: string;
-  doctorCmp: string;
-  doctorRne?: string;
-  reportDate: string;
-  ultrasoundType: UltrasoundType;
-  indication: string;
-  findings: UltrasoundFindings;
-  conclusion: string;
-  recommendations?: string;
-  images: { url: string; caption: string }[];
-  createdAt: string;
-  updatedAt: string;
-}
+export type {
+  UltrasoundType,
+  BiradsCategory,
+  UltrasoundImage,
+  UltrasoundFindings,
+  UltrasoundReport,
+  CreateUltrasoundInput,
+  UpdateUltrasoundInput,
+} from "@/modules/ecografias";
 
 // ============================================================================
 // ETAPA B: FORMATOS DE PROCEDIMIENTOS MENORES & BIOPSIAS (PUNTO 6)

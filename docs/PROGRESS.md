@@ -276,8 +276,27 @@ flowchart LR
   - [x] Re-exportación completa de tipos en `src/types/medical.ts`.
 
 #### 📺 Módulo 11: Ecografías Ginecológicas y Obstétricas (`src/modules/ecografias/`)
-- [ ] Formatos especializados para Ecografía Transvaginal, Pélvica, Mama Bilateral (BI-RADS 1-5) y Obstétrica.
-- [ ] Persistencia en `public.ultrasound_reports`.
+- [x] **Estructura Modular:**
+  - [x] `src/modules/ecografias/ecografias.types.ts`: `UltrasoundReport`, `UltrasoundType`, `BiradsCategory`, `UltrasoundFindings`, `UltrasoundImage`, `CreateUltrasoundInput`.
+  - [x] `src/modules/ecografias/ecografias.validator.ts`:
+    - [x] Catálogo de tipos de ecografía y etiquetas clínicas (`ULTRASOUND_TYPE_LABELS`).
+    - [x] Clasificación mamaria BI-RADS 1 a 5 con descripción de conducta oncológica (`BIRADS_DESCRIPTIONS`).
+    - [x] Calculadora matemática biométrica de volumen uterino en centímetros cúbicos (`calculateUterusVolumeCc`).
+    - [x] Validación Zod de indicación, hallazgos estructurados y conclusión diagnóstica.
+  - [x] `src/modules/ecografias/ecografias.service.ts`:
+    - [x] `fetchUltrasoundReportsFromSupabase()`: Lectura cronológica con filtro por paciente.
+    - [x] `saveUltrasoundReportToSupabase()`: Upsert en `public.ultrasound_reports` con JSONB para Protocolo IDEA y fotos ecográficas.
+    - [x] `deleteUltrasoundReportFromSupabase()`: Eliminación certificada en la nube.
+- [x] **Base de Datos (Supabase):**
+  - [x] Tabla `public.ultrasound_reports` sincronizada con soporte para Transvaginal, Pélvica, Mama Bilateral y Obstétrica.
+- [x] **Interfaz Gráfica:**
+  - [x] Integración de `UltrasoundModal` en la ficha clínica del paciente (`/pacientes/[id]`).
+  - [x] Formatos clínicos dedicados por tipo con selector de BI-RADS y mediciones obstétricas (LCC, FCF, EG).
+  - [x] Generación de enlace para compartir reporte ecográfico por WhatsApp y vista de impresión.
+- [x] **Certificación:**
+  - [x] Script automatizado `scripts/test-ecografias-crud.mjs` (`npm run test:ecografias`) con 5/5 PASS (100%).
+  - [x] Inyección de 4 ecografías oficiales CENDO con `npm run seed:ecografias` (Luciana Ramos, María José Contreras gestante, Camila Valdivia y Rosa Huamán).
+  - [x] Re-exportación completa de tipos en `src/types/medical.ts`.
 
 #### ✂️ Módulo 12: Procedimientos Menores & Biopsias LEEP (`src/modules/procedimientos/`)
 - [ ] Reporte operatorio de cono LEEP, polipectomía, inserción/retiro de DIU o implante Jadelle.
