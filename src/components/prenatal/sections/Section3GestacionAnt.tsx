@@ -45,34 +45,6 @@ export function Section3GestacionAnt({
       {isOpen && (
         <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
 
-          {/* 3.1 Barra Superior Informativa */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
-                GA
-              </div>
-              <div>
-                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider block">
-                  Historial del Embarazo Inmediatamente Anterior
-                </span>
-                <span className="text-[11px] text-muted block">
-                  Periodo intergenésico, vía de culminación, tipo de aborto, lactancia y captación
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 text-[10px] bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
-              <div className="flex items-center gap-1">
-                <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-500 inline-block" />
-                <span className="font-bold text-slate-700">= ALERTA</span>
-              </div>
-              <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
-                <span className="w-3.5 h-3.5 rounded-xs bg-red-600 border border-red-700 inline-block" />
-                <span className="font-bold text-slate-700">= Seguimiento continuo</span>
-              </div>
-            </div>
-          </div>
-
           {/* 3.2 Caja Principal de Gestación Anterior */}
           <div className="rounded-2xl border-2 border-slate-300 p-5 space-y-5 bg-white relative shadow-2xs">
 

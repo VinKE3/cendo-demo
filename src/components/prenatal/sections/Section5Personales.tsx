@@ -604,38 +604,23 @@ export function Section5Personales({
       </button>
 
       {isOpen && (
-        <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
+        <div className="p-4 sm:p-6 space-y-4 text-xs border-t border-border bg-white">
 
-          {/* 5.1 Barra Superior de Resumen y Acción Rápida */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-red-100 text-red-800 flex items-center justify-center font-bold text-xs shrink-0">
-                <ShieldAlert className="w-4 h-4 text-red-700" />
-              </div>
-              <div>
-                <div className="text-xs font-heading font-extrabold text-heading uppercase">
-                  Matriz de Antecedentes Personales Patológicos (MINSA / CLAP)
-                </div>
-                <div className="text-[11px] text-slate-500">
-                  Casillas rojas [🟥] requieren <strong>seguimiento continuo</strong>. Casillas amarillas [🟨] indican <strong>factor de alerta</strong>.
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => handleTogglePersonalHistory("Ninguno")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${baselineData.personalHistory?.includes("Ninguno")
-                    ? "bg-emerald-600 text-white shadow-2xs"
-                    : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-300"
-                  }`}
-                title="Marcar ninguno y desmarcar cualquier patología personal"
-              >
-                <Check className="w-3.5 h-3.5" />
-                <span>✓ Marcar Ninguno (Sana)</span>
-              </button>
-            </div>
+          {/* Acción Rápida: Marcar Ninguno */}
+          <div className="flex items-center justify-between pb-1">
+            <span className="text-xs text-slate-500 font-medium">Antecedentes personales patológicos:</span>
+            <button
+              type="button"
+              onClick={() => handleTogglePersonalHistory("Ninguno")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${baselineData.personalHistory?.includes("Ninguno")
+                  ? "bg-emerald-600 text-white shadow-2xs"
+                  : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-300"
+                }`}
+              title="Marcar ninguno y desmarcar cualquier patología personal"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>✓ Marcar Ninguno (Sana)</span>
+            </button>
           </div>
 
           {/* 5.2 Grid de 3 Columnas idéntico al formato oficial */}

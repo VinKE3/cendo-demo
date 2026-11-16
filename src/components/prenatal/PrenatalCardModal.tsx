@@ -11,6 +11,7 @@ import {
   BookOpen,
   FileText,
   Activity,
+  Printer,
 } from "lucide-react";
 import {
   PrenatalCard,
@@ -24,7 +25,7 @@ import {
   calculateGestationalAge,
   evaluatePrenatalRisks,
 } from "@/lib/prenatalCalculators";
-import { CLINIC_DOCTORS, parseObstetricFormula } from "./prenatalHelpers";
+import { CLINIC_DOCTORS, parseObstetricFormula, DigitGrid } from "./prenatalHelpers";
 
 import { Section1Filiacion } from "./sections/Section1Filiacion";
 import { Section2Obstetricos } from "./sections/Section2Obstetricos";
@@ -400,7 +401,7 @@ export function PrenatalCardModal({
     (isImcAlert ? 1 : 0);
 
   // Guardar Carnet Prenatal
-  const handleSaveCard = () => {
+  const handleSaveCard = (shouldPrint: boolean = false) => {
     const payload = {
       patientId: patient.id,
       clinicEstablishment,
@@ -427,7 +428,7 @@ export function PrenatalCardModal({
       showConfirmButton: false,
     });
 
-    if (onPrintRequested) {
+    if (shouldPrint && onPrintRequested) {
       onPrintRequested(savedCard);
     }
     onClose();
@@ -774,7 +775,42 @@ export function PrenatalCardModal({
               PESTAÑA 1: FICHA BASAL (ACORDEONES 1 AL 9)
               ========================================================================= */}
           {activeMainTab === "basal" && (
-            <div className="space-y-5">
+            <div className="space-y-4">
+              {/* Barra Global Informativa: No. HC & Leyenda Oficial MINSA */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-xs shrink-0">
+                    <FileText className="w-4 h-4 text-purple-700" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider block">
+                      Ficha de Control Materno Perinatal (CPN) &bull; Datos Basales
+                    </span>
+                    <span className="text-[11px] text-muted block">
+                      Criterios de Vigilancia Obstétrica (Norma Técnica MINSA / CLAP)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-heading">No. HC:</span>
+                    <DigitGrid value={patient.dni} length={8} />
+                  </div>
+
+                  <div className="flex items-center gap-2.5 text-[10px] bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
+                    <div className="flex items-center gap-1">
+                      <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-500 inline-block" />
+                      <span className="font-bold text-slate-800">= ALERTA</span>
+                    </div>
+                    <div className="flex items-center gap-1 border-l border-slate-200 pl-2.5">
+                      <span className="w-3.5 h-3.5 rounded-xs bg-red-600 border border-red-700 inline-block" />
+                      <span className="font-bold text-slate-800">= Seguimiento continuo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <Section1Filiacion
                 isOpen={openSections.filiacion}
                 onToggle={() => toggleSection("filiacion")}
@@ -896,11 +932,19 @@ export function PrenatalCardModal({
             </button>
             <button
               type="button"
-              onClick={handleSaveCard}
+              onClick={() => handleSaveCard(false)}
+              className="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>Guardar Ficha</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSaveCard(true)}
               className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer"
             >
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Guardar Carnet Prenatal</span>
+              <Printer className="w-4 h-4 text-secondary" />
+              <span>Guardar e Imprimir Carnet MINSA</span>
             </button>
           </div>
         </div>

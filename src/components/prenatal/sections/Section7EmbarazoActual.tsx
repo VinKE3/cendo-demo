@@ -69,42 +69,27 @@ export function Section7EmbarazoActual({
       </button>
 
       {isOpen && (
-        <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
+        <div className="p-4 sm:p-6 space-y-4 text-xs border-t border-border bg-white">
 
-          {/* 7.1 Barra Superior de Resumen y Cálculo FPP */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center font-bold text-xs shrink-0">
-                <Calendar className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-xs font-heading font-extrabold text-heading uppercase">
-                  Cronología Obstétrica & Eventos Intercurrentes (MINSA / CLAP)
-                </div>
-                <div className="text-[11px] text-slate-500">
-                  Cálculo de EG actual ({currentGestAge.formatted}), FPP Naegele, primera ecografía, antecedentes de hospitalización y tamizaje de violencia.
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  const calculated = calculateNaegeleFPP(baselineData.fum);
-                  setBaselineData({
-                    ...baselineData,
-                    fpp: calculated,
-                    fumDoubt: false,
-                  });
-                }}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 transition-all flex items-center gap-1.5 cursor-pointer"
-                title="Recalcular FPP con Regla de Naegele"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-sky-600" />
-                <span>Recalcular FPP Naegele</span>
-              </button>
-            </div>
+          {/* Acción Rápida: Recalcular Naegele */}
+          <div className="flex items-center justify-between pb-1">
+            <span className="text-xs text-slate-500 font-medium">Cronología de la gestación actual:</span>
+            <button
+              type="button"
+              onClick={() => {
+                const calculated = calculateNaegeleFPP(baselineData.fum);
+                setBaselineData({
+                  ...baselineData,
+                  fpp: calculated,
+                  fumDoubt: false,
+                });
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Recalcular FPP con Regla de Naegele"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+              <span>Recalcular FPP Naegele</span>
+            </button>
           </div>
 
           {/* 7.2 Grid de 4 Bloques (2x2) */}

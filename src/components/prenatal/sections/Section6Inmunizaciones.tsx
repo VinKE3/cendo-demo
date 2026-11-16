@@ -73,46 +73,31 @@ export function Section6Inmunizaciones({
       </button>
 
       {isOpen && (
-        <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
+        <div className="p-4 sm:p-6 space-y-4 text-xs border-t border-border bg-white">
 
-          {/* 6.1 Barra Superior de Resumen y Acción Rápida */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs shrink-0">
-                <FlaskConical className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-xs font-heading font-extrabold text-heading uppercase">
-                  Matriz de Inmunizaciones, Antropometría, Inmunohematología & Hábitos
-                </div>
-                <div className="text-[11px] text-slate-500">
-                  Registro integrado de 5 bloques: Vacunas Previas, Antitetánica, Peso y Talla, Tipo de Sangre (Rh) y Hábitos Nocivos.
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() =>
-                  setBaselineData({
-                    ...baselineData,
-                    previousVaccines: { rubella: true, hepatitisB: true, hpv: true, yellowFever: true },
-                    antitetanicaStatus: "Vacunada",
-                    antitetanicaDosis: "2da",
-                    bloodGroup: "O",
-                    rhFactor: "Rh (+)",
-                    smokerCigarettesDay: 0,
-                    drugsUse: false,
-                  })
-                }
-                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 transition-all flex items-center gap-1.5 cursor-pointer"
-                title="Cargar perfil basal típico sin factores de riesgo"
-              >
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>✓ Parámetros Típicos (O Rh+, No Fuma, No Drogas)</span>
-              </button>
-            </div>
+          {/* Acción Rápida: Parámetros Típicos */}
+          <div className="flex items-center justify-between pb-1">
+            <span className="text-xs text-slate-500 font-medium">Inmunizaciones, Antropometría & Hábitos:</span>
+            <button
+              type="button"
+              onClick={() =>
+                setBaselineData({
+                  ...baselineData,
+                  previousVaccines: { rubella: true, hepatitisB: true, hpv: true, yellowFever: true },
+                  antitetanicaStatus: "Vacunada",
+                  antitetanicaDosis: "2da",
+                  bloodGroup: "O",
+                  rhFactor: "Rh (+)",
+                  smokerCigarettesDay: 0,
+                  drugsUse: false,
+                })
+              }
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Cargar perfil basal típico sin factores de riesgo"
+            >
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <span>✓ Parámetros Típicos (O Rh+, No Fuma, No Drogas)</span>
+            </button>
           </div>
 
           {/* 6.2 Grid Integrado de los 5 Bloques Clínicos */}

@@ -49,39 +49,6 @@ export function Section2Obstetricos({
 
       {isOpen && (
         <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
-          {/* 2.1 Barra Superior de Resumen de Fórmula */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
-                GP
-              </div>
-              <div>
-                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider block">
-                  Fórmula Obstétrica Calculada
-                </span>
-                <span className="text-[11px] font-mono font-bold text-primary block">
-                  G{baselineData.gestas} P{totalPartos}{baselineData.abortos}{baselineData.nacidosVivos} &bull; {baselineData.viven} Viven &bull; {baselineData.cesareas} Cesáreas
-                </span>
-              </div>
-            </div>
-
-            {/* Leyenda de colores del diagrama */}
-            <div className="flex items-center gap-2.5 text-[10px] bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs flex-wrap">
-              <div className="flex items-center gap-1">
-                <span className="w-3.5 h-3.5 rounded-xs bg-white border border-slate-400 inline-block" />
-                <span className="text-slate-600 font-semibold">Paridad estándar</span>
-              </div>
-              <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
-                <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-500 inline-block" />
-                <span className="text-amber-950 font-bold">= ALERTA</span>
-              </div>
-              <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
-                <span className="w-3.5 h-3.5 rounded-xs bg-red-600 border border-red-700 inline-block" />
-                <span className="text-red-950 font-bold">= Seguimiento continuo</span>
-              </div>
-            </div>
-          </div>
-
           {/* 2.2 DIAGRAMA DE ANTECEDENTES OBSTÉTRICOS */}
           <div className="rounded-2xl border-2 border-slate-300 p-5 space-y-6 bg-slate-50/40 relative shadow-2xs overflow-x-auto">
 

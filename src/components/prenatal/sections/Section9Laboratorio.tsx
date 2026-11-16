@@ -499,25 +499,12 @@ export function Section9Laboratorio({
       </button>
 
       {isOpen && (
-        <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
+        <div className="p-4 sm:p-6 space-y-4 text-xs border-t border-border bg-white">
 
-          {/* 9.1 Barra Superior de Resumen y Acciones Rápidas */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-800 flex items-center justify-center font-bold text-xs shrink-0">
-                <FlaskConical className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-xs font-heading font-extrabold text-heading uppercase">
-                  Batería de Laboratorio Gestacional (MINSA / CLAP)
-                </div>
-                <div className="text-[11px] text-slate-500">
-                  Monitoreo hematológico, metabólico, tamizaje de ITS (Sífilis / VIH), urológico, infeccioso y cervical.
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {/* Acciones Rápidas */}
+          <div className="flex items-center justify-between pb-1 flex-wrap gap-2">
+            <span className="text-xs text-slate-500 font-medium">Batería de laboratorio basal:</span>
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleFillNormalLabPanel}
@@ -535,23 +522,6 @@ export function Section9Laboratorio({
               >
                 <span>Restablecer Todo</span>
               </button>
-            </div>
-          </div>
-
-          {/* 9.2 Leyenda idéntica al Carnet MINSA */}
-          <div className="flex items-center gap-4 px-3 py-2 rounded-lg bg-slate-50/70 border border-slate-200/80 text-[11px] text-slate-600 flex-wrap">
-            <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Leyenda de Colores MINSA:</span>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-xs bg-white border border-slate-400 inline-block" />
-              <span><strong>Casilla Blanca [ ]:</strong> Normal / Negativo / No reactivo / No Aplica</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-600 shadow-2xs inline-block" />
-              <span><strong>Casilla Amarilla [🟨]:</strong> ALERTA (Anormal, Reactivo, Positivo o No se Hizo)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-xs bg-rose-500 border border-rose-700 shadow-2xs inline-block" />
-              <span><strong>Casilla Roja [🟥]:</strong> Seguimiento Continuo (Hb &lt; 7.0 g/dL Anemia Severa)</span>
             </div>
           </div>
 

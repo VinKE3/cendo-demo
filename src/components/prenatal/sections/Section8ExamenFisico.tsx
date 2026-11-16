@@ -181,25 +181,12 @@ export function Section8ExamenFisico({
       </button>
 
       {isOpen && (
-        <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
+        <div className="p-4 sm:p-6 space-y-4 text-xs border-t border-border bg-white">
 
-          {/* 8.1 Barra Superior de Resumen y Acciones Rápidas */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center font-bold text-xs shrink-0">
-                <Stethoscope className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-xs font-heading font-extrabold text-heading uppercase">
-                  Examen Físico Basal de la Gestante (MINSA / CLAP)
-                </div>
-                <div className="text-[11px] text-slate-500">
-                  Evaluación inicial obligatoria. Casillas amarillas <span className="font-bold text-amber-700 font-mono">[🟨]</span> representan alertas clínicas u omisión de examen basal.
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {/* Acciones Rápidas */}
+          <div className="flex items-center justify-between pb-1 flex-wrap gap-2">
+            <span className="text-xs text-slate-500 font-medium">Evaluaciones físicas obligatorias:</span>
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleMarkAllPhysicalExamsNormal}
@@ -207,7 +194,7 @@ export function Section8ExamenFisico({
                 title="Marcar todos los 5 exámenes como normales"
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>✓ Marcar Todos Normales (Examen Completo)</span>
+                <span>✓ Marcar Todos Normales</span>
               </button>
               <button
                 type="button"
@@ -217,19 +204,6 @@ export function Section8ExamenFisico({
               >
                 <span>Restablecer</span>
               </button>
-            </div>
-          </div>
-
-          {/* 8.2 Leyenda idéntica al Carnet MINSA */}
-          <div className="flex items-center gap-4 px-3 py-2 rounded-lg bg-slate-50/70 border border-slate-200/80 text-[11px] text-slate-600 flex-wrap">
-            <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Leyenda MINSA:</span>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-600 shadow-2xs inline-block" />
-              <span><strong>Casilla Amarilla [🟨]:</strong> Alerta (Sin Examen u Hallazgo Patológico)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-xs bg-white border border-slate-400 inline-block" />
-              <span><strong>Casilla Blanca [ ]:</strong> Normal (Parámetro fisiológico sin alteración)</span>
             </div>
           </div>
 

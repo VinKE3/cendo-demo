@@ -58,43 +58,6 @@ export function Section1Filiacion({
       {isOpen && (
         <div className="p-4 sm:p-6 space-y-4 text-xs border-t border-border bg-white">
 
-          {/* 1.1 Cabecera CENDO: Título de Ficha + No. HC + Leyenda de Alertas */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3">
-            {/* Left: Clínica CENDO */}
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-sm shrink-0">
-                <FileText className="w-5 h-5 text-purple-700" />
-              </div>
-              <div>
-                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider block">
-                  CENDO &bull; Ficha de Control Materno Perinatal (CPN)
-                </span>
-                <span className="text-[11px] text-muted block">
-                  Seguimiento longitudinal ambulatorio &amp; criterios de vigilancia obstétrica
-                </span>
-              </div>
-            </div>
-
-            {/* Right: No. HC (8 Casillas) + Leyenda */}
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-heading">No. HC:</span>
-                <DigitGrid value={patient.dni} length={8} />
-              </div>
-
-              <div className="flex items-center gap-2 text-[10px] bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
-                <div className="flex items-center gap-1">
-                  <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-500 inline-block" />
-                  <span className="font-bold text-slate-700">= ALERTA</span>
-                </div>
-                <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
-                  <span className="w-3.5 h-3.5 rounded-xs bg-red-600 border border-red-700 inline-block" />
-                  <span className="font-bold text-slate-700">= Seguimiento continuo</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* 1.2 Caja Principal de Filiación */}
           <div className="rounded-2xl border-2 border-slate-300 p-5 space-y-5 bg-white relative shadow-2xs">
 
