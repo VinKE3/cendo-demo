@@ -21,6 +21,7 @@ import {
 import { Patient, DoctorProfile, MedicalConsultation, LabOrderItem, PrescriptionItem } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateConsultationWhatsAppUrl } from "@/lib/whatsappShare";
+import { getPeruDateString } from "@/lib/utils";
 import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
 import {
   FREQUENT_DIAGNOSES,
@@ -126,7 +127,7 @@ export function ConsultationModal({
       setPrescriptionNotes(consultationToEdit.prescriptionNotes || "");
       setNextAppointmentDate(consultationToEdit.nextAppointmentDate || "");
     } else {
-      setConsultationDate(new Date().toISOString().split("T")[0]);
+      setConsultationDate(getPeruDateString());
       setReasonForVisit("");
       setIllnessTime("");
       setSymptoms("");
@@ -192,7 +193,7 @@ export function ConsultationModal({
       doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
       doctorCmp: doctorProfile.cmp || "61693",
       doctorRne: doctorProfile.rne || "38657",
-      orderDate: consultationDate || new Date().toISOString().split("T")[0],
+      orderDate: consultationDate || getPeruDateString(),
       diagnosis: diagnosis || "Evaluación ginecológica en consulta",
       cie10Code: cie10Code || "Z01.4",
       urgency: "Rutina",
@@ -247,7 +248,7 @@ export function ConsultationModal({
       doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
       doctorCmp: doctorProfile.cmp || "61693",
       doctorRne: doctorProfile.rne || "38657",
-      prescriptionDate: consultationDate || new Date().toISOString().split("T")[0],
+      prescriptionDate: consultationDate || getPeruDateString(),
       diagnosis: diagnosis || "Tratamiento médico ginecológico",
       cie10Code: cie10Code || "Z01.4",
       items,
@@ -296,7 +297,7 @@ export function ConsultationModal({
       doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
       doctorCmp: doctorProfile.cmp,
       doctorRne: doctorProfile.rne || undefined,
-      consultationDate: consultationDate || new Date().toISOString().split("T")[0],
+      consultationDate: consultationDate || getPeruDateString(),
       reasonForVisit: reasonForVisit.trim(),
       illnessTime: illnessTime.trim() || undefined,
       symptoms: symptoms.trim() || undefined,
@@ -769,7 +770,7 @@ export function ConsultationModal({
                     doctorName: doctorProfile.fullName,
                     doctorCmp: doctorProfile.cmp,
                     doctorRne: doctorProfile.rne,
-                    consultationDate: consultationDate || new Date().toISOString().split("T")[0],
+                    consultationDate: consultationDate || getPeruDateString(),
                     reasonForVisit,
                     illnessTime: illnessTime || undefined,
                     symptoms: symptoms || undefined,

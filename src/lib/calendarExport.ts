@@ -78,7 +78,7 @@ export function generateGoogleCalendarUrl(
   const details = encodeURIComponent(detailsText);
   const location = encodeURIComponent(doc.clinicAddress);
 
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}&location=${location}`;
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}&location=${location}&ctz=America/Lima`;
 }
 
 /**
@@ -107,11 +107,21 @@ export function generateIcsContent(
     "PRODID:-//CENDO//Centro de Endometriosis y Ginecologia//ES",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
+    "BEGIN:VTIMEZONE",
+    "TZID:America/Lima",
+    "X-LIC-LOCATION:America/Lima",
+    "BEGIN:STANDARD",
+    "TZOFFSETFROM:-0500",
+    "TZOFFSETTO:-0500",
+    "TZNAME:PET",
+    "DTSTART:19700101T000000",
+    "END:STANDARD",
+    "END:VTIMEZONE",
     "BEGIN:VEVENT",
     `UID:cendo-appt-${uid}@cendo.pe`,
-    `DTSTAMP:${nowIso}`,
-    `DTSTART:${startCompact}`,
-    `DTEND:${endCompact}`,
+    `DTSTAMP:${nowIso}Z`,
+    `DTSTART;TZID=America/Lima:${startCompact}`,
+    `DTEND;TZID=America/Lima:${endCompact}`,
     `SUMMARY:${summary}`,
     `DESCRIPTION:${description}`,
     `LOCATION:${location}`,

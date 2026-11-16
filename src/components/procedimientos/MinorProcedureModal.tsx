@@ -20,6 +20,7 @@ import {
 } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateMinorProcedureWhatsAppUrl } from "@/lib/whatsappShare";
+import { getPeruDateString } from "@/lib/utils";
 
 interface MinorProcedureModalProps {
   isOpen: boolean;
@@ -123,7 +124,7 @@ export function MinorProcedureModal({
       setMedicationsPrescribed(procedureToEdit.medicationsPrescribed || "");
       setNextControlDate(procedureToEdit.nextControlDate || "");
     } else {
-      setProcedureDate(new Date().toISOString().split("T")[0]);
+      setProcedureDate(getPeruDateString());
       setProcedureType("BIOPSIA_CERVICAL");
       setPreOpDiagnosis("Sospecha colposcópica de lesión cervical / LIE");
       setPostOpDiagnosis("Biopsia cervical dirigida tomada con pinza Tischler-Morgan");
@@ -175,7 +176,7 @@ export function MinorProcedureModal({
       doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
       doctorCmp: doctorProfile.cmp,
       doctorRne: doctorProfile.rne || undefined,
-      procedureDate: procedureDate || new Date().toISOString().split("T")[0],
+      procedureDate: procedureDate || getPeruDateString(),
       procedureType,
       preOpDiagnosis: preOpDiagnosis.trim(),
       postOpDiagnosis: postOpDiagnosis.trim(),
@@ -476,7 +477,7 @@ export function MinorProcedureModal({
                     doctorName: doctorProfile.fullName,
                     doctorCmp: doctorProfile.cmp,
                     doctorRne: doctorProfile.rne,
-                    procedureDate: procedureDate || new Date().toISOString().split("T")[0],
+                    procedureDate: procedureDate || getPeruDateString(),
                     procedureType,
                     preOpDiagnosis,
                     postOpDiagnosis,

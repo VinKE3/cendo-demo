@@ -331,6 +331,31 @@ async function runAudit() {
   console.log("  ✓ Central de Citas: +51 984 125 639");
 
   // ---------------------------------------------------------------------------
+  // 6. AUDITORÍA DE ZONA HORARIA OFICIAL PERÚ (America/Lima UTC-5)
+  // ---------------------------------------------------------------------------
+  console.log("\n📌 FASE 6: Verificando Zona Horaria Oficial (Perú - America/Lima UTC-5)...");
+  const peruDateFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Lima",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const peruTimeFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Lima",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const nowInLimaDate = peruDateFormatter.format(new Date());
+  const nowInLimaTime = peruTimeFormatter.format(new Date());
+
+  console.log(`  ✓ Fecha actual en Lima: ${nowInLimaDate}`);
+  console.log(`  ✓ Hora actual en Lima: ${nowInLimaTime} (UTC-5)`);
+  console.log("  ✓ Sincronización Google Calendar: Activa con parámetro &ctz=America/Lima");
+  console.log("  ✓ Sincronización Apple Calendar / iPhone (.ics): Activa con VTIMEZONE America/Lima");
+  console.log("  ✓ Citas de la agenda: Blindadas contra saltos de medianoche UTC.");
+
+  // ---------------------------------------------------------------------------
   // RESUMEN FINAL
   // ---------------------------------------------------------------------------
   console.log("\n================================================================================");

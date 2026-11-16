@@ -24,6 +24,7 @@ import {
   Cie10Item,
 } from "@/types/medical";
 import { CIE10_GYN_CATALOG } from "@/modules/catalogo/cie10Catalog";
+import { getPeruDateString, shiftPeruDate, calculateAge } from "@/lib/utils";
 import {
   syncPatientToSupabase,
   deletePatientFromSupabase,
@@ -1731,7 +1732,7 @@ export const INITIAL_APPOINTMENTS: MedicalAppointment[] = [
     patientPhone: "984 125 639",
     doctorId: "doc-patrick-jacinto",
     doctorName: "Dr. Patrick José Jacinto Gomero",
-    appointmentDate: new Date().toISOString().split("T")[0],
+    appointmentDate: getPeruDateString(),
     appointmentTime: "09:00",
     durationMinutes: 30,
     appointmentType: "CONTROL_GINECOLOGICO",
@@ -1750,7 +1751,7 @@ export const INITIAL_APPOINTMENTS: MedicalAppointment[] = [
     patientPhone: "976 543 218",
     doctorId: "doc-patrick-jacinto",
     doctorName: "Dr. Patrick José Jacinto Gomero",
-    appointmentDate: new Date().toISOString().split("T")[0],
+    appointmentDate: getPeruDateString(),
     appointmentTime: "10:30",
     durationMinutes: 45,
     appointmentType: "CONTROL_PRENATAL",
@@ -1769,7 +1770,7 @@ export const INITIAL_APPOINTMENTS: MedicalAppointment[] = [
     patientPhone: "992 847 163",
     doctorId: "doc-patrick-jacinto",
     doctorName: "Dr. Patrick José Jacinto Gomero",
-    appointmentDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+    appointmentDate: shiftPeruDate(getPeruDateString(), 1),
     appointmentTime: "11:30",
     durationMinutes: 45,
     appointmentType: "CONSULTA_PRIMERA_VEZ",
@@ -1788,7 +1789,7 @@ export const INITIAL_APPOINTMENTS: MedicalAppointment[] = [
     patientPhone: "987 456 123",
     doctorId: "doc-patrick-jacinto",
     doctorName: "Dr. Patrick José Jacinto Gomero",
-    appointmentDate: new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0],
+    appointmentDate: shiftPeruDate(getPeruDateString(), 2),
     appointmentTime: "15:00",
     durationMinutes: 60,
     appointmentType: "PROCEDIMIENTO_MENOR",
@@ -1807,7 +1808,7 @@ export const INITIAL_APPOINTMENTS: MedicalAppointment[] = [
     patientPhone: "965 318 742",
     doctorId: "doc-patrick-jacinto",
     doctorName: "Dr. Patrick José Jacinto Gomero",
-    appointmentDate: new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0],
+    appointmentDate: shiftPeruDate(getPeruDateString(), 3),
     appointmentTime: "16:30",
     durationMinutes: 30,
     appointmentType: "CHEQUEO_INTEGRAL",
@@ -3202,7 +3203,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
     }),
     {
       name: "cendo-storage",
-      version: 12,
+      version: 13,
       migrate: (persistedState: any, version: number) => {
         const state = persistedState || {};
         if (!state.cie10Catalog || state.cie10Catalog.length === 0) {
@@ -3211,15 +3212,13 @@ export const useMedicalStore = create<MedicalStoreState>()(
         if (!state.clinicalCheckups || state.clinicalCheckups.length === 0) {
           state.clinicalCheckups = INITIAL_CHECKUPS;
         }
+        if (!state.appointments || state.appointments.length === 0) {
+          state.appointments = INITIAL_APPOINTMENTS;
+        }
         if (state.patients && Array.isArray(state.patients)) {
           state.patients = state.patients.map((p: any) => {
             if ((!p.age || p.age <= 0) && p.birthDate) {
-              const birth = new Date(p.birthDate);
-              const today = new Date();
-              let age = today.getFullYear() - birth.getFullYear();
-              const m = today.getMonth() - birth.getMonth();
-              if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-              p.age = age > 0 ? age : 25;
+              p.age = calculateAge(p.birthDate);
             }
             if (!p.occupation || p.occupation === "Sin ocupación") {
               const init = INITIAL_PATIENTS.find((ip) => ip.id === p.id || ip.dni === p.dni);
@@ -3228,9 +3227,10 @@ export const useMedicalStore = create<MedicalStoreState>()(
             return p;
           });
         }
-        if (version < 12) {
+        if (version < 13) {
           return {
             ...state,
+            appointments: (!state.appointments || state.appointments.length === 0) ? INITIAL_APPOINTMENTS : state.appointments,
             clinicalCheckups: (!state.clinicalCheckups || state.clinicalCheckups.length === 0) ? INITIAL_CHECKUPS : state.clinicalCheckups,
             doctorsList: state.doctorsList || INITIAL_DOCTORS,
             doctorProfile: state.doctorProfile || INITIAL_DOCTOR,
@@ -3245,7 +3245,6 @@ export const useMedicalStore = create<MedicalStoreState>()(
             ultrasoundReports: state.ultrasoundReports || INITIAL_ULTRASOUNDS,
             minorProcedures: state.minorProcedures || INITIAL_MINOR_PROCEDURES,
             procedureQuotes: state.procedureQuotes || INITIAL_QUOTES,
-            appointments: state.appointments || INITIAL_APPOINTMENTS,
             wordHistories: state.wordHistories || INITIAL_WORD_HISTORIES,
             tariffItems: state.tariffItems || INITIAL_TARIFF,
             vademecumItems: state.vademecumItems || INITIAL_VADEMECUM,

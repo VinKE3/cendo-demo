@@ -25,6 +25,7 @@ import {
   calculateGestationalAge,
   evaluatePrenatalRisks,
 } from "@/lib/prenatalCalculators";
+import { getPeruDateString, shiftPeruDate } from "@/lib/utils";
 import { CLINIC_DOCTORS, parseObstetricFormula, DigitGrid } from "./prenatalHelpers";
 
 import { Section1Filiacion } from "./sections/Section1Filiacion";
@@ -62,7 +63,7 @@ export function PrenatalCardModal({
   } = useMedicalStore();
 
   const existingCard = getPrenatalCardByPatientId(patient.id);
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getPeruDateString();
 
   // Médico y fecha de procedimiento
   const [procedureDate, setProcedureDate] = useState(todayStr);
@@ -448,9 +449,7 @@ export function PrenatalCardModal({
     const nextVisitNum = visitsList.length + 1;
     const gestAgeAtVisit = calculateGestationalAge(baselineData.fum, procedureDate || todayStr);
 
-    const nextAppt = new Date();
-    nextAppt.setDate(nextAppt.getDate() + 28);
-    const nextApptStr = nextAppt.toISOString().split("T")[0];
+    const nextApptStr = shiftPeruDate(getPeruDateString(), 28);
 
     const newVisit: PrenatalVisitItem = {
       visitNumber: nextVisitNum,

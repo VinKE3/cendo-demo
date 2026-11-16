@@ -32,6 +32,7 @@ import {
 import { AppointmentModal } from "@/components/agenda/AppointmentModal";
 import { generateAppointmentReminderWhatsAppUrl } from "@/lib/whatsappShare";
 import { generateGoogleCalendarUrl, downloadIcsForAppleCalendar } from "@/lib/calendarExport";
+import { getPeruDateString, shiftPeruDate, formatPeruDateText } from "@/lib/utils";
 
 const TYPE_COLORS: Record<AppointmentType, { bg: string; text: string; border: string }> = {
   CONSULTA_PRIMERA_VEZ: { bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
@@ -64,7 +65,7 @@ export default function AgendaPage() {
     updateAppointment,
   } = useMedicalStore();
 
-  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const todayStr = useMemo(() => getPeruDateString(), []);
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>("TODOS");
   const [selectedStatus, setSelectedStatus] = useState<string>("TODAS");
@@ -73,11 +74,9 @@ export default function AgendaPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<MedicalAppointment | null>(null);
 
-  // Navegación de fecha
+  // Navegación de fecha segura en zona horaria Perú
   const handleShiftDate = (days: number) => {
-    const current = new Date(selectedDate + "T00:00:00");
-    current.setDate(current.getDate() + days);
-    setSelectedDate(current.toISOString().split("T")[0]);
+    setSelectedDate(shiftPeruDate(selectedDate, days));
   };
 
   // Filtrado de citas
@@ -245,6 +244,9 @@ export default function AgendaPage() {
               onChange={(e) => setSelectedDate(e.target.value)}
               className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs font-bold text-heading focus:bg-white focus:outline-none"
             />
+            <span className="text-xs font-semibold text-slate-600 capitalize hidden lg:inline">
+              {formatPeruDateText(selectedDate)} &bull; Hora Perú (UTC-5)
+            </span>
           </div>
 
           {/* Filtro por Médico */}

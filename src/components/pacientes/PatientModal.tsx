@@ -28,6 +28,7 @@ import {
   checkDuplicatePatient,
 } from "@/modules/pacientes";
 import { useMedicalStore } from "@/store/useMedicalStore";
+import { getPeruDateString } from "@/lib/utils";
 
 interface PatientModalProps {
   isOpen: boolean;
@@ -313,7 +314,7 @@ export function PatientModal({
               <div className="relative">
                 <input
                   type="date"
-                  max={new Date().toISOString().split("T")[0]}
+                  max={getPeruDateString()}
                   {...register("birthDate")}
                   className={`w-full px-3 py-2 rounded-xl border bg-surface text-xs font-mono text-heading focus:outline-none focus:ring-2 ${
                     errors.birthDate

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ClinicalCheckup } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
+import { getPeruDateString } from "@/lib/utils";
 
 const checkupSchema = z.object({
   patientId: z.string().min(1, "Debe seleccionar una paciente"),
@@ -81,7 +82,7 @@ export function CheckupModal({
     resolver: zodResolver(checkupSchema),
     defaultValues: {
       patientId: defaultPatientId || (patients[0]?.id || ""),
-      checkupDate: new Date().toISOString().split("T")[0],
+      checkupDate: getPeruDateString(),
       reasonForConsultation: "Chequeo ginecológico preventivo anual",
       breastUltrasoundFindings: "Parénquima mamario de distribución simétrica sin nódulos sólidos ni microcalcificaciones.",
       breastUltrasoundBirads: "BI-RADS 1 (Normal)",
@@ -125,7 +126,7 @@ export function CheckupModal({
       } else {
         reset({
           patientId: defaultPatientId || (patients[0]?.id || ""),
-          checkupDate: new Date().toISOString().split("T")[0],
+          checkupDate: getPeruDateString(),
           reasonForConsultation: "Chequeo ginecológico preventivo anual",
           breastUltrasoundFindings: "Parénquima mamario de distribución simétrica sin nódulos sólidos ni microcalcificaciones.",
           breastUltrasoundBirads: "BI-RADS 1 (Normal)",

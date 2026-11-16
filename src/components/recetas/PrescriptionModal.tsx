@@ -30,6 +30,7 @@ import {
 } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generatePrescriptionWhatsAppUrl } from "@/lib/whatsappShare";
+import { getPeruDateString } from "@/lib/utils";
 import {
   checkDuplicateMedicationInPrescription,
   validatePrescriptionInput,
@@ -151,7 +152,7 @@ export function PrescriptionModal({
 
   // Form State
   const [prescriptionDate, setPrescriptionDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    getPeruDateString()
   );
   const [diagnosis, setDiagnosis] = useState<string>("");
   const [cie10Code, setCie10Code] = useState<string>("");
@@ -194,7 +195,7 @@ export function PrescriptionModal({
       setGeneralIndications(prescriptionToEdit.generalIndications || "");
       setNextAppointmentDate(prescriptionToEdit.nextAppointmentDate || "");
     } else {
-      setPrescriptionDate(new Date().toISOString().split("T")[0]);
+      setPrescriptionDate(getPeruDateString());
       setDiagnosis("Vaginitis aguda / Ectopia periorificial");
       setCie10Code("N76.0");
       setItems([]);

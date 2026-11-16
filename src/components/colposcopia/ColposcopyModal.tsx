@@ -33,6 +33,7 @@ import { useMedicalStore } from "@/store/useMedicalStore";
 import { CervicalClock } from "./CervicalClock";
 import { compressImageFile } from "@/lib/imageCompressor";
 import { uploadClinicalImageToSupabase } from "@/lib/supabaseStorage";
+import { getPeruDateString } from "@/lib/utils";
 import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
 
 const colposcopySchema = z.object({
@@ -187,7 +188,7 @@ export function ColposcopyModal({
     resolver: zodResolver(colposcopySchema),
     defaultValues: {
       patientId: defaultPatientId || (patients[0]?.id || ""),
-      reportDate: new Date().toISOString().split("T")[0],
+      reportDate: getPeruDateString(),
       adequateColposcopy: true,
       inadequateReason: "",
       squamocolumnarJunctionVisible: "Visible",
@@ -322,7 +323,7 @@ export function ColposcopyModal({
       } else {
         reset({
           patientId: defaultPatientId || (patients[0]?.id || ""),
-          reportDate: new Date().toISOString().split("T")[0],
+          reportDate: getPeruDateString(),
           adequateColposcopy: true,
           inadequateReason: "",
           squamocolumnarJunctionVisible: "Visible",

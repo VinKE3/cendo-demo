@@ -24,6 +24,7 @@ import { LabOrder, LabOrderItem, LabCategory, Patient } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { validateLabOrderInput } from "@/modules/laboratorio";
 import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
+import { getPeruDateString } from "@/lib/utils";
 
 const labOrderSchema = z.object({
   patientId: z.string().min(1, "Debe seleccionar una paciente"),
@@ -180,7 +181,7 @@ export function LabOrderModal({
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Todos");
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getPeruDateString();
 
   const defaultDoctorId = doctorProfile?.id || doctorsList[0]?.id || "doc-patrick-jacinto";
 

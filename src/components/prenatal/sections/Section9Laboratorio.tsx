@@ -3,6 +3,7 @@
 import React from "react";
 import { AlertTriangle, Check, Stethoscope, ChevronDown, ChevronUp, BookOpen, ShieldAlert, Activity, FlaskConical } from "lucide-react";
 import { PrenatalBaselineData } from "@/types/medical";
+import { getPeruDateString } from "@/lib/utils";
 
 interface Section9LaboratorioProps {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export function Section9Laboratorio({
   baselineData,
   setBaselineData,
 }: Section9LaboratorioProps) {
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getPeruDateString();
 
   const isHb1Anemia = !baselineData.hemoglobin1NotDone && typeof baselineData.hemoglobin1 === "number" && baselineData.hemoglobin1 < 11.0;
   const isHb2Anemia = !baselineData.hemoglobin2NotDone && typeof baselineData.hemoglobin2 === "number" && baselineData.hemoglobin2 < 11.0;

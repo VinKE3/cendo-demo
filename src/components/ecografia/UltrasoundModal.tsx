@@ -23,6 +23,7 @@ import {
 } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateUltrasoundWhatsAppUrl } from "@/lib/whatsappShare";
+import { getPeruDateString } from "@/lib/utils";
 
 interface UltrasoundModalProps {
   isOpen: boolean;
@@ -117,7 +118,7 @@ export function UltrasoundModal({
       setRecommendations(reportToEdit.recommendations || "");
       setImages(reportToEdit.images || []);
     } else {
-      setReportDate(new Date().toISOString().split("T")[0]);
+      setReportDate(getPeruDateString());
       setUltrasoundType("TRANSVAGINAL");
       setIndication("Evaluación ginecológica rutinaria / Dolor pélvico");
       setConclusion("Útero y anexos dentro de límites ecográficos normales.");
@@ -178,7 +179,7 @@ export function UltrasoundModal({
       doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
       doctorCmp: doctorProfile.cmp,
       doctorRne: doctorProfile.rne || undefined,
-      reportDate: reportDate || new Date().toISOString().split("T")[0],
+      reportDate: reportDate || getPeruDateString(),
       ultrasoundType,
       indication: indication.trim(),
       findings,
@@ -629,7 +630,7 @@ export function UltrasoundModal({
                     doctorName: doctorProfile.fullName,
                     doctorCmp: doctorProfile.cmp,
                     doctorRne: doctorProfile.rne,
-                    reportDate: reportDate || new Date().toISOString().split("T")[0],
+                    reportDate: reportDate || getPeruDateString(),
                     ultrasoundType,
                     indication,
                     findings: {

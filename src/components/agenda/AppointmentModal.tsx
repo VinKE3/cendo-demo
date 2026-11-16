@@ -24,6 +24,7 @@ import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateAppointmentReminderWhatsAppUrl } from "@/lib/whatsappShare";
 import { generateGoogleCalendarUrl, downloadIcsForAppleCalendar } from "@/lib/calendarExport";
 import { validateAppointmentInput, checkScheduleConflict } from "@/modules/agenda";
+import { getPeruDateString } from "@/lib/utils";
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -109,7 +110,7 @@ export function AppointmentModal({
       setNewLastName("");
       setNewDni("");
       setNewPhone("");
-      const today = new Date().toISOString().split("T")[0];
+      const today = getPeruDateString();
       setAppointmentDate(today);
       setAppointmentTime("10:00");
       setDurationMinutes(30);
@@ -223,7 +224,7 @@ export function AppointmentModal({
       patientPhone: finalPatientPhone,
       doctorId: assignedDoctor.id,
       doctorName: `${assignedDoctor.doctorTitle} ${assignedDoctor.fullName}`,
-      appointmentDate: appointmentDate || new Date().toISOString().split("T")[0],
+      appointmentDate: appointmentDate || getPeruDateString(),
       appointmentTime,
       durationMinutes: Number(durationMinutes) || 30,
       appointmentType,
@@ -542,7 +543,7 @@ export function AppointmentModal({
                     patientPhone,
                     doctorId: assignedDoctor.id,
                     doctorName: assignedDoctor.fullName,
-                    appointmentDate: appointmentDate || new Date().toISOString().split("T")[0],
+                    appointmentDate: appointmentDate || getPeruDateString(),
                     appointmentTime,
                     durationMinutes,
                     appointmentType,
