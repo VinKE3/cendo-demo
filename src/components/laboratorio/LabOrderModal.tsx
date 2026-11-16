@@ -57,6 +57,8 @@ interface CatalogTest {
 const TESTS_CATALOG: CatalogTest[] = [
   // Ginecología & Marcadores
   { id: "cat-ca125", name: "CA-125 (Marcador Ovárico / Endometriosis)", category: "Ginecología & Marcadores", sampleType: "Sangre venosa", notes: "Ayuno de 8 horas" },
+  { id: "cat-biopsia-cervix", name: "Biopsia de Cérvix / Endocérvix (Estudio Histopatológico)", category: "Ginecología & Marcadores", sampleType: "Tejido en formol al 10%", notes: "Fijación inmediata en formol tamponado al 10%. Indicar hora y cuadrante." },
+  { id: "cat-biopsia-endometrio", name: "Biopsia de Endometrio / Legrado Biópsico", category: "Ginecología & Marcadores", sampleType: "Tejido en formol al 10%", notes: "Fijación inmediata en formol tamponado al 10%." },
   { id: "cat-pap", name: "Papanicolaou en Base Líquida (ThinPrep)", category: "Ginecología & Marcadores", sampleType: "Muestra cervical", notes: "Abstinencia sexual 48h previas" },
   { id: "cat-vph", name: "Panel Tipificación VPH 23 Genotipos (PCR)", category: "Ginecología & Marcadores", sampleType: "Muestra endocervical", notes: "Sin óvulos 48h previas" },
   { id: "cat-he4", name: "HE-4 + Índice ROMA (Riesgo Ovárico)", category: "Ginecología & Marcadores", sampleType: "Sangre venosa", notes: "Ayuno 8 horas" },
@@ -107,6 +109,13 @@ const TESTS_CATALOG: CatalogTest[] = [
 ];
 
 const PRESET_PACKS = [
+  {
+    name: "Envío Muestras Patología (Biopsia / PAP)",
+    description: "Biopsia de Cérvix + PAP ThinPrep + VPH PCR (Formato de Anatomía Patológica)",
+    testIds: ["cat-biopsia-cervix", "cat-pap", "cat-vph"],
+    diagnosis: "Muestra de tejido y citología para estudio de Anatomía Patológica",
+    cie10: "R87.6",
+  },
   {
     name: "Chequeo Ginecológico CENDO",
     description: "PAP ThinPrep + VPH PCR + CA-125 + Hemograma + Urocultivo",
