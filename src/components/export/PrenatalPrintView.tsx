@@ -39,180 +39,212 @@ export function PrenatalPrintView({
           ========================================================================= */}
       <div className="page-sheet w-[210mm] min-h-[297mm] max-h-[297mm] p-[8mm_12mm_5mm_12mm] flex flex-col justify-between border border-slate-200 shadow-sm rounded-xl print:border-none print:shadow-none print:rounded-none overflow-hidden box-border">
         <div className="space-y-2 flex-1">
-          {/* 1. Membrete Dual CENDO & MINSA */}
-          <div className="border-b-2 border-primary pb-2 flex items-center justify-between">
+          {/* 1. Membrete Dual CENDO & Especialista (Formato Colposcopía) */}
+          <div className="border-b-2 border-primary pb-2 flex items-start justify-between gap-4">
             <div className="flex items-center gap-2.5">
               <BrandLogo size="md" showText={false} />
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-sm font-heading font-extrabold text-primary tracking-tight">
-                    CENDO &bull; CENTRO DE ENDOMETRIOSIS & GINECOLOGÍA
-                  </h1>
-                  <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-300 font-mono text-[8.5px] font-bold">
-                    FORMATO OFICIAL MINSA / CLAP
-                  </span>
-                </div>
-                <p className="text-[9.5px] text-slate-600 font-medium">
-                  Atención Prenatal Integral Especializada &bull; Miraflores, Lima
+                <h1 className="text-sm font-heading font-extrabold text-primary tracking-tight">
+                  CENDO &bull; CENTRO DE ENDOMETRIOSIS & GINECOLOGÍA
+                </h1>
+                <p className="text-[10px] font-semibold text-slate-700">
+                  Unidad de Medicina Materno-Fetal &bull; Control Prenatal de Alta Precisión
+                </p>
+                <p className="text-[8.5px] text-slate-500 font-mono mt-0.2">
+                  {doctor.clinicAddress} &bull; Citas: {doctor.phone}
                 </p>
               </div>
             </div>
 
-            <div className="text-right">
-              <div className="border border-slate-400 rounded px-2 py-0.5 bg-slate-50 text-right">
-                <span className="text-[8px] font-bold text-slate-500 uppercase block">No. HC</span>
-                <span className="font-mono font-extrabold text-slate-900 text-xs">
-                  HC-{patient.dni}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 mt-0.5 text-[8px] justify-end">
-                <span className="flex items-center gap-0.5 font-bold text-amber-800">
-                  <span className="w-2 h-2 bg-amber-400 rounded-xs inline-block" /> Alerta
-                </span>
-                <span className="flex items-center gap-0.5 font-bold text-red-800">
-                  <span className="w-2 h-2 bg-red-500 rounded-xs inline-block" /> Seguimiento
-                </span>
-              </div>
+            <div className="text-right shrink-0">
+              <p className="text-xs font-heading font-extrabold text-slate-800">
+                DR. {doctorDisplayName.toUpperCase()}
+              </p>
+              <p className="text-[9.5px] text-primary font-semibold">
+                {doctor.specialty}
+              </p>
+              <p className="text-[9px] font-mono font-bold text-slate-600">
+                CMP {doctor.cmp || "61693"} &bull; RNE {doctor.rne || "38657"}
+              </p>
             </div>
           </div>
 
-          {/* 2. Sección: Filiación y Antecedentes */}
-          <div className="border border-slate-300 rounded p-1.5 bg-slate-50/60 text-[9.5px] space-y-1">
+          {/* 2. Barra de Título Oficial MINSA / CLAP */}
+          <div className="flex items-center justify-between bg-slate-50 px-2.5 py-1 rounded border border-slate-300">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-heading font-extrabold text-primary text-[10px] uppercase tracking-wide">
+                  CARNET DE ATENCIÓN MATERNO PERINATAL (ANVERSO &bull; PÁG. 1 / 2)
+                </span>
+                <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-300 font-mono text-[8px] font-bold">
+                  MINSA / CLAP &bull; NTS N° 105
+                </span>
+              </div>
+              <p className="text-[8px] text-slate-500">
+                Sistema Informático Perinatal &bull; Centro Especializado CENDO
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 text-[7.5px] font-bold">
+                <span className="flex items-center gap-0.5 px-1 py-0.2 rounded bg-amber-100 border border-amber-300 text-amber-900">
+                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-xs inline-block" /> Alerta
+                </span>
+                <span className="flex items-center gap-0.5 px-1 py-0.2 rounded bg-red-100 border border-red-300 text-red-900">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-xs inline-block" /> Seguimiento
+                </span>
+              </div>
+              <span className="font-mono font-extrabold text-slate-900 text-xs px-2 py-0.5 rounded bg-white border border-slate-300">
+                HC-{patient.dni}
+              </span>
+            </div>
+          </div>
+
+          {/* 3. Sección I: Filiación y Datos de la Gestante */}
+          <div className="border border-slate-300 rounded p-1.5 bg-slate-50/50 text-[9px] space-y-1">
             <div className="grid grid-cols-12 gap-1.5 items-center">
-              <div className="col-span-6">
-                <span className="text-[8px] font-bold uppercase text-slate-500 block">Apellidos y Nombres:</span>
+              <div className="col-span-5">
+                <span className="text-[7.5px] font-bold uppercase text-slate-500 block">Apellidos y Nombres:</span>
                 <strong className="text-slate-900 font-bold text-[10.5px]">
                   {patient.lastName}, {patient.firstName}
                 </strong>
               </div>
-              <div className="col-span-3">
-                <span className="text-[8px] font-bold uppercase text-slate-500 block">DNI N°:</span>
-                <span className="font-mono font-bold text-slate-900">{patient.dni}</span>
+              <div className="col-span-2">
+                <span className="text-[7.5px] font-bold uppercase text-slate-500 block">DNI N°:</span>
+                <span className="font-mono font-bold text-slate-900 text-[10px]">{patient.dni}</span>
               </div>
-              <div className="col-span-3">
-                <span className="text-[8px] font-bold uppercase text-slate-500 block">Edad:</span>
-                <span className="font-bold text-slate-900">
+              <div className={`col-span-2 p-0.5 rounded ${patient.age < 15 || patient.age > 35 ? "bg-amber-100 border border-amber-300" : ""}`}>
+                <span className="text-[7.5px] font-bold uppercase text-slate-500 block">Edad:</span>
+                <span className="font-bold text-slate-900 text-[10px]">
                   {patient.age} años
                   {patient.age < 15 || patient.age > 35 ? (
-                    <span className="ml-1 text-[8px] px-1 bg-amber-400 text-black font-extrabold rounded">ALERTA</span>
+                    <span className="ml-1 text-[7px] px-1 bg-amber-400 text-black font-extrabold rounded">ALERTA</span>
                   ) : null}
+                </span>
+              </div>
+              <div className={`col-span-3 p-0.5 rounded ${baseline.civilStatus === "Soltera" ? "bg-amber-50 border border-amber-200" : ""}`}>
+                <span className="text-[7.5px] font-bold uppercase text-slate-500 block">Estado Civil / Estudios:</span>
+                <span className="font-semibold text-slate-800 text-[9px]">
+                  {baseline.civilStatus} &bull; {baseline.educationLevel}
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-12 gap-1.5 pt-1 border-t border-slate-200">
+            <div className="grid grid-cols-12 gap-1.5 pt-0.5 border-t border-slate-200 text-[8.5px]">
               <div className="col-span-4">
-                <span className="text-[8px] font-bold uppercase text-slate-500 block">Establecimiento:</span>
-                <span className="text-slate-800 truncate block">CENDO Miraflores</span>
+                <span className="text-[7.5px] font-bold uppercase text-slate-500 block">Establecimiento / Seguro:</span>
+                <span className="text-slate-800 font-medium">CENDO Miraflores &bull; {baseline.insuranceType} ({baseline.insuranceCode || "Particular"})</span>
+              </div>
+              <div className="col-span-5">
+                <span className="text-[7.5px] font-bold uppercase text-slate-500 block">Domicilio / Localidad:</span>
+                <span className="text-slate-800 truncate block">{patient.address || "Miraflores, Lima"}</span>
               </div>
               <div className="col-span-3">
-                <span className="text-[8px] font-bold uppercase text-slate-500 block">Tipo Seguro:</span>
-                <span className="text-slate-800 font-semibold">{baseline.insuranceType} ({baseline.insuranceCode || "Particular"})</span>
-              </div>
-              <div className="col-span-3">
-                <span className="text-[8px] font-bold uppercase text-slate-500 block">Estado Civil / Estudios:</span>
-                <span className="text-slate-800">{baseline.civilStatus} &bull; {baseline.educationLevel}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="text-[8px] font-bold uppercase text-slate-500 block">Teléfono:</span>
-                <span className="font-mono text-slate-800">{patient.phone}</span>
+                <span className="text-[7.5px] font-bold uppercase text-slate-500 block">Teléfono de Contacto:</span>
+                <span className="font-mono font-bold text-slate-900">{patient.phone}</span>
               </div>
             </div>
 
             {baseline.fatherName && (
-              <div className="pt-1 border-t border-slate-200 text-[9px] text-slate-700">
-                <span className="font-bold text-slate-500">Padre RN:</span> {baseline.fatherName} {baseline.fatherDni ? `(DNI ${baseline.fatherDni})` : ""}
+              <div className="pt-0.5 border-t border-slate-200 text-[8px] text-slate-700 flex items-center justify-between">
+                <span><strong>Padre del RN:</strong> {baseline.fatherName} {baseline.fatherDni ? `(DNI: ${baseline.fatherDni})` : ""}</span>
+                <span><strong>Embarazo Planeado:</strong> Sí</span>
               </div>
             )}
           </div>
 
-          {/* 3. Bloque: Antecedentes Obstétricos y Gestación Anterior */}
+          {/* 4. Sección II: Antecedentes Obstétricos (Matriz Gráfica CLAP) */}
           <div className="grid grid-cols-12 gap-1.5">
             {/* Antecedentes Obstétricos (7 cols) */}
             <div className="col-span-7 border border-slate-300 rounded p-1.5 bg-white text-[9px] space-y-1">
               <div className="flex items-center justify-between border-b border-slate-200 pb-0.5">
-                <span className="font-bold uppercase tracking-wider text-primary text-[8.5px]">
+                <span className="font-bold uppercase tracking-wider text-primary text-[8px]">
                   Antecedentes Obstétricos (G_ P____)
                 </span>
-                <span className="font-mono font-bold text-slate-700">
+                <span className="font-mono font-extrabold text-slate-800 text-[9.5px]">
                   G{baseline.gestas} P{baseline.partosVaginales + baseline.cesareas}{baseline.abortos}{baseline.nacidosVivos}
                 </span>
               </div>
 
               <div className="grid grid-cols-4 gap-1 text-center pt-0.5">
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
-                  <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Gestas</span>
-                  <strong className={`text-xs ${baseline.gestas === 0 || baseline.gestas >= 4 ? "text-amber-700 font-extrabold" : "text-slate-900"}`}>
+                <div className={`p-1 rounded border ${baseline.gestas === 0 || baseline.gestas >= 4 ? "bg-amber-100 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
+                  <span className="text-[7px] uppercase font-bold text-slate-500 block">Gestas</span>
+                  <strong className={`text-xs ${baseline.gestas === 0 || baseline.gestas >= 4 ? "text-amber-800 font-extrabold" : "text-slate-900"}`}>
                     {baseline.gestas}
                   </strong>
+                  {baseline.gestas >= 4 && <span className="text-[6.5px] font-bold text-amber-800 block">ALERTA</span>}
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
-                  <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Abortos</span>
-                  <strong className={`text-xs ${baseline.abortos > 0 ? "text-red-700 font-extrabold" : "text-slate-900"}`}>
+                <div className={`p-1 rounded border ${baseline.abortos > 0 ? (baseline.abortos >= 3 ? "bg-red-100 border-red-300 text-red-900" : "bg-amber-100 border-amber-300 text-amber-900") : "bg-slate-50 border-slate-200"}`}>
+                  <span className="text-[7px] uppercase font-bold text-slate-500 block">Abortos</span>
+                  <strong className="text-xs font-extrabold">
                     {baseline.abortos}
                   </strong>
+                  {baseline.abortos > 0 && <span className="text-[6.5px] font-bold block">{baseline.abortos >= 3 ? "ROJO" : "ALERTA"}</span>}
                 </div>
                 <div className="p-1 rounded bg-slate-50 border border-slate-200">
-                  <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Vaginales</span>
+                  <span className="text-[7px] uppercase font-bold text-slate-500 block">Vaginales</span>
                   <strong className="text-xs text-slate-900">{baseline.partosVaginales}</strong>
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
-                  <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Cesáreas</span>
-                  <strong className={`text-xs ${baseline.cesareas > 0 ? "text-amber-700 font-extrabold" : "text-slate-900"}`}>
+                <div className={`p-1 rounded border ${baseline.cesareas > 0 ? "bg-amber-100 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
+                  <span className="text-[7px] uppercase font-bold text-slate-500 block">Cesáreas</span>
+                  <strong className={`text-xs ${baseline.cesareas > 0 ? "text-amber-800 font-extrabold" : "text-slate-900"}`}>
                     {baseline.cesareas}
                   </strong>
+                  {baseline.cesareas > 0 && <span className="text-[6.5px] font-bold text-amber-800 block">ALERTA</span>}
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-1 text-center pt-0.5">
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
-                  <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Nacidos Vivos</span>
-                  <strong className="text-[11px] text-slate-900">{baseline.nacidosVivos}</strong>
+                <div className="p-0.5 rounded bg-slate-50 border border-slate-200">
+                  <span className="text-[7px] uppercase font-bold text-slate-500 block">Nacidos Vivos</span>
+                  <strong className="text-[10px] text-slate-900">{baseline.nacidosVivos}</strong>
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
-                  <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Nacidos Muertos</span>
-                  <strong className="text-[11px] text-slate-900">{baseline.nacidosMuertos}</strong>
+                <div className={`p-0.5 rounded border ${baseline.nacidosMuertos > 0 ? "bg-amber-100 border-amber-300 text-amber-900 font-bold" : "bg-slate-50 border-slate-200"}`}>
+                  <span className="text-[7px] uppercase font-bold text-slate-500 block">Nacidos Muertos</span>
+                  <strong className="text-[10px]">{baseline.nacidosMuertos}</strong>
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
-                  <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Viven</span>
-                  <strong className="text-[11px] text-emerald-700 font-bold">{baseline.viven}</strong>
+                <div className="p-0.5 rounded bg-emerald-50 border border-emerald-200">
+                  <span className="text-[7px] uppercase font-bold text-emerald-800 block">Viven</span>
+                  <strong className="text-[10px] text-emerald-700 font-bold">{baseline.viven}</strong>
                 </div>
               </div>
             </div>
 
             {/* Gestación Anterior & Factores (5 cols) */}
             <div className="col-span-5 border border-slate-300 rounded p-1.5 bg-white text-[8.5px] space-y-1">
-              <span className="font-bold uppercase tracking-wider text-primary text-[8.5px] block border-b border-slate-200 pb-0.5">
-                Gestación Anterior
+              <span className="font-bold uppercase tracking-wider text-primary text-[8px] block border-b border-slate-200 pb-0.5">
+                Gestación Anterior & Factores
               </span>
               <p className="text-slate-700">
                 Terminación: <strong>{baseline.previousDeliveryType || "No aplica / Primigesta"}</strong>
               </p>
               <p className="text-slate-700">
-                Per. Intergenésico Adecuado: <strong>{baseline.adequateIntergenesicPeriod ? "Sí" : "No aplica"}</strong>
+                Per. Intergenésico Adecuado: <strong>{baseline.adequateIntergenesicPeriod ? "Sí" : "No aplica / < 2 años"}</strong>
               </p>
               <p className="text-slate-700">
                 Lactancia previa: <strong>{baseline.breastfeedingMonths || "No hubo"}</strong>
               </p>
-              <div className="pt-0.5 border-t border-slate-100 flex items-center justify-between text-[8px]">
+              <div className="pt-0.5 border-t border-slate-100 flex items-center justify-between text-[7.5px]">
                 <span>RN Mayor Peso: <strong>{baseline.rnMayorPesoGramos ? `${baseline.rnMayorPesoGramos}g` : "—"}</strong></span>
-                <span>Parto pretérmino: <strong>{baseline.pretermHistory ? "SÍ (Alerta)" : "NO"}</strong></span>
+                <span className={baseline.pretermHistory ? "px-1 rounded bg-amber-100 text-amber-800 font-bold" : ""}>
+                  Pretérmino: <strong>{baseline.pretermHistory ? "SÍ (Alerta)" : "NO"}</strong>
+                </span>
               </div>
             </div>
           </div>
 
-          {/* 4. Antecedentes Familiares, Personales & Vacunas */}
-          <div className="grid grid-cols-12 gap-1.5 text-[8.5px]">
+          {/* 5. Sección III: Antecedentes Familiares, Personales & Vacunas */}
+          <div className="grid grid-cols-12 gap-1.5 text-[8px]">
             <div className="col-span-4 border border-slate-300 rounded p-1.5 bg-slate-50/50">
-              <span className="font-bold text-slate-700 uppercase block mb-0.5">Antecedentes Familiares:</span>
+              <span className="font-bold text-slate-700 uppercase block mb-0.5 text-[7.5px]">Antecedentes Familiares:</span>
               <p className="text-slate-800 leading-tight">
                 {baseline.familyHistory && baseline.familyHistory.length > 0
                   ? baseline.familyHistory.join(", ")
-                  : "Sin antecedentes de relevancia"}
+                  : "Sin antecedentes familiares de relevancia"}
               </p>
             </div>
             <div className="col-span-5 border border-slate-300 rounded p-1.5 bg-slate-50/50">
-              <span className="font-bold text-slate-700 uppercase block mb-0.5">Antecedentes Personales:</span>
+              <span className="font-bold text-slate-700 uppercase block mb-0.5 text-[7.5px]">Antecedentes Personales:</span>
               <p className="text-slate-800 leading-tight">
                 {baseline.personalHistory && baseline.personalHistory.length > 0
                   ? baseline.personalHistory.join(", ")
@@ -220,8 +252,8 @@ export function PrenatalPrintView({
               </p>
             </div>
             <div className="col-span-3 border border-slate-300 rounded p-1.5 bg-slate-50/50">
-              <span className="font-bold text-slate-700 uppercase block mb-0.5">Vacunas Previas:</span>
-              <div className="grid grid-cols-2 gap-0.5 text-[8px]">
+              <span className="font-bold text-slate-700 uppercase block mb-0.5 text-[7.5px]">Vacunas Previas:</span>
+              <div className="grid grid-cols-2 gap-0.5 text-[7.5px]">
                 <span>Rubeola: <strong>{baseline.previousVaccines?.rubella ? "✓ SÍ" : "NO"}</strong></span>
                 <span>Hepatitis B: <strong>{baseline.previousVaccines?.hepatitisB ? "✓ SÍ" : "NO"}</strong></span>
                 <span>Papiloma: <strong>{baseline.previousVaccines?.hpv ? "✓ SÍ" : "NO"}</strong></span>
@@ -230,56 +262,59 @@ export function PrenatalPrintView({
             </div>
           </div>
 
-          {/* 5. Datos Basales del Embarazo Actual & Calculadora de Naegele */}
-          <div className="border border-slate-300 rounded p-2 bg-amber-50/40 text-[9px] space-y-1.5">
-            <div className="flex items-center justify-between border-b border-amber-200 pb-1">
-              <span className="font-heading font-extrabold uppercase tracking-wider text-amber-950 text-[9.5px]">
+          {/* 6. Sección IV: Embarazo Actual & Calculadora de Naegele */}
+          <div className="border border-slate-300 rounded p-1.5 bg-amber-50/40 text-[8.5px] space-y-1">
+            <div className="flex items-center justify-between border-b border-amber-200 pb-0.5">
+              <span className="font-heading font-extrabold uppercase tracking-wider text-amber-950 text-[8.5px]">
                 Datos Basales del Embarazo Actual & Regla de Naegele
               </span>
-              <span className="px-2 py-0.2 rounded bg-amber-200 text-amber-900 font-mono font-bold text-[8.5px]">
+              <span className={`px-2 py-0.2 rounded font-mono font-bold text-[8px] ${risks.isHighRisk ? "bg-red-200 text-red-900 border border-red-300" : "bg-emerald-100 text-emerald-900 border border-emerald-300"}`}>
                 {risks.riskCategory}
               </span>
             </div>
 
-            <div className="grid grid-cols-12 gap-2 items-center">
-              <div className="col-span-2 p-1 rounded bg-white border border-amber-200">
-                <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Peso Habitual:</span>
+            <div className="grid grid-cols-12 gap-1.5 items-center">
+              <div className={`col-span-2 p-1 rounded border ${baseline.usualWeightKg < 45 ? "bg-amber-100 border-amber-300 text-amber-900" : "bg-white border-amber-200"}`}>
+                <span className="text-[7px] uppercase font-bold text-slate-500 block">Peso Habitual:</span>
                 <strong className="text-slate-900 text-xs">{baseline.usualWeightKg} kg</strong>
+                {baseline.usualWeightKg < 45 && <span className="text-[6.5px] font-bold text-amber-800 block">ALERTA</span>}
               </div>
-              <div className="col-span-2 p-1 rounded bg-white border border-amber-200">
-                <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Talla:</span>
+              <div className={`col-span-2 p-1 rounded border ${baseline.heightCm < 150 ? "bg-amber-100 border-amber-300 text-amber-900" : "bg-white border-amber-200"}`}>
+                <span className="text-[7px] uppercase font-bold text-slate-500 block">Talla:</span>
                 <strong className="text-slate-900 text-xs">{baseline.heightCm} cm</strong>
+                {baseline.heightCm < 150 && <span className="text-[6.5px] font-bold text-amber-800 block">ALERTA</span>}
               </div>
-              <div className="col-span-2 p-1 rounded bg-white border border-amber-200">
-                <span className="text-[7.5px] uppercase font-bold text-slate-500 block">Grupo & Rh:</span>
+              <div className={`col-span-2 p-1 rounded border ${baseline.rhFactor.includes("Rh (-)") ? "bg-amber-100 border-amber-300" : "bg-white border-amber-200"}`}>
+                <span className="text-[7px] uppercase font-bold text-slate-500 block">Grupo & Rh:</span>
                 <strong className="text-slate-900 text-xs">{baseline.bloodGroup} {baseline.rhFactor}</strong>
               </div>
-              <div className="col-span-3 p-1 rounded bg-white border border-amber-200">
-                <span className="text-[7.5px] uppercase font-bold text-slate-500 block">FUM (Última Regla):</span>
+              <div className={`col-span-3 p-1 rounded border ${baseline.fumDoubt ? "bg-amber-100 border-amber-300" : "bg-white border-amber-200"}`}>
+                <span className="text-[7px] uppercase font-bold text-slate-500 block">FUM (Última Regla):</span>
                 <strong className="text-slate-900 text-xs font-mono">{baseline.fum}</strong>
+                {baseline.fumDoubt && <span className="text-[6.5px] font-bold text-amber-800 block">FUM DUDOSA (ALERTA)</span>}
               </div>
-              <div className="col-span-3 p-1 rounded bg-primary text-white border border-primary">
-                <span className="text-[7.5px] uppercase font-bold text-secondary block">FPP (Regla Naegele):</span>
+              <div className="col-span-3 p-1 rounded bg-primary text-white border border-primary text-center">
+                <span className="text-[7px] uppercase font-bold text-secondary block">FPP (Regla Naegele):</span>
                 <strong className="text-white text-xs font-mono">{baseline.fpp}</strong>
               </div>
             </div>
 
             {baseline.ultrasoundGestationalAgeWeeks && (
-              <div className="text-[8.5px] text-slate-700 flex items-center justify-between pt-0.5">
+              <div className="text-[8px] text-slate-700 flex items-center justify-between pt-0.5 border-t border-amber-200/60">
                 <span>EG por Ecografía Precoz: <strong>{baseline.ultrasoundGestationalAgeWeeks} sem</strong> (Fecha: {baseline.ultrasoundDate || "—"})</span>
-                <span>Fuma: <strong>{baseline.smokerCigarettesDay ? `${baseline.smokerCigarettesDay} cig/d` : "No"}</strong> &bull; Drogas: <strong>{baseline.drugsUse ? "Sí" : "No"}</strong></span>
+                <span>Fumadora: <strong>{baseline.smokerCigarettesDay ? `${baseline.smokerCigarettesDay} cig/d (ALERTA)` : "No"}</strong> &bull; Drogas: <strong>{baseline.drugsUse ? "Sí (ALERTA)" : "No"}</strong></span>
               </div>
             )}
           </div>
 
-          {/* 6. Examen Físico Basal & Laboratorios de Tamizaje */}
-          <div className="grid grid-cols-12 gap-1.5 text-[8.5px]">
+          {/* 7. Sección V: Examen Físico Basal & Laboratorios de Tamizaje */}
+          <div className="grid grid-cols-12 gap-1.5 text-[8px]">
             {/* Examen Físico */}
-            <div className="col-span-4 border border-slate-300 rounded p-1.5 bg-white space-y-1">
-              <span className="font-bold uppercase tracking-wider text-primary text-[8.5px] block border-b border-slate-200 pb-0.5">
+            <div className="col-span-4 border border-slate-300 rounded p-1.5 bg-white space-y-0.5">
+              <span className="font-bold uppercase tracking-wider text-primary text-[7.5px] block border-b border-slate-200 pb-0.5">
                 Examen Físico Basal
               </span>
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 text-[8px]">
                 <div className="flex justify-between"><span>Ex. Clínico:</span><strong>{baseline.clinicalExam}</strong></div>
                 <div className="flex justify-between"><span>Mamas:</span><strong>{baseline.breastsExam}</strong></div>
                 <div className="flex justify-between"><span>Cérvix:</span><strong>{baseline.cervixExam}</strong></div>
@@ -288,46 +323,78 @@ export function PrenatalPrintView({
               </div>
             </div>
 
-            {/* Laboratorios de Tamizaje */}
-            <div className="col-span-8 border border-slate-300 rounded p-1.5 bg-white space-y-1">
-              <span className="font-bold uppercase tracking-wider text-primary text-[8.5px] block border-b border-slate-200 pb-0.5">
+            {/* Laboratorios de Tamizaje MINSA */}
+            <div className="col-span-8 border border-slate-300 rounded p-1.5 bg-white space-y-0.5">
+              <span className="font-bold uppercase tracking-wider text-primary text-[7.5px] block border-b border-slate-200 pb-0.5">
                 Exámenes de Laboratorio Basales (Tamizaje MINSA)
               </span>
-              <div className="grid grid-cols-3 gap-1 text-[8px]">
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
+              <div className="grid grid-cols-3 gap-1 text-[7.5px]">
+                <div className={`p-1 rounded border ${baseline.hemoglobin1 && baseline.hemoglobin1 < 11 ? "bg-amber-100 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
                   <span className="block text-slate-500 font-bold">Hemoglobina 1:</span>
                   <strong className="font-mono text-slate-900">{baseline.hemoglobin1 ? `${baseline.hemoglobin1} g/dL` : "—"}</strong>
+                  {baseline.hemoglobin1 && baseline.hemoglobin1 < 11 && <span className="text-[6px] font-bold text-amber-800 block">ANEMIA (ALERTA)</span>}
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
+                <div className={`p-1 rounded border ${baseline.bloodGlucose1 && baseline.bloodGlucose1 >= 92 ? "bg-amber-100 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
                   <span className="block text-slate-500 font-bold">Glicemia 1:</span>
                   <strong className="font-mono text-slate-900">{baseline.bloodGlucose1 ? `${baseline.bloodGlucose1} mg/dL` : "—"}</strong>
+                  {baseline.bloodGlucose1 && baseline.bloodGlucose1 >= 92 && <span className="text-[6px] font-bold text-amber-800 block">DG (ALERTA)</span>}
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
+                <div className={`p-1 rounded border ${baseline.vdrlRpr1 === "Reactivo" ? "bg-red-100 border-red-300 text-red-900" : "bg-slate-50 border-slate-200"}`}>
                   <span className="block text-slate-500 font-bold">VDRL / RPR:</span>
                   <strong className="text-slate-900">{baseline.vdrlRpr1 || "No reactivo"}</strong>
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
+                <div className={`p-1 rounded border ${baseline.hivScreening1 === "Positivo" ? "bg-red-100 border-red-300 text-red-900" : "bg-slate-50 border-slate-200"}`}>
                   <span className="block text-slate-500 font-bold">Tamizaje VIH:</span>
                   <strong className="text-slate-900">{baseline.hivScreening1 || "Negativo"}</strong>
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
+                <div className={`p-1 rounded border ${baseline.hepatitisBScreening === "Positivo" ? "bg-red-100 border-red-300 text-red-900" : "bg-slate-50 border-slate-200"}`}>
                   <span className="block text-slate-500 font-bold">Hepatitis B:</span>
                   <strong className="text-slate-900">{baseline.hepatitisBScreening || "Negativo"}</strong>
                 </div>
-                <div className="p-1 rounded bg-slate-50 border border-slate-200">
+                <div className={`p-1 rounded border ${baseline.completeUrineExam === "Patológico" ? "bg-amber-100 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
                   <span className="block text-slate-500 font-bold">Ex. Orina / Urocultivo:</span>
                   <strong className="text-slate-900">{baseline.completeUrineExam || "Normal"}</strong>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* 8. Sección VI: Criterios de Riesgo Perinatal Detectados */}
+          {risks && risks.warningFlags.length > 0 && (
+            <div className="border border-amber-300 rounded p-1 bg-amber-50/60 text-[8px] space-y-0.5">
+              <span className="font-bold uppercase text-amber-950 block text-[7.5px]">
+                Criterios de Alerta Perinatal Activos en este Embarazo:
+              </span>
+              <p className="text-amber-900 font-medium leading-tight">
+                {risks.warningFlags.join(" • ")}
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Cenefa de pie de Página 1 */}
-        <div className="shrink-0 pt-2">
-          <p className="text-[8px] text-slate-400 font-mono text-center mb-0.5">
-            Continúa en Página 2: Matriz de 9 Consultas Prenatales, Signos de Alarma y Patologías Maternas
-          </p>
+        {/* Cenefa de pie de Página 1 & Sello Médico */}
+        <div className="shrink-0 pt-1 space-y-1">
+          <div className="border-t border-slate-200 pt-1 flex items-end justify-between text-[8px]">
+            <div className="text-slate-500 font-mono">
+              <p>Formato de Carnet Perinatal Oficial MINSA / CLAP &bull; Anverso</p>
+              <p>Continúa en Reverso: Matriz de 9 Atenciones, Curva AU y Patologías Maternas</p>
+            </div>
+
+            <div className="text-center min-w-[180px]">
+              <div className="h-6 border-b border-slate-400 flex items-center justify-center">
+                <span className="font-serif italic text-primary/70 text-xs select-none">
+                  Dr. {doctorDisplayName}
+                </span>
+              </div>
+              <p className="font-heading font-extrabold text-slate-900 text-[9.5px]">
+                DR. {doctorDisplayName.toUpperCase()}
+              </p>
+              <p className="text-[8px] text-slate-600 font-mono">
+                CMP {doctor.cmp || "61693"} &bull; RNE {doctor.rne || "38657"}
+              </p>
+            </div>
+          </div>
+
           <CendoFooterWave
             address={doctor.clinicAddress}
             email={doctor.contactEmail}

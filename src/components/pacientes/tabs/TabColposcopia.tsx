@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { FileCheck2, Activity, Plus, MessageCircle } from "lucide-react";
+import { FileCheck2, Activity, Plus, MessageCircle, Printer } from "lucide-react";
 import { Patient, ColposcopyReport, ClinicalCheckup, DoctorProfile } from "@/types/medical";
 import { generateColposcopyWhatsAppUrl, generateCheckupWhatsAppUrl } from "@/lib/whatsappShare";
 
@@ -13,8 +13,10 @@ interface TabColposcopiaProps {
   doctorProfile?: DoctorProfile | null;
   onOpenNewColpo: () => void;
   onEditColpo: (colpo: ColposcopyReport) => void;
+  onPrintColpo: (colpo: ColposcopyReport) => void;
   onOpenNewCheckup: () => void;
   onEditCheckup: (chk: ClinicalCheckup) => void;
+  onPrintCheckup: (chk: ClinicalCheckup) => void;
 }
 
 export function TabColposcopia({
@@ -24,8 +26,10 @@ export function TabColposcopia({
   doctorProfile,
   onOpenNewColpo,
   onEditColpo,
+  onPrintColpo,
   onOpenNewCheckup,
   onEditCheckup,
+  onPrintCheckup,
 }: TabColposcopiaProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -75,7 +79,7 @@ export function TabColposcopia({
                   <span>Biopsia: <strong>{c.cervicalBiopsyTaken ? "Sí" : "No"}</strong></span>
                 </div>
 
-                <div className="pt-2 flex items-center justify-end gap-3">
+                <div className="pt-2 flex flex-wrap items-center justify-end gap-3 border-t border-slate-200">
                   <button
                     onClick={() => {
                       const url = generateColposcopyWhatsAppUrl(patient, c, doctorProfile);
@@ -88,6 +92,14 @@ export function TabColposcopia({
                     <span>WhatsApp</span>
                   </button>
                   <button
+                    onClick={() => onPrintColpo(c)}
+                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                    title="Ver informe oficial A4 e imprimir"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Ver / Imprimir A4</span>
+                  </button>
+                  <button
                     onClick={() => onEditColpo(c)}
                     className="text-xs font-semibold text-slate-700 hover:text-primary transition-colors cursor-pointer"
                   >
@@ -95,9 +107,10 @@ export function TabColposcopia({
                   </button>
                   <Link
                     href="/colposcopia"
-                    className="text-xs font-semibold text-primary hover:underline"
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                    title="Ir al listado general de colposcopías"
                   >
-                    Ver en Colposcopía &rarr;
+                    Módulo &rarr;
                   </Link>
                 </div>
               </div>
@@ -160,7 +173,7 @@ export function TabColposcopia({
                   <span>Endometrio: <strong>{chk.endometriumThicknessMm} mm</strong></span>
                 </div>
 
-                <div className="pt-2 flex items-center justify-end gap-3">
+                <div className="pt-2 flex flex-wrap items-center justify-end gap-3 border-t border-slate-200">
                   <button
                     onClick={() => {
                       const url = generateCheckupWhatsAppUrl(patient, chk, doctorProfile);
@@ -173,6 +186,14 @@ export function TabColposcopia({
                     <span>WhatsApp</span>
                   </button>
                   <button
+                    onClick={() => onPrintCheckup(chk)}
+                    className="text-xs font-bold text-indigo-700 hover:underline flex items-center gap-1 cursor-pointer"
+                    title="Ver informe oficial A4 e imprimir"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Ver / Imprimir A4</span>
+                  </button>
+                  <button
                     onClick={() => onEditCheckup(chk)}
                     className="text-xs font-semibold text-slate-700 hover:text-indigo-700 transition-colors cursor-pointer"
                   >
@@ -180,9 +201,10 @@ export function TabColposcopia({
                   </button>
                   <Link
                     href="/chequeos"
-                    className="text-xs font-semibold text-indigo-700 hover:underline"
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                    title="Ir al listado general de chequeos"
                   >
-                    Ver en Chequeos &rarr;
+                    Módulo &rarr;
                   </Link>
                 </div>
               </div>

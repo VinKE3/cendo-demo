@@ -420,10 +420,15 @@ export default function AgendaPage() {
                   {/* Enlace a Historia Clínica */}
                   <Link
                     href={`/pacientes/${appt.patientId}`}
-                    className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-primary transition-colors cursor-pointer"
-                    title="Abrir Historia Clínica"
+                    className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                      appt.appointmentType === "CONSULTA_PRIMERA_VEZ"
+                        ? "bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-primary"
+                    }`}
+                    title="Abrir Historia Clínica de la Paciente"
                   >
-                    <FileText className="w-4 h-4" />
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>{appt.appointmentType === "CONSULTA_PRIMERA_VEZ" ? "🆕 Iniciar HC" : "Ver HC"}</span>
                   </Link>
 
                   {/* Editar */}

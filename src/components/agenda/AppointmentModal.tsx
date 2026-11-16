@@ -11,6 +11,7 @@ import {
   MessageCircle,
   Stethoscope,
   Sparkles,
+  Plus,
 } from "lucide-react";
 import {
   Patient,
@@ -63,12 +64,21 @@ export function AppointmentModal({
     doctorProfile,
     addAppointment,
     updateAppointment,
+    addPatient,
+    getPatientByDni,
   } = useMedicalStore();
 
   const [selectedPatientId, setSelectedPatientId] = useState("");
   const [patientName, setPatientName] = useState("");
   const [patientDni, setPatientDni] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
+
+  // Modo Paciente Nueva
+  const [isNewPatientMode, setIsNewPatientMode] = useState(false);
+  const [newFirstName, setNewFirstName] = useState("");
+  const [newLastName, setNewLastName] = useState("");
+  const [newDni, setNewDni] = useState("");
+  const [newPhone, setNewPhone] = useState("");
 
   const [selectedDoctorId, setSelectedDoctorId] = useState(doctorProfile.id);
   const [appointmentDate, setAppointmentDate] = useState("");
@@ -94,6 +104,11 @@ export function AppointmentModal({
       setStatus(appointmentToEdit.status);
       setNotes(appointmentToEdit.notes || "");
     } else {
+      setIsNewPatientMode(false);
+      setNewFirstName("");
+      setNewLastName("");
+      setNewDni("");
+      setNewPhone("");
       const today = new Date().toISOString().split("T")[0];
       setAppointmentDate(today);
       setAppointmentTime("10:00");
@@ -134,24 +149,78 @@ export function AppointmentModal({
   if (!isOpen) return null;
 
   const handleSave = () => {
-    if (!patientName.trim()) {
-      Swal.fire({
-        icon: "warning",
-        title: "Paciente Requerido",
-        text: "Por favor seleccione una paciente de la lista.",
-        confirmButtonColor: "#0A4D68",
-      });
-      return;
+    let finalPatientId = selectedPatientId;
+    let finalPatientName = patientName.trim();
+    let finalPatientDni = patientDni.trim();
+    let finalPatientPhone = patientPhone.trim();
+
+    // Si está en modo Paciente Nueva (Primera Vez)
+    if (isNewPatientMode && !appointmentToEdit) {
+      if (!newFirstName.trim() || !newLastName.trim()) {
+        Swal.fire({
+          icon: "warning",
+          title: "Datos Incompletos",
+          text: "Por favor ingrese Nombres y Apellidos de la nueva paciente.",
+          confirmButtonColor: "#0A4D68",
+        });
+        return;
+      }
+      if (!newDni.trim() || newDni.trim().length < 8) {
+        Swal.fire({
+          icon: "warning",
+          title: "DNI Requerido",
+          text: "Ingrese un DNI válido de 8 dígitos para registrar la Historia Clínica.",
+          confirmButtonColor: "#0A4D68",
+        });
+        return;
+      }
+
+      // Verificar si ya existe por DNI
+      const existing = getPatientByDni(newDni.trim());
+      if (existing) {
+        finalPatientId = existing.id;
+        finalPatientName = `${existing.lastName}, ${existing.firstName}`;
+        finalPatientDni = existing.dni;
+        finalPatientPhone = newPhone.trim() || existing.phone;
+      } else {
+        // Crear paciente automáticamente en el sistema
+        const created = addPatient({
+          dni: newDni.trim(),
+          firstName: newFirstName.trim().toUpperCase(),
+          lastName: newLastName.trim().toUpperCase(),
+          phone: newPhone.trim() || "999999999",
+          email: "",
+          address: "Lima, Perú",
+          civilStatus: "Soltera",
+          occupation: "Particular",
+          age: 28,
+          birthDate: "1996-01-01",
+        });
+        finalPatientId = created.id;
+        finalPatientName = `${created.lastName}, ${created.firstName}`;
+        finalPatientDni = created.dni;
+        finalPatientPhone = created.phone;
+      }
+    } else {
+      if (!finalPatientName) {
+        Swal.fire({
+          icon: "warning",
+          title: "Paciente Requerido",
+          text: "Por favor seleccione una paciente de la lista o registre una nueva.",
+          confirmButtonColor: "#0A4D68",
+        });
+        return;
+      }
     }
 
     const assignedDoctor = doctorsList.find((d) => d.id === selectedDoctorId) || doctorProfile;
 
     const payload = {
       id: appointmentToEdit ? appointmentToEdit.id : undefined,
-      patientId: selectedPatientId || "pat-manual",
-      patientName: patientName.trim(),
-      patientDni: patientDni.trim(),
-      patientPhone: patientPhone.trim(),
+      patientId: finalPatientId || "pat-manual",
+      patientName: finalPatientName,
+      patientDni: finalPatientDni,
+      patientPhone: finalPatientPhone,
       doctorId: assignedDoctor.id,
       doctorName: `${assignedDoctor.doctorTitle} ${assignedDoctor.fullName}`,
       appointmentDate: appointmentDate || new Date().toISOString().split("T")[0],
@@ -241,21 +310,108 @@ export function AppointmentModal({
 
         {/* Formulario */}
         <div className="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
-          {/* Selección de Paciente */}
-          <div className="space-y-1">
-            <label className="font-bold text-heading block">Paciente *</label>
-            <select
-              value={selectedPatientId}
-              onChange={handlePatientSelectChange}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-primary focus:bg-white focus:outline-none"
-            >
-              <option value="" disabled>Seleccione una paciente registrada...</option>
-              {patients.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.lastName}, {p.firstName} — DNI {p.dni} ({p.phone})
-                </option>
-              ))}
-            </select>
+          {/* Selección o Registro de Paciente */}
+          <div className="space-y-2 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center justify-between">
+              <label className="font-bold text-heading block">Paciente *</label>
+              {!appointmentToEdit && (
+                <div className="flex items-center rounded-lg bg-slate-200/70 p-0.5 text-[11px] font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setIsNewPatientMode(false)}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      !isNewPatientMode
+                        ? "bg-white text-primary shadow-xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Registrada ({patients.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsNewPatientMode(true);
+                      setAppointmentType("CONSULTA_PRIMERA_VEZ");
+                    }}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 ${
+                      isNewPatientMode
+                        ? "bg-primary text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>+ Nueva Paciente</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {!isNewPatientMode ? (
+              <select
+                value={selectedPatientId}
+                onChange={handlePatientSelectChange}
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold focus:border-primary focus:bg-white focus:outline-none"
+              >
+                <option value="" disabled>Seleccione una paciente registrada...</option>
+                {patients.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.lastName}, {p.firstName} — DNI {p.dni} ({p.phone})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="space-y-2.5 pt-1">
+                <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>
+                    <strong>Paciente de Primera Vez:</strong> Al agendar la cita se creará automáticamente su Historia Clínica en CENDO.
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-600 block uppercase">Nombres *</label>
+                    <input
+                      type="text"
+                      placeholder="Ej. Carla Paola"
+                      value={newFirstName}
+                      onChange={(e) => setNewFirstName(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-600 block uppercase">Apellidos *</label>
+                    <input
+                      type="text"
+                      placeholder="Ej. Fernández Soto"
+                      value={newLastName}
+                      onChange={(e) => setNewLastName(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-600 block uppercase">DNI (8 dígitos) *</label>
+                    <input
+                      type="text"
+                      maxLength={8}
+                      placeholder="Ej. 74859612"
+                      value={newDni}
+                      onChange={(e) => setNewDni(e.target.value.replace(/\D/g, ""))}
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-mono font-bold focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-600 block uppercase">Celular / WhatsApp *</label>
+                    <input
+                      type="text"
+                      placeholder="Ej. 987654321"
+                      value={newPhone}
+                      onChange={(e) => setNewPhone(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-mono focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Médico Asignado */}

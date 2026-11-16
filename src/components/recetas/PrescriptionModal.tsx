@@ -34,6 +34,7 @@ import {
   checkDuplicateMedicationInPrescription,
   validatePrescriptionInput,
 } from "@/modules/recetas";
+import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
 
 interface PrescriptionModalProps {
   isOpen: boolean;
@@ -421,53 +422,35 @@ export function PrescriptionModal({
 
         {/* Cuerpo del Modal con Scroll */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
-          {/* Fila 1: Datos de Emisión y Diagnóstico CIE-10 */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-            <div className="sm:col-span-3 space-y-1">
-              <label className="font-bold text-heading uppercase text-[10px] tracking-wider block">
-                Fecha de Emisión:
-              </label>
-              <input
-                type="date"
-                value={prescriptionDate}
-                onChange={(e) => setPrescriptionDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-border bg-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
+          {/* Fila 1: Datos de Emisión y Diagnóstico CIE-10 (Feedback Dr. Patrick) */}
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+              <div className="flex items-center gap-2">
+                <label className="font-bold text-heading uppercase text-[10px] tracking-wider block">
+                  Fecha de Emisión:
+                </label>
+                <input
+                  type="date"
+                  value={prescriptionDate}
+                  onChange={(e) => setPrescriptionDate(e.target.value)}
+                  className="px-3 py-1.5 rounded-lg border border-border bg-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <span className="text-[11px] text-muted font-mono">
+                Prescripción Ambulatoria CENDO
+              </span>
             </div>
 
-            <div className="sm:col-span-6 space-y-1">
-              <label className="font-bold text-heading uppercase text-[10px] tracking-wider block">
-                Diagnóstico Conclusivo / Motivo de Prescripción:
-              </label>
-              <input
-                type="text"
-                list="diag-suggestions"
-                value={diagnosis}
-                onChange={(e) => setDiagnosis(e.target.value)}
-                placeholder="ej. Vaginitis mixta aguda"
-                className="w-full px-3 py-2 rounded-xl border border-border bg-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <datalist id="diag-suggestions">
-                {COMMON_DIAGNOSES.map((d) => (
-                  <option key={d.code} value={d.label}>
-                    CIE-10: {d.code}
-                  </option>
-                ))}
-              </datalist>
-            </div>
-
-            <div className="sm:col-span-3 space-y-1">
-              <label className="font-bold text-heading uppercase text-[10px] tracking-wider block">
-                Código CIE-10:
-              </label>
-              <input
-                type="text"
-                value={cie10Code}
-                onChange={(e) => setCie10Code(e.target.value)}
-                placeholder="ej. N76.0"
-                className="w-full px-3 py-2 rounded-xl border border-border bg-white text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
+            <Cie10Autocomplete
+              diagnosis={diagnosis}
+              cie10Code={cie10Code}
+              onChange={(d, c) => {
+                setDiagnosis(d);
+                setCie10Code(c);
+              }}
+              label="Diagnóstico Conclusivo / Motivo de Prescripción"
+              required
+            />
           </div>
 
           {/* Fila 2: Buscador y Selector del Vademécum CENDO */}

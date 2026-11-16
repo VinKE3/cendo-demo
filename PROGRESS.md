@@ -275,3 +275,40 @@
 - **Control de Calidad & Verificación de Código:**
   - [x] `npx tsc --noEmit` completado con 0 errores de TypeScript (`exit code 0`).
   - [x] `npm run build` completado exitosamente con 14 rutas de producción (`exit code 0`).
+
+---
+
+## 🩺 FASE 8: REFINAMIENTO CLÍNICO & FEEDBACK DIRECTO DR. PATRICK JACINTO (15 Nov 2026)
+
+> **Metodología de Implementación:** De lo más fácil a lo más avanzado con pruebas unitarias y de integración en cada hito.
+
+### 🟢 NIVEL 1: Optimizaciones Inmediatas de Visualización y Navegación
+- [x] **1.0.** Sincronización de citas con Google Calendar (1-clic) y Apple Calendar / iPhone (.ics con alarma 30 min).
+- [x] **1.1.** Acceso directo a **"Ver / Imprimir A4"** de Colposcopías y Chequeos en la ficha de la paciente (`TabColposcopia.tsx` y `PatientDetailModals.tsx`).
+- [x] **1.2.** Rediseño de cabecera de Ecografía (`UltrasoundPrintView.tsx`): Título grande, imponente y distinguible a golpe de vista.
+- [x] **1.3.** Renombrar pestaña "Documentos & Word" a **"Resultados & Exámenes"** y botón directo para subir resultados en la pestaña de Laboratorio.
+
+### 🟡 NIVEL 2: Flujo Rápido de Agendamiento de Pacientes Nuevas (Primera Vez)
+- [x] **2.1.** Selector dual en modal de citas (`AppointmentModal.tsx`):
+  - Modo 1: Paciente Registrada.
+  - Modo 2: **+ Paciente Nueva** (Nombres, Apellidos, DNI y Celular).
+- [x] **2.2.** Auto-creación de Historia Clínica al confirmar la cita de primera vez.
+- [x] **2.3.** Botón contextual en lista de citas (`/agenda`): `🆕 Iniciar HC` que abre la historia clínica lista para la primera consulta.
+
+### 🟠 NIVEL 3: Diagnósticos Inteligentes con Catálogo CIE-10 & Órdenes en Consulta
+- [x] **3.1.** Módulo de catálogo CIE-10 Gineco-Obstétrico de alta frecuencia (`src/modules/catalogo/cie10Catalog.ts`).
+- [x] **3.2.** Buscador predictivo bidireccional (`Cie10Autocomplete.tsx`): búsqueda por nombre de enfermedad o por código CIE-10 con presets rápidos.
+- [x] **3.3.** Integración en Consulta, Colposcopía, Órdenes y Recetas.
+- [x] **3.4.** Desplegables de exámenes frecuentes y recetas dentro de Consulta (`ConsultationModal.tsx`) con generación de órdenes en 1 clic.
+- [x] **3.5.** Certificación: Build Next.js 14 exitoso (14/14 rutas, 0 errores) y suite completa de pruebas unitarias 15/15 PASS (100%).
+
+### 🔴 NIVEL 4: Módulo de Control Prenatal Especializado (Formato Físico MINSA/CLAP)
+- [x] **4.1.** Creación de la pestaña dedicada **"Control Prenatal"** en la ficha clínica (`/pacientes/[id]`) con visualización de EG, FPP Naegele, riesgo ARO y matriz de 9 atenciones.
+- [x] **4.2.** Creación de `src/components/pacientes/tabs/TabControlPrenatal.tsx` con accesos rápidos a `Ver / Imprimir A4`, `Enviar WhatsApp` y `Gestionar Carnet`.
+- [x] **4.3.** Re-maquetación de la primera cara del Carnet Perinatal (`PrenatalPrintView.tsx`) con máxima fidelidad gráfica a la foto física del MINSA y estilo visual de Colposcopía:
+  - [x] Membrete dual CENDO y especialista con credenciales CMP 61693 | RNE 38657.
+  - [x] Casillas de alerta amarillas (edad <15 o >35, soltera, primaria, cesáreas, abortos, IMC anormal, anemia, DG) y de seguimiento continuo rojas (VDRL, VIH, HBsAg).
+  - [x] Diagrama de antecedentes obstétricos G_ P____ y matriz de laboratorios de tamizaje del 1º Trimestre.
+  - [x] Sello médico institucional del Director Médico al pie del anverso.
+- [x] **4.4.** Certificación: Build Next.js 14 exitoso (14/14 rutas, 0 errores) y suite completa de pruebas unitarias prenatal (`npm run test:prenatal`) 5/5 PASS (100%).
+

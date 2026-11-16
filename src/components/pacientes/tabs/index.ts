@@ -5,4 +5,5 @@ export { TabEcografias } from "./TabEcografias";
 export { TabProcedimientos } from "./TabProcedimientos";
 export { TabRecetas } from "./TabRecetas";
 export { TabLaboratorioCotizaciones } from "./TabLaboratorioCotizaciones";
+export { TabControlPrenatal } from "./TabControlPrenatal";
 export { TabDocumentosWord } from "./TabDocumentosWord";

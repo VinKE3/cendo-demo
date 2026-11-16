@@ -20,7 +20,9 @@ import {
 import { PatientModal } from "@/components/pacientes/PatientModal";
 import { PatientBackgroundModal } from "@/components/pacientes/PatientBackgroundModal";
 import { ColposcopyModal } from "@/components/colposcopia/ColposcopyModal";
+import { ColposcopyPrintView } from "@/components/export/ColposcopyPrintView";
 import { CheckupModal } from "@/components/chequeos/CheckupModal";
+import { CheckupPrintView } from "@/components/export/CheckupPrintView";
 import { PrescriptionModal } from "@/components/recetas/PrescriptionModal";
 import { PrescriptionPrintView } from "@/components/export/PrescriptionPrintView";
 import { LabOrderModal } from "@/components/laboratorio/LabOrderModal";
@@ -49,6 +51,8 @@ import {
   generateUltrasoundWhatsAppUrl,
   generateMinorProcedureWhatsAppUrl,
   generateQuoteWhatsAppUrl,
+  generateColposcopyWhatsAppUrl,
+  generateCheckupWhatsAppUrl,
 } from "@/lib/whatsappShare";
 
 interface PatientDetailModalsProps {
@@ -65,9 +69,17 @@ interface PatientDetailModalsProps {
   isColpoModalOpen: boolean;
   setIsColpoModalOpen: (open: boolean) => void;
   editingColpo: ColposcopyReport | null;
+  viewingColpo: ColposcopyReport | null;
+  setViewingColpo: (colpo: ColposcopyReport | null) => void;
+  isColpoPrintOpen: boolean;
+  setIsColpoPrintOpen: (open: boolean) => void;
   isCheckupModalOpen: boolean;
   setIsCheckupModalOpen: (open: boolean) => void;
   editingCheckup: ClinicalCheckup | null;
+  viewingCheckup: ClinicalCheckup | null;
+  setViewingCheckup: (chk: ClinicalCheckup | null) => void;
+  isCheckupPrintOpen: boolean;
+  setIsCheckupPrintOpen: (open: boolean) => void;
   // Prescription Modals
   isPrescriptionModalOpen: boolean;
   setIsPrescriptionModalOpen: (open: boolean) => void;
@@ -149,9 +161,17 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
     isColpoModalOpen,
     setIsColpoModalOpen,
     editingColpo,
+    viewingColpo,
+    setViewingColpo,
+    isColpoPrintOpen,
+    setIsColpoPrintOpen,
     isCheckupModalOpen,
     setIsCheckupModalOpen,
     editingCheckup,
+    viewingCheckup,
+    setViewingCheckup,
+    isCheckupPrintOpen,
+    setIsCheckupPrintOpen,
     isPrescriptionModalOpen,
     setIsPrescriptionModalOpen,
     editingPrescription,
@@ -237,12 +257,112 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
         defaultPatientId={patient.id}
       />
 
+      {isColpoPrintOpen && viewingColpo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-4xl my-6 overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="px-6 py-3.5 border-b border-border bg-slate-900 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-accent" />
+                <span className="font-heading font-bold text-sm">
+                  Vista Previa &bull; Informe de Colposcopía Oficial CENDO (IFCPC 2011)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = generateColposcopyWhatsAppUrl(patient, viewingColpo, activeDoctor);
+                    window.open(url, "_blank");
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => printHtmlElement("colposcopy-print-sheet", "Colposcopia_" + patient.lastName + "_" + patient.firstName)}
+                  className="px-4 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir / Guardar PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsColpoPrintOpen(false)}
+                  className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
+              <ColposcopyPrintView
+                report={viewingColpo}
+                patient={patient}
+                doctor={activeDoctor}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <CheckupModal
         isOpen={isCheckupModalOpen}
         onClose={() => setIsCheckupModalOpen(false)}
         initialData={editingCheckup}
         defaultPatientId={patient.id}
       />
+
+      {isCheckupPrintOpen && viewingCheckup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-4xl my-6 overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="px-6 py-3.5 border-b border-border bg-slate-900 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-accent" />
+                <span className="font-heading font-bold text-sm">
+                  Vista Previa &bull; Informe de Chequeo Preventivo Integral CENDO
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = generateCheckupWhatsAppUrl(patient, viewingCheckup, activeDoctor);
+                    window.open(url, "_blank");
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => printHtmlElement("checkup-print-sheet", "Chequeo_" + patient.lastName + "_" + patient.firstName)}
+                  className="px-4 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir / Guardar PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCheckupPrintOpen(false)}
+                  className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
+              <CheckupPrintView
+                checkup={viewingCheckup}
+                patient={patient}
+                doctor={activeDoctor}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <PrescriptionModal
         isOpen={isPrescriptionModalOpen}

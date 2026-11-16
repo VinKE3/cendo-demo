@@ -33,6 +33,7 @@ import { useMedicalStore } from "@/store/useMedicalStore";
 import { CervicalClock } from "./CervicalClock";
 import { compressImageFile } from "@/lib/imageCompressor";
 import { uploadClinicalImageToSupabase } from "@/lib/supabaseStorage";
+import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
 
 const colposcopySchema = z.object({
   patientId: z.string().min(1, "Debe seleccionar una paciente"),
@@ -236,6 +237,8 @@ export function ColposcopyModal({
   const watchPatientId = watch("patientId");
   const watchAdequate = watch("adequateColposcopy");
   const watchBiopsyTaken = watch("cervicalBiopsyTaken");
+  const watchDiagnosis = watch("diagnosis") || "";
+  const watchCie10 = watch("cie10Code") || "";
 
   // Paciente seleccionada y sus antecedentes clínicos
   const selectedPatient = patients.find((p) => p.id === watchPatientId);
@@ -1650,40 +1653,22 @@ export function ColposcopyModal({
 
             {openSections.diagnosis && (
               <div className="p-4 space-y-4 text-xs border-t border-border">
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <div className="sm:col-span-1 space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-heading block">
-                      Código CIE-10
-                    </label>
-                    <input
-                      type="text"
-                      {...register("cie10Code")}
-                      className="w-full px-3 py-2 rounded-xl border border-border bg-white text-xs font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-3 space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-heading block">
-                      Diagnóstico Colposcópico Conclusivo <span className="text-status-alert">*</span>
-                    </label>
-                    <textarea
-                      rows={2}
-                      {...register("diagnosis")}
-                      placeholder="Conclusiones diagnósticas del examen..."
-                      className={`w-full px-3 py-2 rounded-xl border bg-white text-xs font-medium text-heading focus:outline-none focus:ring-2 resize-none ${
-                        errors.diagnosis
-                          ? "border-status-alert focus:ring-status-alert/20"
-                          : "border-border focus:ring-primary/20"
-                      }`}
-                    />
-                    {errors.diagnosis && (
-                      <p className="text-[11px] text-status-alert flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>{errors.diagnosis.message}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
+                <Cie10Autocomplete
+                  diagnosis={watchDiagnosis}
+                  cie10Code={watchCie10}
+                  onChange={(d, c) => {
+                    setValue("diagnosis", d);
+                    setValue("cie10Code", c);
+                  }}
+                  label="Diagnóstico Colposcópico Conclusivo & Código CIE-10"
+                  required
+                />
+                {errors.diagnosis && (
+                  <p className="text-[11px] text-status-alert flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    <span>{errors.diagnosis.message}</span>
+                  </p>
+                )}
 
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-heading block">

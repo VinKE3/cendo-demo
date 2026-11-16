@@ -14,10 +14,14 @@ import {
   User,
   HeartPulse,
   Sparkles,
+  FlaskConical,
+  Pill,
+  Plus,
 } from "lucide-react";
-import { Patient, DoctorProfile, MedicalConsultation } from "@/types/medical";
+import { Patient, DoctorProfile, MedicalConsultation, LabOrderItem, PrescriptionItem } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateConsultationWhatsAppUrl } from "@/lib/whatsappShare";
+import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
 import {
   FREQUENT_DIAGNOSES,
   calculateBmi,
@@ -33,6 +37,27 @@ interface ConsultationModalProps {
   onSavedAndPrint?: (consultation: MedicalConsultation) => void;
 }
 
+const FREQUENT_LAB_OPTIONS = [
+  "Hemograma Completo + Plaquetas",
+  "Perfil Hormonal Ginecológico (FSH, LH, Estradiol, Prolactina)",
+  "Marcador CA-125 (Endometriosis / Ovárico)",
+  "Examen Completo de Orina + Urocultivo con Antibiograma",
+  "Beta-HCG Cuantitativa en Sangre",
+  "Papanicolaou (PAP) en Base Líquida + Test VPH",
+  "Glucosa, Urea, Creatinina & Perfil Lipídico",
+  "Ecografía Transvaginal con Mapeo de Endometriosis",
+  "Ecografía Mamaria Bilateral de Alta Resolución",
+];
+
+const FREQUENT_MED_OPTIONS = [
+  { label: "Dienogest 2 mg (Endometriosis)", text: "Dienogest 2 mg: 1 comp diario vía oral a la misma hora sin descanso x 3 meses." },
+  { label: "Ketoprofeno 100 mg (Dolor Pélvico)", text: "Ketoprofeno 100 mg: 1 tab c/8h vía oral después de alimentos condicional a dolor." },
+  { label: "Metronidazol + Nistatina (Óvulos)", text: "Metronidazol 500mg + Nistatina 100,000UI: 1 óvulo vaginal c/noche x 10 noches." },
+  { label: "Doxiciclina 100 mg (Cervicitis / EPI)", text: "Doxiciclina 100 mg: 1 cáp c/12h vía oral con abundante agua x 14 días." },
+  { label: "Mupirocina 2% (Tópico)", text: "Mupirocina 2% ungüento: aplicar capa fina en zona vulvar c/12h x 7 días." },
+  { label: "Ácido Mefenámico 500 mg (Dismenorrea)", text: "Ácido Mefenámico 500 mg: 1 tab c/8h vía oral al inicio del dolor menstrual x 3 días." },
+];
+
 export function ConsultationModal({
   isOpen,
   onClose,
@@ -40,7 +65,7 @@ export function ConsultationModal({
   consultationToEdit,
   onSavedAndPrint,
 }: ConsultationModalProps) {
-  const { doctorProfile, addConsultation, updateConsultation } = useMedicalStore();
+  const { doctorProfile, addConsultation, updateConsultation, addLabOrder, addPrescription } = useMedicalStore();
 
   const [consultationDate, setConsultationDate] = useState("");
   const [reasonForVisit, setReasonForVisit] = useState("");
@@ -127,6 +152,122 @@ export function ConsultationModal({
   }, [consultationToEdit, isOpen]);
 
   if (!isOpen) return null;
+
+  const handleGenerateLabOrder = () => {
+    if (!auxiliaryExams.trim()) {
+      Swal.fire({
+        icon: "info",
+        title: "Sin Exámenes",
+        text: "Por favor seleccione o escriba exámenes auxiliares antes de generar la orden.",
+        confirmButtonColor: "#0A4D68",
+      });
+      return;
+    }
+
+    const rawItems = auxiliaryExams
+      .split("\n")
+      .map((line) => line.replace(/^[•\-\*]\s*/, "").trim())
+      .filter(Boolean);
+
+    const items: LabOrderItem[] = rawItems.length > 0
+      ? rawItems.map((testName, idx) => ({
+          id: `lab-item-${Date.now()}-${idx}`,
+          category: "Ginecología & Marcadores",
+          testName,
+          sampleType: "Según protocolo",
+          notes: diagnosis ? `Dx: ${diagnosis}` : undefined,
+        }))
+      : [
+          {
+            id: `lab-item-${Date.now()}-0`,
+            category: "Ginecología & Marcadores",
+            testName: auxiliaryExams.trim(),
+            sampleType: "Según protocolo",
+          },
+        ];
+
+    addLabOrder({
+      patientId: patient.id,
+      doctorId: doctorProfile.id,
+      doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
+      doctorCmp: doctorProfile.cmp || "61693",
+      doctorRne: doctorProfile.rne || "38657",
+      orderDate: consultationDate || new Date().toISOString().split("T")[0],
+      diagnosis: diagnosis || "Evaluación ginecológica en consulta",
+      cie10Code: cie10Code || "Z01.4",
+      urgency: "Rutina",
+      items,
+      patientInstructions: "Cumplir ayuno o indicaciones según protocolo de laboratorio.",
+    });
+
+    Swal.fire({
+      icon: "success",
+      title: "¡Orden de Laboratorio Generada!",
+      html: `
+        <div style="font-size: 13px; color: #475569; text-align: left;">
+          Se registraron <b>${items.length} exámenes</b> en la orden médica oficial.<br/>
+          Ya está disponible en la pestaña <b>Laboratorio</b> para imprimir o enviar por WhatsApp a la paciente.
+        </div>
+      `,
+      confirmButtonColor: "#0A4D68",
+      confirmButtonText: "Entendido",
+    });
+  };
+
+  const handleGeneratePrescription = () => {
+    if (!prescriptionNotes.trim()) {
+      Swal.fire({
+        icon: "info",
+        title: "Sin Medicamentos",
+        text: "Por favor seleccione o escriba los medicamentos antes de generar la receta.",
+        confirmButtonColor: "#0A4D68",
+      });
+      return;
+    }
+
+    const lines = prescriptionNotes
+      .split("\n")
+      .map((l) => l.replace(/^[•\-\*]\s*/, "").trim())
+      .filter(Boolean);
+
+    const items: PrescriptionItem[] = lines.map((line, idx) => ({
+      id: `rec-item-${Date.now()}-${idx}`,
+      medicationName: line,
+      presentation: "Presentación indicada",
+      dosage: "Según pauta médica",
+      frequency: "Indicada",
+      duration: "Tratamiento completo",
+      instructions: line,
+      route: "Vía Oral",
+    }));
+
+    addPrescription({
+      patientId: patient.id,
+      doctorId: doctorProfile.id,
+      doctorName: `${doctorProfile.doctorTitle} ${doctorProfile.fullName}`,
+      doctorCmp: doctorProfile.cmp || "61693",
+      doctorRne: doctorProfile.rne || "38657",
+      prescriptionDate: consultationDate || new Date().toISOString().split("T")[0],
+      diagnosis: diagnosis || "Tratamiento médico ginecológico",
+      cie10Code: cie10Code || "Z01.4",
+      items,
+      generalIndications: "Cumplir la indicación médica completa.",
+      nextAppointmentDate: nextAppointmentDate || undefined,
+    });
+
+    Swal.fire({
+      icon: "success",
+      title: "¡Receta Médica Oficial Generada!",
+      html: `
+        <div style="font-size: 13px; color: #475569; text-align: left;">
+          La receta ha sido generada con formato membretado CENDO.<br/>
+          Ya está lista en la pestaña <b>Recetas</b> para imprimir en A4/A5 o enviar por WhatsApp.
+        </div>
+      `,
+      confirmButtonColor: "#0A4D68",
+      confirmButtonText: "Entendido",
+    });
+  };
 
   const handleSave = (shouldPrint = false) => {
     if (!reasonForVisit.trim()) {
@@ -489,32 +630,23 @@ export function ConsultationModal({
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <div className="md:col-span-9 space-y-1">
-                <label className="font-semibold text-slate-800 block">Diagnóstico Principal *</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Endometriosis pélvica profunda infiltrante..."
-                  value={diagnosis}
-                  onChange={(e) => setDiagnosis(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-emerald-950 focus:border-emerald-600 focus:outline-none"
-                />
-              </div>
-
-              <div className="md:col-span-3 space-y-1">
-                <label className="font-semibold text-slate-800 block">Código CIE-10</label>
-                <input
-                  type="text"
-                  placeholder="Ej: N80.3"
-                  value={cie10Code}
-                  onChange={(e) => setCie10Code(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-mono font-bold uppercase focus:border-emerald-600 focus:outline-none"
+              {/* Diagnóstico con Autocompletado CIE-10 (Feedback Dr. Patrick) */}
+              <div className="md:col-span-12">
+                <Cie10Autocomplete
+                  diagnosis={diagnosis}
+                  cie10Code={cie10Code}
+                  onChange={(diag, code) => {
+                    setDiagnosis(diag);
+                    setCie10Code(code);
+                  }}
+                  required
                 />
               </div>
 
               <div className="md:col-span-12 space-y-1">
                 <label className="font-semibold text-slate-800 block">Plan de Trabajo / Indicaciones</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   placeholder="Pautas de manejo, conducta médica..."
                   value={treatmentPlan}
                   onChange={(e) => setTreatmentPlan(e.target.value)}
@@ -522,35 +654,101 @@ export function ConsultationModal({
                 />
               </div>
 
-              <div className="md:col-span-6 space-y-1">
-                <label className="font-semibold text-slate-800 block">Exámenes Auxiliares Solicitados</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Hemograma, Perfil tiroideo, Ecografía transvaginal..."
+              {/* Exámenes Auxiliares con Desplegable & Generación a 1 Clic */}
+              <div className="md:col-span-6 space-y-1.5 p-3 rounded-xl bg-teal-50/60 border border-teal-200">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-teal-950 flex items-center gap-1.5">
+                    <FlaskConical className="w-4 h-4 text-teal-700" />
+                    <span>Exámenes Auxiliares</span>
+                  </label>
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const newExams = auxiliaryExams ? `${auxiliaryExams}\n• ${e.target.value}` : `• ${e.target.value}`;
+                        setAuxiliaryExams(newExams);
+                        e.target.value = "";
+                      }
+                    }}
+                    defaultValue=""
+                    className="px-2 py-0.5 rounded-lg bg-white border border-teal-200 text-[10px] font-bold text-teal-800 cursor-pointer focus:outline-none"
+                  >
+                    <option value="" disabled>+ Añadir examen frecuente...</option>
+                    {FREQUENT_LAB_OPTIONS.map((lab) => (
+                      <option key={lab} value={lab}>
+                        {lab}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <textarea
+                  rows={2}
+                  placeholder="Ej: • Hemograma completo&#10;• Perfil hormonal&#10;• Ecografía transvaginal..."
                   value={auxiliaryExams}
                   onChange={(e) => setAuxiliaryExams(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-emerald-600 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-xl bg-white border border-teal-200 text-xs focus:border-teal-600 focus:outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={handleGenerateLabOrder}
+                  className="w-full py-1.5 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                  title="Crear orden médica oficial lista para imprimir con estos exámenes"
+                >
+                  <FlaskConical className="w-3.5 h-3.5" />
+                  <span>🧪 Generar Orden de Laboratorio (1 Clic)</span>
+                </button>
               </div>
 
-              <div className="md:col-span-6 space-y-1">
-                <label className="font-semibold text-slate-800 block">Receta / Tratamiento Farmacológico (Rp/)</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Dienogest 2mg diario continuo, Ketorolaco 10mg condicional..."
+              {/* Receta Médica con Desplegable & Generación a 1 Clic */}
+              <div className="md:col-span-6 space-y-1.5 p-3 rounded-xl bg-indigo-50/60 border border-indigo-200">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-indigo-950 flex items-center gap-1.5">
+                    <Pill className="w-4 h-4 text-indigo-700" />
+                    <span>Receta Médica (Rp/)</span>
+                  </label>
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const newNotes = prescriptionNotes ? `${prescriptionNotes}\n• ${e.target.value}` : `• ${e.target.value}`;
+                        setPrescriptionNotes(newNotes);
+                        e.target.value = "";
+                      }
+                    }}
+                    defaultValue=""
+                    className="px-2 py-0.5 rounded-lg bg-white border border-indigo-200 text-[10px] font-bold text-indigo-800 cursor-pointer focus:outline-none"
+                  >
+                    <option value="" disabled>+ Añadir fármaco frecuente...</option>
+                    {FREQUENT_MED_OPTIONS.map((med) => (
+                      <option key={med.label} value={med.text}>
+                        {med.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <textarea
+                  rows={2}
+                  placeholder="Ej: • Dienogest 2mg diario continuo x 3 meses&#10;• Ketoprofeno 100mg condicional a dolor..."
                   value={prescriptionNotes}
                   onChange={(e) => setPrescriptionNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-emerald-600 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-xs focus:border-indigo-600 focus:outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={handleGeneratePrescription}
+                  className="w-full py-1.5 px-3 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                  title="Crear receta médica oficial con membrete lista para imprimir"
+                >
+                  <Pill className="w-3.5 h-3.5" />
+                  <span>💊 Generar Receta Médica Oficial (1 Clic)</span>
+                </button>
               </div>
 
-              <div className="md:col-span-6 space-y-1">
+              <div className="md:col-span-12 space-y-1 pt-1">
                 <label className="font-semibold text-slate-800 block">Próxima Cita de Control Sugerida</label>
                 <input
                   type="date"
                   value={nextAppointmentDate}
                   onChange={(e) => setNextAppointmentDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-mono focus:border-emerald-600 focus:outline-none"
+                  className="w-full sm:w-64 px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-mono focus:border-emerald-600 focus:outline-none"
                 />
               </div>
             </div>

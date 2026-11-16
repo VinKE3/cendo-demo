@@ -70,9 +70,29 @@ export function UltrasoundPrintView({
             </div>
           </div>
 
-          {/* 2. Datos de Paciente & Tipo de Examen */}
+          {/* BANNER DESTACADO: TÍTULO DEL TIPO DE ECOGRAFÍA (Feedback Dr. Patrick Jacinto) */}
+          <div className="py-2.5 px-4 rounded-xl bg-slate-900 text-white flex items-center justify-between shadow-xs border-l-4 border-amber-400">
+            <div>
+              <span className="text-[8.5px] font-mono font-bold tracking-widest text-amber-400 uppercase block">
+                MODALIDAD DIAGNÓSTICA ESPECIALIZADA
+              </span>
+              <h2 className="text-sm sm:text-base font-heading font-extrabold text-white tracking-wide uppercase">
+                {TYPE_NAMES[report.ultrasoundType] || report.ultrasoundType}
+              </h2>
+            </div>
+            <div className="text-right pl-3 shrink-0">
+              <span className="text-[9px] font-mono text-slate-300 block">
+                Protocolo CENDO
+              </span>
+              <span className="text-[10px] font-mono font-bold text-emerald-400">
+                Alta Definición
+              </span>
+            </div>
+          </div>
+
+          {/* 2. Datos de Paciente */}
           <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs grid grid-cols-1 md:grid-cols-12 gap-2.5 items-center">
-            <div className="md:col-span-5">
+            <div className="md:col-span-6">
               <span className="text-[9.5px] uppercase font-bold text-slate-500 block">
                 Paciente:
               </span>
@@ -81,27 +101,18 @@ export function UltrasoundPrintView({
               </strong>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               <span className="text-[9.5px] uppercase font-bold text-slate-500 block">
                 DNI:
               </span>
               <span className="font-mono font-bold text-slate-900">{patient.dni}</span>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               <span className="text-[9.5px] uppercase font-bold text-slate-500 block">
                 Edad:
               </span>
               <span className="font-semibold text-slate-800">{patient.age} años</span>
-            </div>
-
-            <div className="md:col-span-3">
-              <span className="text-[9.5px] uppercase font-bold text-slate-500 block">
-                Examen Realizado:
-              </span>
-              <strong className="text-primary text-[11px] block truncate">
-                {TYPE_NAMES[report.ultrasoundType] || report.ultrasoundType}
-              </strong>
             </div>
 
             {report.indication && (

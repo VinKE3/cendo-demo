@@ -23,6 +23,7 @@ import {
 import { LabOrder, LabOrderItem, LabCategory, Patient } from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { validateLabOrderInput } from "@/modules/laboratorio";
+import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
 
 const labOrderSchema = z.object({
   patientId: z.string().min(1, "Debe seleccionar una paciente"),
@@ -198,6 +199,8 @@ export function LabOrderModal({
 
   const selectedPatientId = watch("patientId");
   const selectedDoctorId = watch("doctorId");
+  const watchDiagnosis = watch("diagnosis") || "";
+  const watchCie10 = watch("cie10Code") || "";
 
   // Cargar datos en edición o modo nuevo
   useEffect(() => {
@@ -477,31 +480,21 @@ export function LabOrderModal({
               </div>
             </div>
 
-            {/* 2. Diagnóstico Presuntivo & CIE-10 */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div className="md:col-span-3 space-y-1">
-                <label className="text-xs font-bold text-slate-700">
-                  Diagnóstico Presuntivo / Motivo de Solicitud *
-                </label>
-                <input
-                  type="text"
-                  {...register("diagnosis")}
-                  placeholder="Ej: Evaluación de dolor pélvico crónico y descarte de endometriosis"
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                {errors.diagnosis && (
-                  <p className="text-[11px] text-red-600">{errors.diagnosis.message}</p>
-                )}
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Código CIE-10</label>
-                <input
-                  type="text"
-                  {...register("cie10Code")}
-                  placeholder="Z01.4"
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 font-mono font-bold uppercase"
-                />
-              </div>
+            {/* 2. Diagnóstico Presuntivo & CIE-10 (Feedback Dr. Patrick) */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+              <Cie10Autocomplete
+                diagnosis={watchDiagnosis}
+                cie10Code={watchCie10}
+                onChange={(d, c) => {
+                  setValue("diagnosis", d);
+                  setValue("cie10Code", c);
+                }}
+                label="Diagnóstico Presuntivo / Motivo de Solicitud"
+                required
+              />
+              {errors.diagnosis && (
+                <p className="text-[11px] text-red-600 mt-1">{errors.diagnosis.message}</p>
+              )}
             </div>
 
             {/* 3. Paquetes Rápidos en 1 Clic */}

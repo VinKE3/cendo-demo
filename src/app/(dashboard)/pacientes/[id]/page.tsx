@@ -39,6 +39,7 @@ import {
   TabColposcopia,
   TabEcografias,
   TabProcedimientos,
+  TabControlPrenatal,
   TabRecetas,
   TabLaboratorioCotizaciones,
   TabDocumentosWord,
@@ -51,6 +52,7 @@ type PatientTab =
   | "colposcopia"
   | "ecografias"
   | "procedimientos"
+  | "prenatal"
   | "recetas"
   | "laboratorio"
   | "documentos";
@@ -66,8 +68,12 @@ export default function FichaPacientePage() {
   const [isBgModalOpen, setIsBgModalOpen] = useState(false);
   const [isColpoModalOpen, setIsColpoModalOpen] = useState(false);
   const [editingColpo, setEditingColpo] = useState<ColposcopyReport | null>(null);
+  const [viewingColpo, setViewingColpo] = useState<ColposcopyReport | null>(null);
+  const [isColpoPrintOpen, setIsColpoPrintOpen] = useState(false);
   const [isCheckupModalOpen, setIsCheckupModalOpen] = useState(false);
   const [editingCheckup, setEditingCheckup] = useState<ClinicalCheckup | null>(null);
+  const [viewingCheckup, setViewingCheckup] = useState<ClinicalCheckup | null>(null);
+  const [isCheckupPrintOpen, setIsCheckupPrintOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
   const [editingPrescription, setEditingPrescription] = useState<MedicalPrescription | null>(null);
   const [viewingPrescription, setViewingPrescription] = useState<MedicalPrescription | null>(null);
@@ -120,6 +126,7 @@ export default function FichaPacientePage() {
     deleteQuote,
     getWordHistoriesByPatientId,
     deleteWordHistory,
+    getDocumentsByPatientId,
     doctorProfile,
   } = useMedicalStore();
 
@@ -135,6 +142,7 @@ export default function FichaPacientePage() {
   const minorProcedures = getMinorProceduresByPatientId(patientId);
   const quotes = getQuotesByPatientId(patientId);
   const wordHistories = getWordHistoriesByPatientId(patientId);
+  const patientDocuments = getDocumentsByPatientId(patientId);
 
   // Calculadora de Amenorrea por FUR
   const furCalculation = useMemo(() => {
@@ -185,9 +193,10 @@ export default function FichaPacientePage() {
     { id: "colposcopia", label: "Colposcopía", icon: <FileCheck2 className="w-4 h-4" />, count: colpos.length },
     { id: "ecografias", label: "Ecografías", icon: <Activity className="w-4 h-4" />, count: ultrasoundReports.length },
     { id: "procedimientos", label: "Procedimientos", icon: <Scissors className="w-4 h-4" />, count: minorProcedures.length },
+    { id: "prenatal", label: "Control Prenatal", icon: <Baby className="w-4 h-4" />, count: prenatalCard ? (prenatalCard.visits?.length || 1) : 0 },
     { id: "recetas", label: "Recetas", icon: <Pill className="w-4 h-4" />, count: prescriptions.length },
     { id: "laboratorio", label: "Laboratorio & Cotiz.", icon: <FlaskConical className="w-4 h-4" />, count: labOrders.length + quotes.length },
-    { id: "documentos", label: "Documentos & Word", icon: <FileText className="w-4 h-4" />, count: wordHistories.length },
+    { id: "documentos", label: "Resultados & Exámenes", icon: <FileText className="w-4 h-4" />, count: patientDocuments.length + wordHistories.length },
   ];
 
   return (
@@ -326,6 +335,10 @@ export default function FichaPacientePage() {
               setEditingColpo(colpo);
               setIsColpoModalOpen(true);
             }}
+            onPrintColpo={(colpo) => {
+              setViewingColpo(colpo);
+              setIsColpoPrintOpen(true);
+            }}
             onOpenNewCheckup={() => {
               setEditingCheckup(null);
               setIsCheckupModalOpen(true);
@@ -333,6 +346,10 @@ export default function FichaPacientePage() {
             onEditCheckup={(chk) => {
               setEditingCheckup(chk);
               setIsCheckupModalOpen(true);
+            }}
+            onPrintCheckup={(chk) => {
+              setViewingCheckup(chk);
+              setIsCheckupPrintOpen(true);
             }}
           />
         )}
@@ -376,6 +393,19 @@ export default function FichaPacientePage() {
               setIsMinorProcPrintOpen(true);
             }}
             onDeleteMinorProc={(id) => deleteMinorProcedure(id)}
+          />
+        )}
+
+        {activeTab === "prenatal" && (
+          <TabControlPrenatal
+            patient={patient}
+            prenatalCard={prenatalCard}
+            doctorProfile={doctorProfile}
+            onOpenPrenatalModal={() => setIsPrenatalModalOpen(true)}
+            onOpenPrenatalPrint={(card) => {
+              setViewingPrenatalCard(card);
+              setIsPrenatalPrintModalOpen(true);
+            }}
           />
         )}
 
@@ -425,6 +455,7 @@ export default function FichaPacientePage() {
               setIsQuotePrintOpen(true);
             }}
             onDeleteQuote={(id) => deleteQuote(id)}
+            onOpenUploadDocModal={() => setIsUploadDocModalOpen(true)}
           />
         )}
 
@@ -457,9 +488,17 @@ export default function FichaPacientePage() {
         isColpoModalOpen={isColpoModalOpen}
         setIsColpoModalOpen={setIsColpoModalOpen}
         editingColpo={editingColpo}
+        viewingColpo={viewingColpo}
+        setViewingColpo={setViewingColpo}
+        isColpoPrintOpen={isColpoPrintOpen}
+        setIsColpoPrintOpen={setIsColpoPrintOpen}
         isCheckupModalOpen={isCheckupModalOpen}
         setIsCheckupModalOpen={setIsCheckupModalOpen}
         editingCheckup={editingCheckup}
+        viewingCheckup={viewingCheckup}
+        setViewingCheckup={setViewingCheckup}
+        isCheckupPrintOpen={isCheckupPrintOpen}
+        setIsCheckupPrintOpen={setIsCheckupPrintOpen}
         isPrescriptionModalOpen={isPrescriptionModalOpen}
         setIsPrescriptionModalOpen={setIsPrescriptionModalOpen}
         editingPrescription={editingPrescription}

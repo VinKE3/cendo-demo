@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FlaskConical, Receipt, Plus, MessageCircle, Printer } from "lucide-react";
+import { FlaskConical, Receipt, Plus, MessageCircle, Printer, Upload } from "lucide-react";
 import Swal from "sweetalert2";
 import { Patient, LabOrder, ProcedureQuote, DoctorProfile } from "@/types/medical";
 import { generateLabOrderWhatsAppUrl, generateQuoteWhatsAppUrl } from "@/lib/whatsappShare";
@@ -18,6 +18,7 @@ interface TabLaboratorioCotizacionesProps {
   onOpenNewQuote: () => void;
   onPrintQuote: (quote: ProcedureQuote) => void;
   onDeleteQuote: (id: string) => void;
+  onOpenUploadDocModal?: () => void;
 }
 
 export function TabLaboratorioCotizaciones({
@@ -32,6 +33,7 @@ export function TabLaboratorioCotizaciones({
   onOpenNewQuote,
   onPrintQuote,
   onDeleteQuote,
+  onOpenUploadDocModal,
 }: TabLaboratorioCotizacionesProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -44,13 +46,25 @@ export function TabLaboratorioCotizaciones({
               Órdenes de Laboratorio ({labOrders.length})
             </h3>
           </div>
-          <button
-            onClick={onOpenNewLabOrder}
-            className="text-xs text-teal-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Nueva Orden</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {onOpenUploadDocModal && (
+              <button
+                onClick={onOpenUploadDocModal}
+                className="px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer border border-blue-200"
+                title="Cargar resultado de laboratorio externo o patología en PDF"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>+ Cargar Resultado (PDF)</span>
+              </button>
+            )}
+            <button
+              onClick={onOpenNewLabOrder}
+              className="text-xs text-teal-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nueva Orden</span>
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3">
