@@ -118,23 +118,94 @@ export interface PrenatalBaselineData {
   pelvisExamDetail?: string;
   dentalExam: "Normal" | "Patológico" | "Sin Examen" | string;
   dentalExamDetail?: string;
+  // ==========================================
+  // EXÁMENES DE LABORATORIO (MINSA / CLAP)
+  // ==========================================
+  // Hemoglobina
   hemoglobin1?: number;
   hemoglobin1Date?: string;
+  hemoglobin1NotDone?: boolean;
   hemoglobin2?: number;
   hemoglobin2Date?: string;
+  hemoglobin2NotDone?: boolean;
+  hemoglobinDischarge?: number;
+  hemoglobinDischargeDate?: string;
+  hemoglobinDischargeNotDone?: boolean;
+
+  // Glicemia & Tolerancia
   bloodGlucose1?: number;
   bloodGlucose1Date?: string;
+  glucose1Result?: "Normal" | "Anormal" | "No se Hizo" | string;
+  glucose1Date?: string;
+  glucose1Value?: number;
+  glucose2Result?: "Normal" | "Anormal" | "No se Hizo" | string;
+  glucose2Date?: string;
+  glucose2Value?: number;
+  glucoseToleranceResult?: "Normal" | "Anormal" | "No se Hizo" | "No se Aplica" | string;
+  glucoseToleranceDate?: string;
+  glucoseToleranceValue?: number;
+
+  // Sífilis & Infecciones de Transmisión Sexual
   vdrlRpr1?: "No reactivo" | "Reactivo" | "No se hizo" | string;
   vdrlRpr1Date?: string;
+  vdrlRpr1Result?: "No reactivo" | "Reactivo" | "No se Hizo" | string;
+  vdrlRpr2Result?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
+  vdrlRpr2Date?: string;
+  ftaAbsResult?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
+  ftaAbsDate?: string;
+  tphaResult?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
+  tphaDate?: string;
+  rapidSyphilisResult?: "No reactivo" | "Reactivo" | "No se Hizo" | string;
+  rapidSyphilisDate?: string;
   hivScreening1?: "Negativo" | "Positivo" | "No se hizo" | string;
   hivScreening1Date?: string;
-  hepatitisBScreening?: "Negativo" | "Positivo" | "No se hizo" | string;
-  hepatitisBScreeningDate?: string;
+  hivRapid1Result?: "No reactivo" | "Reactivo" | "No se Hizo" | string;
+  hivRapid1Date?: string;
+  hivRapid2Result?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
+  hivRapid2Date?: string;
+  hivElisaResult?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
+  hivElisaDate?: string;
+
+  // Infecciones Especiales & Zoonosis/Vectores
+  westernBlotResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  westernBlotDate?: string;
+  htlv1Result?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  htlv1Date?: string;
+  torchResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  torchDate?: string;
+  thickBloodSmearResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  thickBloodSmearDate?: string;
+  malariaRapidResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  malariaRapidDate?: string;
+  malariaFluorescenceResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  malariaFluorescenceDate?: string;
+
+  // Orina & Infecciones
   completeUrineExam?: "Normal" | "Patológico" | "No se hizo" | string;
   completeUrineExamDate?: string;
+  completeUrineExamResult?: "Negativo" | "Positivo" | "No se Hizo" | string;
+  leukocyturiaResult?: "Negativo" | "Positivo" | "No se Hizo" | string;
+  nitritesResult?: "Negativo" | "Positivo" | "No se Hizo" | string;
+  nitritesDate?: string;
   urineCulture?: "Negativo" | "Positivo" | "Pendiente" | "No se hizo" | string;
-  papTestResult?: "Normal" | "Anormal" | "No se hizo" | string;
-  colposcopyResult?: "Normal" | "Anormal" | "No se hizo" | string;
+  urineCultureResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  urineCultureDate?: string;
+  bkSputumResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  bkSputumDate?: string;
+  listeriaResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  listeriaDate?: string;
+  hepatitisBScreening?: "Negativo" | "Positivo" | "No se hizo" | string;
+  hepatitisBScreeningDate?: string;
+  hepatitisBResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  hepatitisBDate?: string;
+
+  // Tamizaje Cervical en Gestantes
+  papTestResult?: "Normal" | "Anormal" | "No se Hizo" | string;
+  papTestDate?: string;
+  ivaaResult?: "Normal" | "Anormal" | "No se Hizo" | "No se Aplica" | string;
+  ivaaDate?: string;
+  colposcopyResult?: "Normal" | "Anormal" | "No se Hizo" | "No se Aplica" | string;
+  colposcopyDate?: string;
 }
 
 export interface MaternalPathologyItem {
