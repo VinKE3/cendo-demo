@@ -101,8 +101,11 @@ export interface PrenatalBaselineData {
   fumDoubt: boolean;
   ultrasoundGestationalAgeWeeks?: number;
   ultrasoundDate?: string;
+  ultrasoundNoApplies?: boolean;
   fpp: string;
+  hospitalized?: boolean;
   hospitalizationHistory?: { date?: string; diagnosis?: string; cie10?: string };
+  hadEmergency?: boolean;
   emergencyHistory?: { date?: string; diagnosis?: string; cie10?: string };
   violenceScreening?: { screeningDone?: boolean; violenceDetected?: boolean; date?: string };
   clinicalExam: "Normal" | "Patológico" | "Sin Examen" | string;
