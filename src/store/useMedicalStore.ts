@@ -21,7 +21,9 @@ import {
   ProcedureQuote,
   MedicalAppointment,
   WordHistoryDocument,
+  Cie10Item,
 } from "@/types/medical";
+import { CIE10_GYN_CATALOG } from "@/modules/catalogo/cie10Catalog";
 import {
   syncPatientToSupabase,
   deletePatientFromSupabase,
@@ -1928,6 +1930,14 @@ interface MedicalStoreState {
   updateVademecumItem: (id: string, updates: Partial<MedicationVademecum>) => void;
   deleteVademecumItem: (id: string) => void;
 
+  // Catálogo Maestro CIE-10 (Gineco-Obstetricia)
+  cie10Catalog: Cie10Item[];
+  addCie10Item: (item: Omit<Cie10Item, "id" | "createdAt">) => Cie10Item;
+  updateCie10Item: (code: string, updates: Partial<Cie10Item>) => void;
+  deleteCie10Item: (code: string) => void;
+  toggleCie10Favorite: (code: string) => void;
+  resetCie10Catalog: () => void;
+
   // Recetas Médicas Inteligentes
   prescriptions: MedicalPrescription[];
   addPrescription: (
@@ -2075,6 +2085,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
           wordHistories: [],
           tariffItems: [],
           vademecumItems: [],
+          cie10Catalog: [],
         });
       },
 
@@ -2683,6 +2694,59 @@ export const useMedicalStore = create<MedicalStoreState>()(
         deleteVademecumFromSupabase(id);
       },
 
+      // CATÁLOGO MAESTRO CIE-10 (GINECOLOGÍA & OBSTETRICIA)
+      cie10Catalog: CIE10_GYN_CATALOG,
+      addCie10Item: (item) => {
+        const newItem: Cie10Item = {
+          ...item,
+          code: item.code.trim().toUpperCase(),
+          id: `cie-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => {
+          const currentList = state.cie10Catalog || [];
+          const filtered = currentList.filter(
+            (c) => c.code.toUpperCase() !== newItem.code.toUpperCase()
+          );
+          return {
+            cie10Catalog: [newItem, ...filtered],
+          };
+        });
+        return newItem;
+      },
+      updateCie10Item: (code, updates) => {
+        set((state) => ({
+          cie10Catalog: (state.cie10Catalog || []).map((item) =>
+            item.code.toUpperCase() === code.toUpperCase()
+              ? {
+                  ...item,
+                  ...updates,
+                  code: updates.code ? updates.code.trim().toUpperCase() : item.code,
+                }
+              : item
+          ),
+        }));
+      },
+      deleteCie10Item: (code) => {
+        set((state) => ({
+          cie10Catalog: (state.cie10Catalog || []).filter(
+            (item) => item.code.toUpperCase() !== code.toUpperCase()
+          ),
+        }));
+      },
+      toggleCie10Favorite: (code) => {
+        set((state) => ({
+          cie10Catalog: (state.cie10Catalog || []).map((item) =>
+            item.code.toUpperCase() === code.toUpperCase()
+              ? { ...item, isFavorite: !item.isFavorite }
+              : item
+          ),
+        }));
+      },
+      resetCie10Catalog: () => {
+        set({ cie10Catalog: CIE10_GYN_CATALOG });
+      },
+
       // RECETAS MÉDICAS INTELIGENTES
       prescriptions: INITIAL_PRESCRIPTIONS,
       addPrescription: (data) => {
@@ -3126,37 +3190,43 @@ export const useMedicalStore = create<MedicalStoreState>()(
           wordHistories: INITIAL_WORD_HISTORIES,
           tariffItems: INITIAL_TARIFF,
           vademecumItems: INITIAL_VADEMECUM,
+          cie10Catalog: CIE10_GYN_CATALOG,
         });
       },
     }),
     {
       name: "cendo-storage",
-      version: 9,
+      version: 10,
       migrate: (persistedState: any, version: number) => {
-        if (version < 9) {
+        const state = persistedState || {};
+        if (!state.cie10Catalog || state.cie10Catalog.length === 0) {
+          state.cie10Catalog = CIE10_GYN_CATALOG;
+        }
+        if (version < 10) {
           return {
-            ...(persistedState || {}),
-            doctorsList: INITIAL_DOCTORS,
-            doctorProfile: INITIAL_DOCTOR,
-            patients: INITIAL_PATIENTS,
-            backgrounds: INITIAL_BACKGROUNDS,
-            colposcopyReports: INITIAL_COLPOSCOPY,
-            clinicalCheckups: INITIAL_CHECKUPS,
-            prescriptions: INITIAL_PRESCRIPTIONS,
-            labOrders: INITIAL_LAB_ORDERS,
-            prenatalCards: INITIAL_PRENATAL_CARDS,
-            patientDocuments: INITIAL_DOCUMENTS,
-            consultations: INITIAL_CONSULTATIONS,
-            ultrasoundReports: INITIAL_ULTRASOUNDS,
-            minorProcedures: INITIAL_MINOR_PROCEDURES,
-            procedureQuotes: INITIAL_QUOTES,
-            appointments: INITIAL_APPOINTMENTS,
-            wordHistories: INITIAL_WORD_HISTORIES,
-            tariffItems: INITIAL_TARIFF,
-            vademecumItems: INITIAL_VADEMECUM,
+            ...state,
+            doctorsList: state.doctorsList || INITIAL_DOCTORS,
+            doctorProfile: state.doctorProfile || INITIAL_DOCTOR,
+            patients: state.patients || INITIAL_PATIENTS,
+            backgrounds: state.backgrounds || INITIAL_BACKGROUNDS,
+            colposcopyReports: state.colposcopyReports || INITIAL_COLPOSCOPY,
+            clinicalCheckups: state.clinicalCheckups || INITIAL_CHECKUPS,
+            prescriptions: state.prescriptions || INITIAL_PRESCRIPTIONS,
+            labOrders: state.labOrders || INITIAL_LAB_ORDERS,
+            prenatalCards: state.prenatalCards || INITIAL_PRENATAL_CARDS,
+            patientDocuments: state.patientDocuments || INITIAL_DOCUMENTS,
+            consultations: state.consultations || INITIAL_CONSULTATIONS,
+            ultrasoundReports: state.ultrasoundReports || INITIAL_ULTRASOUNDS,
+            minorProcedures: state.minorProcedures || INITIAL_MINOR_PROCEDURES,
+            procedureQuotes: state.procedureQuotes || INITIAL_QUOTES,
+            appointments: state.appointments || INITIAL_APPOINTMENTS,
+            wordHistories: state.wordHistories || INITIAL_WORD_HISTORIES,
+            tariffItems: state.tariffItems || INITIAL_TARIFF,
+            vademecumItems: state.vademecumItems || INITIAL_VADEMECUM,
+            cie10Catalog: state.cie10Catalog || CIE10_GYN_CATALOG,
           };
         }
-        return persistedState;
+        return state;
       },
       storage: createJSONStorage(() => localStorage),
     }

@@ -142,6 +142,15 @@ export type {
   MedicalAppointment,
 } from "@/modules/agenda";
 
+// ============================================================================
+// CATÁLOGO MAESTRO CIE-10 (GINECOLOGÍA & OBSTETRICIA)
+// ============================================================================
+export type {
+  Cie10Item,
+  Cie10Category,
+} from "@/modules/catalogo/cie10Catalog";
+
+
 
 
 

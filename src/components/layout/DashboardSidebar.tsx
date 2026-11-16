@@ -21,6 +21,7 @@ import {
   Sparkles,
   RotateCcw,
   UserCheck,
+  BookOpen,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { BrandLogo } from "@/components/layout/BrandLogo";
@@ -118,6 +119,12 @@ export function DashboardSidebar({
       href: "/vademecum",
       icon: Pill,
       badge: null,
+    },
+    {
+      name: "Catálogo CIE-10",
+      href: "/cie-10",
+      icon: BookOpen,
+      badge: "CIE",
     },
     {
       name: "Exportar / Base de Datos",
