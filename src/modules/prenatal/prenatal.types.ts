@@ -86,6 +86,10 @@ export interface PrenatalBaselineData {
   personalHistoryOther?: string;
   previousVaccines: { rubella: boolean; hepatitisB: boolean; hpv: boolean; yellowFever: boolean };
   antitetanicaDosis?: "Previa" | "1ra" | "2da" | "Sin dosis" | "No aplica" | string;
+  antitetanicaPrevDoses?: number;
+  antitetanica1stDoseMonth?: string;
+  antitetanica2ndDoseMonth?: string;
+  antitetanicaStatus?: "Sin dosis" | "No Aplica" | "Vacunada" | string;
   usualWeightKg: number;
   heightCm: number;
   bloodGroup: "A" | "B" | "AB" | "O" | string;
