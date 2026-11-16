@@ -310,5 +310,6 @@
   - [x] Casillas de alerta amarillas (edad <15 o >35, soltera, primaria, cesáreas, abortos, IMC anormal, anemia, DG) y de seguimiento continuo rojas (VDRL, VIH, HBsAg).
   - [x] Diagrama de antecedentes obstétricos G_ P____ y matriz de laboratorios de tamizaje del 1º Trimestre.
   - [x] Sello médico institucional del Director Médico al pie del anverso.
-- [x] **4.4.** Certificación: Build Next.js 14 exitoso (14/14 rutas, 0 errores) y suite completa de pruebas unitarias prenatal (`npm run test:prenatal`) 5/5 PASS (100%).
+- [x] **4.4.** Rediseño interactivo del modal de Carnet Prenatal (`PrenatalCardModal.tsx`) con 4 sub-secciones estructuradas idénticas a las capturas físicas del MINSA y botón `✨ Auto-completar desde HC` (paridad G_ P____, FUM, antecedentes y somatometría).
+- [x] **4.5.** Certificación: Build Next.js 14 exitoso (14/14 rutas, 0 errores) y suite completa de pruebas unitarias prenatal (`npm run test:prenatal`) 5/5 PASS (100%).
 
