@@ -79,6 +79,8 @@ export interface PrenatalBaselineData {
   pregnancyCaptured?: boolean;
   communityAgentReferred?: boolean;
   familyHistory: string[];
+  familyHistoryDetails?: Record<string, string>;
+  familyHistoryOther?: string;
   personalHistory: string[];
   previousVaccines: { rubella: boolean; hepatitisB: boolean; hpv: boolean; yellowFever: boolean };
   antitetanicaDosis?: "Previa" | "1ra" | "2da" | "Sin dosis" | "No aplica" | string;
