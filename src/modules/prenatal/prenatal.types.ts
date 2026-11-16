@@ -71,10 +71,13 @@ export interface PrenatalBaselineData {
   deadFirstWeek?: number;
   deadAfterFirstWeek?: number;
   previousDeliveryDate?: string;
-  previousDeliveryType?: "Parto Vaginal" | "Cesárea" | "Aborto" | "Ectópico" | "Molar";
-  previousAbortionType?: "Incompleto" | "Completo" | "Frustro/Retenido" | "Séptico" | "No Aplica";
+  previousDeliveryType?: "Parto Vaginal" | "Cesárea" | "Aborto" | "Ectópico" | "Aborto molar" | "Molar" | "No Aplica" | string;
+  previousAbortionType?: "Incompleto" | "Completo" | "Frustro/Retenido" | "Séptico" | "No Aplica" | string;
   adequateIntergenesicPeriod?: boolean;
-  breastfeedingMonths?: "< 6 meses" | "6 meses o más" | "No hubo" | "No aplica" | string;
+  breastfeedingMonths?: "< 6 meses" | "6 meses o más" | "no hubo" | "No hubo" | "No aplica" | string;
+  deliveryPlace?: "EESS" | "Domic." | "No aplica" | string;
+  pregnancyCaptured?: boolean;
+  communityAgentReferred?: boolean;
   familyHistory: string[];
   personalHistory: string[];
   previousVaccines: { rubella: boolean; hepatitisB: boolean; hpv: boolean; yellowFever: boolean };
