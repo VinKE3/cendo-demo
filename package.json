@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "audit:clinical": "node scripts/audit_clinical_integrity.mjs",
     "test:vademecum": "node scripts/test-vademecum-crud.mjs",
     "seed:vademecum": "node scripts/seed-vademecum.mjs",
     "test:tarifario": "node scripts/test-tarifario-crud.mjs",
