@@ -348,7 +348,7 @@ export function PrenatalCardModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col overflow-hidden">
         
         {/* =========================================================================
             1. HEADER OFICIAL (ESTILO COLPOSCOPÍA MODAL)
@@ -364,7 +364,7 @@ export function PrenatalCardModal({
                   {existingCard ? "Editar Carnet de Control Prenatal (CPN)" : "+ Nuevo Carnet de Control Prenatal (CPN)"}
                 </h3>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-50 text-purple-800 border border-purple-200">
-                  MINSA &bull; CLAP / OPS &bull; NTS N° 105
+                  CENDO &bull; Control Prenatal Ambulatorio
                 </span>
               </div>
               <p className="text-xs text-muted">
@@ -545,7 +545,7 @@ export function PrenatalCardModal({
           </div>
 
           {/* =========================================================================
-              ACORDEÓN 1: FILIACIÓN DE LA GESTANTE & UBIGEO (DATOS MINSA)
+              ACORDEÓN 1: FILIACIÓN DE LA GESTANTE & UBIGEO
               ========================================================================= */}
           <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
             <button
@@ -558,10 +558,10 @@ export function PrenatalCardModal({
                   1
                 </span>
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
-                  FILIACIÓN DE LA GESTANTE & UBIGEO (DATOS MINSA)
+                  FILIACIÓN DE LA GESTANTE & UBIGEO
                 </span>
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                  Formato Oficial MINSA / CLAP
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                  Filiación & Datos Sociodemográficos
                 </span>
               </div>
               {openSections.filiacion ? (
@@ -572,36 +572,27 @@ export function PrenatalCardModal({
             </button>
 
             {openSections.filiacion && (
-              <div className="p-4 sm:p-5 space-y-4 text-xs border-t border-border bg-white">
+              <div className="p-4 sm:p-6 space-y-4 text-xs border-t border-border bg-white">
                 
-                {/* 1.1 Cabecera Oficial MINSA: Logos + No. HC (8 casillas) + Leyenda de Alerta */}
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/90 flex flex-col md:flex-row items-center justify-between gap-3">
-                  {/* Left: Escudo y MINSA */}
+                {/* 1.1 Cabecera CENDO: Título de Ficha + No. HC + Leyenda de Alertas */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3">
+                  {/* Left: Clínica CENDO */}
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
-                      <div className="w-4 h-5 flex flex-col rounded-xs overflow-hidden border border-slate-300">
-                        <span className="flex-1 bg-red-600" />
-                        <span className="flex-1 bg-white" />
-                        <span className="flex-1 bg-red-600" />
-                      </div>
-                      <div className="leading-tight">
-                        <span className="text-[11px] font-black text-red-700 tracking-tight block">PERÚ</span>
-                        <span className="text-[9px] font-bold text-slate-700 block">Ministerio de Salud</span>
-                      </div>
+                    <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-sm shrink-0">
+                      <FileText className="w-5 h-5 text-purple-700" />
                     </div>
-
-                    <div className="text-left border-l border-slate-200 pl-3">
-                      <span className="text-[10px] font-black text-amber-600 tracking-wider uppercase block">
-                        Red de Salud Arequipa Caylloma
+                    <div>
+                      <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider block">
+                        CENDO &bull; Ficha de Control Materno Perinatal (CPN)
                       </span>
-                      <span className="text-[9px] text-slate-500 font-medium block">
-                        CENDO &bull; Consultorio Gineco-Obstétrico Especializado
+                      <span className="text-[11px] text-muted block">
+                        Seguimiento longitudinal ambulatorio &amp; criterios de vigilancia obstétrica
                       </span>
                     </div>
                   </div>
 
-                  {/* Right: No. HC (8 Casillas) + Leyenda Oficial */}
-                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                  {/* Right: No. HC (8 Casillas) + Leyenda */}
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-heading">No. HC:</span>
                       <DigitGrid value={patient.dni} length={8} />
@@ -610,91 +601,91 @@ export function PrenatalCardModal({
                     <div className="flex items-center gap-2 text-[10px] bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
                       <div className="flex items-center gap-1">
                         <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-500 inline-block" />
-                        <span className="font-semibold text-slate-700">= ALERTA</span>
+                        <span className="font-bold text-slate-700">= ALERTA</span>
                       </div>
                       <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
                         <span className="w-3.5 h-3.5 rounded-xs bg-red-600 border border-red-700 inline-block" />
-                        <span className="font-semibold text-slate-700">= Seguimiento continuo</span>
+                        <span className="font-bold text-slate-700">= Seguimiento continuo</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 1.2 Caja Principal de Filiación (Borde exterior con títulos de Nombres y Establecimiento) */}
-                <div className="rounded-2xl border-2 border-slate-300 p-4 sm:p-5 space-y-4 bg-white relative">
+                {/* 1.2 Caja Principal de Filiación */}
+                <div className="rounded-2xl border-2 border-slate-300 p-5 space-y-5 bg-white relative shadow-2xs">
                   
                   {/* Cabecera integrada sobre la caja */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-200">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-600 uppercase">Nombres y Apellidos:</span>
+                      <span className="text-xs font-bold text-slate-500 uppercase">Nombres y Apellidos:</span>
                       <span className="text-sm font-extrabold text-heading">
                         {patient.lastName}, {patient.firstName}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-600 uppercase">Establecimiento:</span>
+                      <span className="text-xs font-bold text-slate-500 uppercase shrink-0">Establecimiento:</span>
                       <input
                         type="text"
                         value={clinicEstablishment}
                         onChange={(e) => setClinicEstablishment(e.target.value)}
-                        className="px-2.5 py-1 rounded-lg border border-slate-300 bg-slate-50 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary w-64"
+                        className="px-3 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary w-72"
                       />
                     </div>
                   </div>
 
-                  {/* Fila 1: Establ. Origen + No Aplica / Referencia + Tipo Seguro + Código Afiliación (12 casillas) */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
-                    {/* Establ. Origen */}
-                    <div className="lg:col-span-5 flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Establ. Origen:</span>
-                      <input
-                        type="text"
-                        value={baselineData.establishmentOrigin || ""}
-                        onChange={(e) => setBaselineData({ ...baselineData, establishmentOrigin: e.target.value })}
-                        placeholder="Centro de salud de origen..."
-                        className="flex-1 min-w-[140px] px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                      />
-                      <div className="flex items-center gap-2 shrink-0">
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={baselineData.originNoApplies ?? true}
-                            onChange={(e) =>
-                              setBaselineData({
-                                ...baselineData,
-                                originNoApplies: e.target.checked,
-                                originReferral: e.target.checked ? false : baselineData.originReferral,
-                              })
-                            }
-                            className="rounded text-primary focus:ring-0"
-                          />
-                          <span className="text-[11px] font-semibold text-slate-700">No Aplica</span>
-                        </label>
+                  {/* BLOQUE 1: Establecimiento de Origen */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-xs font-bold text-slate-700 shrink-0">Establ. Origen:</span>
+                    <input
+                      type="text"
+                      value={baselineData.establishmentOrigin || ""}
+                      onChange={(e) => setBaselineData({ ...baselineData, establishmentOrigin: e.target.value })}
+                      placeholder="Centro de salud de origen..."
+                      className="flex-1 min-w-[200px] px-3 py-1.5 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                    <div className="flex items-center gap-4 shrink-0 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={baselineData.originNoApplies ?? true}
+                          onChange={(e) =>
+                            setBaselineData({
+                              ...baselineData,
+                              originNoApplies: e.target.checked,
+                              originReferral: e.target.checked ? false : baselineData.originReferral,
+                            })
+                          }
+                          className="rounded text-primary focus:ring-0"
+                        />
+                        <span className="text-xs font-semibold text-slate-700">No Aplica</span>
+                      </label>
 
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={baselineData.originReferral ?? false}
-                            onChange={(e) =>
-                              setBaselineData({
-                                ...baselineData,
-                                originReferral: e.target.checked,
-                                originNoApplies: e.target.checked ? false : baselineData.originNoApplies,
-                              })
-                            }
-                            className="rounded text-primary focus:ring-0"
-                          />
-                          <span className="text-[11px] font-semibold text-slate-700">Referencia</span>
-                        </label>
-                      </div>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={baselineData.originReferral ?? false}
+                          onChange={(e) =>
+                            setBaselineData({
+                              ...baselineData,
+                              originReferral: e.target.checked,
+                              originNoApplies: e.target.checked ? false : baselineData.originNoApplies,
+                            })
+                          }
+                          className="rounded text-primary focus:ring-0"
+                        />
+                        <span className="text-xs font-semibold text-slate-700">Referencia</span>
+                      </label>
                     </div>
+                  </div>
 
-                    {/* Tipo Seguro */}
-                    <div className="lg:col-span-3 flex items-center gap-2 border-l-0 lg:border-l border-slate-200 lg:pl-3">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Tipo Seguro:</span>
-                      <div className="flex items-center gap-2">
-                        {(["SIS", "ESSALUD", "PRIVADO"] as const).map((seg) => (
-                          <label key={seg} className="flex items-center gap-1 cursor-pointer">
+                  {/* BLOQUE 2: Tipo de Seguro & Código de Afiliación (En 2 columnas separadas para evitar colisión) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-200">
+                    {/* Columna Izquierda: Tipo de Seguro */}
+                    <div className="flex flex-col gap-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200">
+                      <span className="text-xs font-bold text-slate-700">Tipo de Seguro:</span>
+                      <div className="flex flex-wrap items-center gap-3">
+                        {(["SIS", "ESSALUD", "PRIVADO", "No Aplica"] as const).map((seg) => (
+                          <label key={seg} className="flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
                             <input
                               type="radio"
                               name="insuranceTypeRadio"
@@ -702,17 +693,16 @@ export function PrenatalCardModal({
                               onChange={() => setBaselineData({ ...baselineData, insuranceType: seg })}
                               className="text-primary focus:ring-0"
                             />
-                            <span className="text-[11px] font-semibold text-slate-700">{seg}</span>
+                            <span className="text-xs font-semibold text-slate-800">{seg}</span>
                           </label>
                         ))}
                       </div>
                     </div>
 
-                    {/* Código Afiliación Seguro (12 casillas) */}
-                    <div className="lg:col-span-4 flex flex-col sm:flex-row sm:items-center gap-2 border-l-0 lg:border-l border-slate-200 lg:pl-3">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Código Afiliación:</span>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <DigitGrid value={baselineData.insuranceAffiliationCode || ""} length={12} />
+                    {/* Columna Derecha: Código Afiliación Seguro (Con espacio amplio para las 12 casillas) */}
+                    <div className="flex flex-col gap-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-slate-700">Código Afiliación Seguro:</span>
                         <input
                           type="text"
                           maxLength={12}
@@ -720,22 +710,25 @@ export function PrenatalCardModal({
                           onChange={(e) =>
                             setBaselineData({ ...baselineData, insuranceAffiliationCode: e.target.value.toUpperCase() })
                           }
-                          placeholder="12 car."
-                          className="w-20 px-1.5 py-1 text-[11px] font-mono font-bold uppercase rounded border border-slate-300 bg-white"
+                          placeholder="Ingresar código (hasta 12 car.)"
+                          className="w-48 px-2 py-1 text-xs font-mono font-bold uppercase rounded-lg border border-slate-300 bg-white"
                         />
+                      </div>
+                      <div className="overflow-x-auto py-0.5">
+                        <DigitGrid value={baselineData.insuranceAffiliationCode || ""} length={12} />
                       </div>
                     </div>
                   </div>
 
-                  {/* Fila 2: DNI N° (8 casillas) + Ocupación + Edad + Indicador Rojo < 15 / > 35 */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center pt-2 border-t border-slate-200">
-                    {/* DNI N° */}
-                    <div className="md:col-span-4 flex items-center gap-2">
+                  {/* BLOQUE 3: DNI N° + Ocupación + Edad + Casilla Roja de Seguimiento */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center pt-3 border-t border-slate-200">
+                    {/* DNI N° (4 cols) */}
+                    <div className="md:col-span-4 flex items-center gap-2.5">
                       <span className="text-xs font-bold text-slate-700 shrink-0">DNI N°:</span>
                       <DigitGrid value={patient.dni} length={8} />
                     </div>
 
-                    {/* Ocupación */}
+                    {/* Ocupación (4 cols) */}
                     <div className="md:col-span-4 flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-700 shrink-0">Ocupación:</span>
                       <input
@@ -743,11 +736,11 @@ export function PrenatalCardModal({
                         value={baselineData.patientOccupation || ""}
                         onChange={(e) => setBaselineData({ ...baselineData, patientOccupation: e.target.value })}
                         placeholder="Ocupación de la gestante..."
-                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
 
-                    {/* Edad + Indicador Rojo < 15 / > 35 */}
+                    {/* Edad + Indicador Rojo < 15 / > 35 (4 cols) */}
                     <div className="md:col-span-4 flex items-center justify-between sm:justify-start gap-3">
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-bold text-slate-700">Edad:</span>
@@ -767,7 +760,7 @@ export function PrenatalCardModal({
                             ? "bg-red-500 text-white font-extrabold border-red-600 shadow-sm ring-2 ring-red-400/50"
                             : "bg-slate-50 text-slate-600 border-slate-300"
                         }`}
-                        title={isAgeRisk ? "¡Alerta Roja MINSA! Edad de riesgo obstétrico (< 15 o > 35 años)" : "Edad dentro del rango estándar"}
+                        title={isAgeRisk ? "¡Alerta de Riesgo Obstétrico! (< 15 o > 35 años)" : "Edad dentro del rango estándar"}
                       >
                         <span
                           className={`w-3.5 h-3.5 rounded-xs flex items-center justify-center font-bold text-[10px] ${
@@ -776,95 +769,84 @@ export function PrenatalCardModal({
                         >
                           {isAgeRisk ? "✓" : ""}
                         </span>
-                        <span className="text-[11px] font-bold">&lt; 15 / &gt; 35</span>
+                        <span className="text-[11px] font-bold">&lt; 15 / &gt; 35 (Seguimiento)</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Fila 3: Dirección + Estudios (con Analfabeta en Amarillo) + Años Aprobados */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center pt-2 border-t border-slate-200">
-                    {/* Dirección */}
-                    <div className="lg:col-span-5 flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Dirección:</span>
-                      <input
-                        type="text"
-                        value={baselineData.patientAddress || ""}
-                        onChange={(e) => setBaselineData({ ...baselineData, patientAddress: e.target.value })}
-                        placeholder="Dirección domiciliaria completa..."
-                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                      />
-                    </div>
+                  {/* BLOQUE 4: Nivel de Instrucción (Estudios) & Años Aprobados */}
+                  <div className="pt-3 border-t border-slate-200 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="text-xs font-bold text-slate-700 shrink-0">Estudios:</span>
+                        
+                        {/* Analfabeta (Alerta Amarilla) */}
+                        <label
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border cursor-pointer transition-colors ${
+                            baselineData.educationLevel === "Analfabeta"
+                              ? "bg-amber-300 border-amber-500 text-amber-950 font-bold shadow-2xs"
+                              : "bg-amber-50 border-amber-200 text-amber-900"
+                          }`}
+                          title="Casilla de ALERTA"
+                        >
+                          <input
+                            type="radio"
+                            name="educationRadio"
+                            checked={baselineData.educationLevel === "Analfabeta"}
+                            onChange={() => setBaselineData({ ...baselineData, educationLevel: "Analfabeta" })}
+                            className="text-amber-600 focus:ring-0"
+                          />
+                          <span className="text-xs font-bold">Analfabeta [ALERTA]</span>
+                        </label>
 
-                    {/* Estudios */}
-                    <div className="lg:col-span-7 flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Estudios:</span>
-                      
-                      {/* Analfabeta (Alerta Amarilla) */}
-                      <label
-                        className={`flex items-center gap-1 px-2 py-0.5 rounded border cursor-pointer transition-colors ${
-                          baselineData.educationLevel === "Analfabeta"
-                            ? "bg-amber-300 border-amber-500 text-amber-950 font-bold shadow-2xs"
-                            : "bg-amber-50/70 border-amber-200 text-amber-900"
-                        }`}
-                        title="Casilla de ALERTA MINSA"
-                      >
-                        <input
-                          type="radio"
-                          name="educationRadio"
-                          checked={baselineData.educationLevel === "Analfabeta"}
-                          onChange={() => setBaselineData({ ...baselineData, educationLevel: "Analfabeta" })}
-                          className="text-amber-600 focus:ring-0"
-                        />
-                        <span className="text-[11px]">Analfabeta [ALERTA]</span>
-                      </label>
+                        <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                          <input
+                            type="radio"
+                            name="educationRadio"
+                            checked={baselineData.educationLevel === "Primaria"}
+                            onChange={() => setBaselineData({ ...baselineData, educationLevel: "Primaria" })}
+                            className="text-primary focus:ring-0"
+                          />
+                          <span className="text-xs text-slate-700">Primaria</span>
+                        </label>
 
-                      <label className="flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="educationRadio"
-                          checked={baselineData.educationLevel === "Primaria"}
-                          onChange={() => setBaselineData({ ...baselineData, educationLevel: "Primaria" })}
-                          className="text-primary focus:ring-0"
-                        />
-                        <span className="text-[11px] text-slate-700">Primaria</span>
-                      </label>
+                        <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                          <input
+                            type="radio"
+                            name="educationRadio"
+                            checked={baselineData.educationLevel === "Secundaria"}
+                            onChange={() => setBaselineData({ ...baselineData, educationLevel: "Secundaria" })}
+                            className="text-primary focus:ring-0"
+                          />
+                          <span className="text-xs text-slate-700">Secundaria</span>
+                        </label>
 
-                      <label className="flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="educationRadio"
-                          checked={baselineData.educationLevel === "Secundaria"}
-                          onChange={() => setBaselineData({ ...baselineData, educationLevel: "Secundaria" })}
-                          className="text-primary focus:ring-0"
-                        />
-                        <span className="text-[11px] text-slate-700">Secundaria</span>
-                      </label>
+                        <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                          <input
+                            type="radio"
+                            name="educationRadio"
+                            checked={baselineData.educationLevel === "Superior Univ"}
+                            onChange={() => setBaselineData({ ...baselineData, educationLevel: "Superior Univ" })}
+                            className="text-primary focus:ring-0"
+                          />
+                          <span className="text-xs text-slate-700">Superior</span>
+                        </label>
 
-                      <label className="flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="educationRadio"
-                          checked={baselineData.educationLevel === "Superior Univ"}
-                          onChange={() => setBaselineData({ ...baselineData, educationLevel: "Superior Univ" })}
-                          className="text-primary focus:ring-0"
-                        />
-                        <span className="text-[11px] text-slate-700">Superior</span>
-                      </label>
-
-                      <label className="flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="educationRadio"
-                          checked={baselineData.educationLevel === "Superior No Univ"}
-                          onChange={() => setBaselineData({ ...baselineData, educationLevel: "Superior No Univ" })}
-                          className="text-primary focus:ring-0"
-                        />
-                        <span className="text-[11px] text-slate-700">Superior no Univ.</span>
-                      </label>
+                        <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                          <input
+                            type="radio"
+                            name="educationRadio"
+                            checked={baselineData.educationLevel === "Superior No Univ"}
+                            onChange={() => setBaselineData({ ...baselineData, educationLevel: "Superior No Univ" })}
+                            className="text-primary focus:ring-0"
+                          />
+                          <span className="text-xs text-slate-700">Superior no Univ.</span>
+                        </label>
+                      </div>
 
                       {/* Años aprobados */}
-                      <div className="flex items-center gap-1 ml-auto">
-                        <span className="text-[11px] font-bold text-slate-700">Años aprobados:</span>
+                      <div className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200">
+                        <span className="text-xs font-bold text-slate-700">Años aprobados:</span>
                         <input
                           type="number"
                           min={0}
@@ -876,38 +858,19 @@ export function PrenatalCardModal({
                               approvedEducationYears: parseInt(e.target.value, 10) || 0,
                             })
                           }
-                          className="w-12 px-1.5 py-1 text-center font-bold text-xs rounded border border-slate-300 bg-white"
+                          className="w-14 px-2 py-1 text-center font-bold text-xs rounded border border-slate-300 bg-white"
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Fila 4: Localidad + Cod. Sector + Estado Civil (Soltera en Amarillo) + Padre RN */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center pt-2 border-t border-slate-200">
-                    {/* Localidad & Cod. Sector */}
-                    <div className="lg:col-span-4 flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Localidad:</span>
-                      <input
-                        type="text"
-                        value={baselineData.locality || ""}
-                        onChange={(e) => setBaselineData({ ...baselineData, locality: e.target.value })}
-                        placeholder="Localidad..."
-                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
-                      />
-                      <span className="text-xs font-bold text-slate-700 shrink-0 ml-1">Cod. Sector:</span>
-                      <input
-                        type="text"
-                        value={baselineData.healthSectorCode || ""}
-                        onChange={(e) => setBaselineData({ ...baselineData, healthSectorCode: e.target.value })}
-                        placeholder="SEC-01"
-                        className="w-20 px-2 py-1.5 rounded-lg border border-slate-300 text-xs font-mono bg-white"
-                      />
-                    </div>
-
-                    {/* Estado Civil (con Soltera en Amarillo) */}
-                    <div className="lg:col-span-5 flex flex-wrap items-center gap-2">
+                  {/* BLOQUE 5: Estado Civil & Padre del RN (En su propia fila dedicada, SIN Ubigeo mezclado) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center pt-3 border-t border-slate-200">
+                    {/* Estado Civil (7 cols) */}
+                    <div className="lg:col-span-7 flex flex-wrap items-center gap-2.5">
                       <span className="text-xs font-bold text-slate-700 shrink-0">Estado Civil:</span>
-                      <label className="flex items-center gap-1 cursor-pointer">
+                      
+                      <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-white cursor-pointer">
                         <input
                           type="radio"
                           name="civilStatusRadio"
@@ -915,10 +878,10 @@ export function PrenatalCardModal({
                           onChange={() => setBaselineData({ ...baselineData, civilStatus: "Casada" })}
                           className="text-primary focus:ring-0"
                         />
-                        <span className="text-[11px] text-slate-700">Casada</span>
+                        <span className="text-xs text-slate-700">Casada</span>
                       </label>
 
-                      <label className="flex items-center gap-1 cursor-pointer">
+                      <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-white cursor-pointer">
                         <input
                           type="radio"
                           name="civilStatusRadio"
@@ -926,17 +889,17 @@ export function PrenatalCardModal({
                           onChange={() => setBaselineData({ ...baselineData, civilStatus: "Conviviente" })}
                           className="text-primary focus:ring-0"
                         />
-                        <span className="text-[11px] text-slate-700">Conviviente</span>
+                        <span className="text-xs text-slate-700">Conviviente</span>
                       </label>
 
                       {/* Soltera con Alerta Amarilla */}
                       <label
-                        className={`flex items-center gap-1 px-2 py-0.5 rounded border cursor-pointer transition-colors ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border cursor-pointer transition-colors ${
                           baselineData.civilStatus === "Soltera"
                             ? "bg-amber-300 border-amber-500 text-amber-950 font-bold shadow-2xs"
-                            : "bg-amber-50/70 border-amber-200 text-amber-900"
+                            : "bg-amber-50 border-amber-200 text-amber-900"
                         }`}
-                        title="Casilla de ALERTA MINSA"
+                        title="Casilla de ALERTA"
                       >
                         <input
                           type="radio"
@@ -945,10 +908,10 @@ export function PrenatalCardModal({
                           onChange={() => setBaselineData({ ...baselineData, civilStatus: "Soltera" })}
                           className="text-amber-600 focus:ring-0"
                         />
-                        <span className="text-[11px]">Soltera [ALERTA]</span>
+                        <span className="text-xs font-bold">Soltera [ALERTA]</span>
                       </label>
 
-                      <label className="flex items-center gap-1 cursor-pointer">
+                      <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-white cursor-pointer">
                         <input
                           type="radio"
                           name="civilStatusRadio"
@@ -956,61 +919,100 @@ export function PrenatalCardModal({
                           onChange={() => setBaselineData({ ...baselineData, civilStatus: "Otro" })}
                           className="text-primary focus:ring-0"
                         />
-                        <span className="text-[11px] text-slate-700">Otro</span>
+                        <span className="text-xs text-slate-700">Otro</span>
                       </label>
                     </div>
 
-                    {/* Padre RN */}
-                    <div className="lg:col-span-3 flex items-center gap-2">
+                    {/* Padre RN (5 cols) */}
+                    <div className="lg:col-span-5 flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-700 shrink-0">Padre RN:</span>
                       <input
                         type="text"
                         value={baselineData.fatherName || ""}
                         onChange={(e) => setBaselineData({ ...baselineData, fatherName: e.target.value })}
-                        placeholder="Nombres y Apellidos"
-                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
+                        placeholder="Nombres y Apellidos del padre..."
+                        className="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
                       />
                     </div>
                   </div>
 
-                  {/* Fila 5: Ubigeo (Departamento, Provincia, Distrito) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Departamento:</span>
-                      <input
-                        type="text"
-                        value={baselineData.department || ""}
-                        onChange={(e) => setBaselineData({ ...baselineData, department: e.target.value })}
-                        placeholder="ej. Lima"
-                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
-                      />
+                  {/* BLOQUE 6: Dirección, Localidad & Ubigeo (Organizado en 2 filas limpias) */}
+                  <div className="pt-3 border-t border-slate-200 space-y-3">
+                    {/* Fila 6.1: Dirección + Localidad + Cod. Sector */}
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                      <div className="sm:col-span-6 flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-700 shrink-0">Dirección:</span>
+                        <input
+                          type="text"
+                          value={baselineData.patientAddress || ""}
+                          onChange={(e) => setBaselineData({ ...baselineData, patientAddress: e.target.value })}
+                          placeholder="Dirección domiciliaria completa..."
+                          className="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-4 flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-700 shrink-0">Localidad:</span>
+                        <input
+                          type="text"
+                          value={baselineData.locality || ""}
+                          onChange={(e) => setBaselineData({ ...baselineData, locality: e.target.value })}
+                          placeholder="Localidad..."
+                          className="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2 flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-slate-700 shrink-0">Sector:</span>
+                        <input
+                          type="text"
+                          value={baselineData.healthSectorCode || ""}
+                          onChange={(e) => setBaselineData({ ...baselineData, healthSectorCode: e.target.value })}
+                          placeholder="SEC-01"
+                          className="w-full px-2 py-1.5 rounded-lg border border-slate-300 text-xs font-mono bg-white text-center"
+                        />
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Provincia:</span>
-                      <input
-                        type="text"
-                        value={baselineData.province || ""}
-                        onChange={(e) => setBaselineData({ ...baselineData, province: e.target.value })}
-                        placeholder="ej. Lima"
-                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
-                      />
-                    </div>
+                    {/* Fila 6.2: Departamento, Provincia, Distrito */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-700 shrink-0">Departamento:</span>
+                        <input
+                          type="text"
+                          value={baselineData.department || ""}
+                          onChange={(e) => setBaselineData({ ...baselineData, department: e.target.value })}
+                          placeholder="ej. Lima"
+                          className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
+                        />
+                      </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-700 shrink-0">Distrito:</span>
-                      <input
-                        type="text"
-                        value={baselineData.district || ""}
-                        onChange={(e) => setBaselineData({ ...baselineData, district: e.target.value })}
-                        placeholder="ej. Miraflores"
-                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
-                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-700 shrink-0">Provincia:</span>
+                        <input
+                          type="text"
+                          value={baselineData.province || ""}
+                          onChange={(e) => setBaselineData({ ...baselineData, province: e.target.value })}
+                          placeholder="ej. Lima"
+                          className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-700 shrink-0">Distrito:</span>
+                        <input
+                          type="text"
+                          value={baselineData.district || ""}
+                          onChange={(e) => setBaselineData({ ...baselineData, district: e.target.value })}
+                          placeholder="ej. Miraflores"
+                          className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Fila 6: Teléfono & Correo electrónico */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200">
+                  {/* BLOQUE 7: Contacto (Teléfono & Correo) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-200">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-700 shrink-0">Teléfono:</span>
                       <input
@@ -1033,6 +1035,7 @@ export function PrenatalCardModal({
                       />
                     </div>
                   </div>
+
                 </div>
 
               </div>
