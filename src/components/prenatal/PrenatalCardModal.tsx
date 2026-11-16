@@ -108,6 +108,93 @@ function DigitGrid({
   );
 }
 
+/**
+ * Componente visual de 2 casillas gemelas cuadradas [ ][ ]
+ * para el diagrama de antecedentes obstétricos (Gestas, Partos, Cesáreas, etc.)
+ */
+function PairDigitBox({
+  label,
+  value,
+  onChange,
+  variant = "default",
+  badge,
+}: {
+  label: string;
+  value: number;
+  onChange: (val: number) => void;
+  variant?: "default" | "yellow" | "red";
+  badge?: string;
+}) {
+  const formatted = String(Math.max(0, value || 0)).padStart(2, "0").slice(-2);
+  const d1 = formatted[0];
+  const d2 = formatted[1];
+
+  const colorStyles = {
+    default: "bg-white border-slate-400 text-slate-800",
+    yellow: "bg-amber-300 border-amber-500 text-amber-950 font-black shadow-2xs",
+    red: "bg-red-500 border-red-600 text-white font-black shadow-2xs ring-2 ring-red-400/50",
+  }[variant];
+
+  return (
+    <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all min-w-[105px] w-full max-w-[140px]">
+      <div className="flex items-center gap-0.5">
+        <span className={`w-7 h-8 sm:w-8 sm:h-9 border-2 rounded-xs flex items-center justify-center font-mono font-bold text-sm ${colorStyles}`}>
+          {d1}
+        </span>
+        <span className={`w-7 h-8 sm:w-8 sm:h-9 border-2 rounded-xs flex items-center justify-center font-mono font-bold text-sm ${colorStyles}`}>
+          {d2}
+        </span>
+      </div>
+
+      <span className="text-[11px] font-extrabold text-slate-800 uppercase tracking-tight text-center leading-tight">
+        {label}
+      </span>
+
+      {badge && (
+        <span
+          className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
+            variant === "red"
+              ? "bg-red-100 text-red-800"
+              : variant === "yellow"
+              ? "bg-amber-100 text-amber-900"
+              : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          {badge}
+        </span>
+      )}
+
+      {/* Controles de ajuste rápido (+ / - / input) */}
+      <div className="flex items-center gap-1 pt-0.5">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(0, value - 1))}
+          className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors cursor-pointer"
+          title="Restar 1"
+        >
+          -
+        </button>
+        <input
+          type="number"
+          min={0}
+          max={99}
+          value={value}
+          onChange={(e) => onChange(parseInt(e.target.value, 10) || 0)}
+          className="w-9 text-center font-mono font-bold text-xs border border-slate-300 rounded bg-slate-50 py-0.5"
+        />
+        <button
+          type="button"
+          onClick={() => onChange(value + 1)}
+          className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors cursor-pointer"
+          title="Sumar 1"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function PrenatalCardModal({
   isOpen,
   onClose,
@@ -136,8 +223,9 @@ export function PrenatalCardModal({
 
   // Estado de los acordeones desplegables
   const [openSections, setOpenSections] = useState({
-    filiacion: true, // Sección 1 desplegada por defecto
-    obstetricos: false,
+    filiacion: false, // colapsado para ver de inmediato la sección 2
+    obstetricos: true, // Sección 2 desplegada por defecto
+    gestacionAnterior: false,
     antecedentes: false,
     embarazo: false,
     laboratorio: false,
@@ -184,7 +272,12 @@ export function PrenatalCardModal({
     nacidosVivos: 0,
     nacidosMuertos: 0,
     viven: 0,
-    rnMayorPesoGramos: 0,
+    rnMayorPesoGramos: 3400,
+    lowWeightHistory: false,
+    multipleHistory: false,
+    pretermHistory: false,
+    deadFirstWeek: 0,
+    deadAfterFirstWeek: 0,
     familyHistory: ["Ninguno"],
     personalHistory: ["Ninguno"],
     previousVaccines: { rubella: true, hepatitisB: true, hpv: true, yellowFever: true },
@@ -307,6 +400,10 @@ export function PrenatalCardModal({
 
   // Alerta de edad MINSA: < 15 o > 35 años requiere seguimiento continuo
   const isAgeRisk = patientAge < 15 || patientAge > 35;
+
+  // Cálculos reactivos de antecedentes obstétricos
+  const totalPartos = (baselineData.partosVaginales || 0) + (baselineData.cesareas || 0);
+  const isParityRisk = totalPartos === 0 || totalPartos >= 4;
 
   // Antecedentes de la paciente para el drawer
   const patientBg = getBackground(patient.id);
@@ -1043,20 +1140,23 @@ export function PrenatalCardModal({
           </div>
 
           {/* =========================================================================
-              ACORDEÓN 2: ANTECEDENTES OBSTÉTRICOS & GESTACIÓN ANTERIOR (EN COLA)
+              ACORDEÓN 2: ANTECEDENTES OBSTÉTRICOS (ÁRBOL DE PARIDAD G P)
               ========================================================================= */}
           <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
             <button
               type="button"
               onClick={() => toggleSection("obstetricos")}
-              className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
+              className="w-full p-4 bg-slate-50/80 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center shrink-0">
                   2
                 </span>
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
-                  ANTECEDENTES OBSTÉTRICOS & GESTACIÓN ANTERIOR
+                  ANTECEDENTES OBSTÉTRICOS (ÁRBOL DE PARIDAD)
+                </span>
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  G{baselineData.gestas} P{totalPartos}{baselineData.abortos}{baselineData.nacidosVivos} &bull; Viven {baselineData.viven}
                 </span>
               </div>
               {openSections.obstetricos ? (
@@ -1067,22 +1167,345 @@ export function PrenatalCardModal({
             </button>
 
             {openSections.obstetricos && (
+              <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
+                {/* 2.1 Barra Superior de Resumen de Fórmula */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
+                      GP
+                    </div>
+                    <div>
+                      <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider block">
+                        Fórmula Obstétrica Calculada
+                      </span>
+                      <span className="text-[11px] font-mono font-bold text-primary block">
+                        G{baselineData.gestas} P{totalPartos}{baselineData.abortos}{baselineData.nacidosVivos} &bull; {baselineData.viven} Viven &bull; {baselineData.cesareas} Cesáreas
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Leyenda de colores del diagrama */}
+                  <div className="flex items-center gap-2.5 text-[10px] bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs flex-wrap">
+                    <div className="flex items-center gap-1">
+                      <span className="w-3.5 h-3.5 rounded-xs bg-white border border-slate-400 inline-block" />
+                      <span className="text-slate-600 font-semibold">Paridad estándar</span>
+                    </div>
+                    <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
+                      <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-500 inline-block" />
+                      <span className="text-amber-950 font-bold">= ALERTA</span>
+                    </div>
+                    <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
+                      <span className="w-3.5 h-3.5 rounded-xs bg-red-600 border border-red-700 inline-block" />
+                      <span className="text-red-950 font-bold">= Seguimiento continuo</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2.2 DIAGRAMA DE ANTECEDENTES OBSTÉTRICOS */}
+                <div className="rounded-2xl border-2 border-slate-300 p-5 space-y-6 bg-slate-50/40 relative shadow-2xs overflow-x-auto">
+                  
+                  {/* Cabecera integrada sobre el diagrama */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Diagrama de Flujo de Antecedentes Obstétricos
+                    </span>
+                    <span className="text-[11px] text-muted font-sans hidden sm:inline">
+                      Cada variable muestra 2 casillas gemelas editables con botones (+ / -)
+                    </span>
+                  </div>
+
+                  {/* Estructura del Árbol (5 Columnas Horizontales) */}
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 lg:gap-5 items-stretch min-w-[780px]">
+                    
+                    {/* COLUMNA 1: GESTAS (Raíz) */}
+                    <div className="flex flex-col items-center justify-center space-y-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                      <div className="text-center space-y-0.5">
+                        <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">Paso 1</span>
+                        <strong className="text-xs text-slate-900 block">Total Gestas</strong>
+                      </div>
+                      
+                      <PairDigitBox
+                        label="Gestas"
+                        value={baselineData.gestas}
+                        onChange={(val) => setBaselineData({ ...baselineData, gestas: val })}
+                        badge={baselineData.gestas >= 4 ? "Multípara" : baselineData.gestas === 1 ? "Primigesta" : undefined}
+                      />
+
+                      <div className="text-[10px] text-center text-slate-500 max-w-[120px] pt-1 border-t border-slate-100">
+                        Total de embarazos previos y actual
+                      </div>
+                    </div>
+
+                    {/* COLUMNA 2: ABORTOS & CRITERIOS DE ALERTA DE PARTOS */}
+                    <div className="flex flex-col justify-between space-y-3">
+                      {/* Rama Abortos (Alerta Amarilla) */}
+                      <div className="flex flex-col items-center p-3 rounded-2xl bg-amber-50/60 border border-amber-200/80 shadow-2xs">
+                        <span className="text-[10px] font-bold text-amber-800 uppercase block mb-1">
+                          Pérdidas (&lt; 22 sem.)
+                        </span>
+                        <PairDigitBox
+                          label="Abortos"
+                          value={baselineData.abortos}
+                          onChange={(val) => setBaselineData({ ...baselineData, abortos: val })}
+                          variant={baselineData.abortos > 0 ? "yellow" : "default"}
+                          badge={baselineData.abortos >= 3 ? "Recurrente" : baselineData.abortos > 0 ? "Alerta" : undefined}
+                        />
+                      </div>
+
+                      {/* Caja de 4 Criterios de Alerta que alimentan a Partos */}
+                      <div className="p-3 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2 shadow-2xs">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 block text-center border-b border-amber-200 pb-1">
+                          Criterios de Alerta (Partos)
+                        </span>
+                        <div className="space-y-1.5 text-xs">
+                          {/* 0 ó + 3 */}
+                          <div
+                            className={`flex items-center justify-between p-1.5 rounded-lg border transition-colors ${
+                              isParityRisk ? "bg-amber-300 border-amber-500 text-amber-950 font-bold" : "bg-white border-slate-200 text-slate-600"
+                            }`}
+                            title={isParityRisk ? "Alerta: 0 partos (Nulípara) o 4 a más partos (Multípara)" : "Paridad intermedia"}
+                          >
+                            <span className="text-[11px]">0 ó + 3</span>
+                            <span className={`w-4 h-4 rounded-xs border flex items-center justify-center font-bold text-[10px] ${
+                              isParityRisk ? "bg-amber-400 border-amber-600 text-amber-950" : "border-slate-300 bg-slate-50"
+                            }`}>
+                              {isParityRisk ? "✓" : ""}
+                            </span>
+                          </div>
+
+                          {/* < 2500 g */}
+                          <label className="flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-200 hover:border-amber-300 cursor-pointer transition-colors">
+                            <span className="text-[11px] font-semibold text-slate-700">&lt; 2500 g</span>
+                            <input
+                              type="checkbox"
+                              checked={baselineData.lowWeightHistory ?? false}
+                              onChange={(e) => setBaselineData({ ...baselineData, lowWeightHistory: e.target.checked })}
+                              className="w-4 h-4 rounded text-amber-500 focus:ring-0 cursor-pointer"
+                            />
+                          </label>
+
+                          {/* Múltiple */}
+                          <label className="flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-200 hover:border-amber-300 cursor-pointer transition-colors">
+                            <span className="text-[11px] font-semibold text-slate-700">Múltiple</span>
+                            <input
+                              type="checkbox"
+                              checked={baselineData.multipleHistory ?? false}
+                              onChange={(e) => setBaselineData({ ...baselineData, multipleHistory: e.target.checked })}
+                              className="w-4 h-4 rounded text-amber-500 focus:ring-0 cursor-pointer"
+                            />
+                          </label>
+
+                          {/* < 37 sem. */}
+                          <label className="flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-200 hover:border-amber-300 cursor-pointer transition-colors">
+                            <span className="text-[11px] font-semibold text-slate-700">&lt; 37 sem.</span>
+                            <input
+                              type="checkbox"
+                              checked={baselineData.pretermHistory ?? false}
+                              onChange={(e) => setBaselineData({ ...baselineData, pretermHistory: e.target.checked })}
+                              className="w-4 h-4 rounded text-amber-500 focus:ring-0 cursor-pointer"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* COLUMNA 3: PARTOS (Vaginales & Cesáreas) */}
+                    <div className="flex flex-col justify-between space-y-3 p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                      <div>
+                        <div className="text-center mb-1">
+                          <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">Paso 2</span>
+                          <strong className="text-xs text-slate-900 block">Total Partos</strong>
+                        </div>
+                        {/* Casilla de Partos Total */}
+                        <PairDigitBox
+                          label="Partos"
+                          value={totalPartos}
+                          onChange={(val) => {
+                            setBaselineData({ ...baselineData, partosVaginales: Math.max(0, val - (baselineData.cesareas || 0)) });
+                          }}
+                          badge={isParityRisk ? "Alerta 0 / +3" : "Paridad Normal"}
+                          variant={isParityRisk ? "yellow" : "default"}
+                        />
+                      </div>
+
+                      <div className="w-full border-t border-slate-200 pt-2 space-y-2.5">
+                        {/* Vaginales */}
+                        <PairDigitBox
+                          label="Vaginales"
+                          value={baselineData.partosVaginales}
+                          onChange={(val) => setBaselineData({ ...baselineData, partosVaginales: val })}
+                        />
+
+                        {/* Cesáreas (Alerta Roja de Seguimiento) */}
+                        <PairDigitBox
+                          label="Cesáreas"
+                          value={baselineData.cesareas}
+                          onChange={(val) => setBaselineData({ ...baselineData, cesareas: val })}
+                          variant={baselineData.cesareas > 0 ? "red" : "default"}
+                          badge={baselineData.cesareas > 0 ? "Seguimiento Rojo" : undefined}
+                        />
+                      </div>
+                    </div>
+
+                    {/* COLUMNA 4: NACIDOS VIVOS & NACIDOS MUERTOS */}
+                    <div className="flex flex-col justify-between space-y-3 p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                      <div>
+                        <div className="text-center mb-1">
+                          <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">Paso 3</span>
+                          <strong className="text-xs text-slate-900 block">Condición Natal</strong>
+                        </div>
+                        {/* Nacidos Vivos */}
+                        <PairDigitBox
+                          label="Nacidos vivos"
+                          value={baselineData.nacidosVivos}
+                          onChange={(val) => setBaselineData({ ...baselineData, nacidosVivos: val, viven: Math.min(baselineData.viven, val) })}
+                        />
+                      </div>
+
+                      <div className="w-full border-t border-slate-200 pt-2">
+                        {/* Nacidos Muertos (Alerta Amarilla) */}
+                        <PairDigitBox
+                          label="Nacidos muertos"
+                          value={baselineData.nacidosMuertos}
+                          onChange={(val) => setBaselineData({ ...baselineData, nacidosMuertos: val })}
+                          variant={baselineData.nacidosMuertos > 0 ? "yellow" : "default"}
+                          badge={baselineData.nacidosMuertos > 0 ? "Óbito Alerta" : undefined}
+                        />
+                      </div>
+                    </div>
+
+                    {/* COLUMNA 5: DESENLACES DE NACIDOS VIVOS (Viven / Muertes Neonatales) */}
+                    <div className="flex flex-col justify-between space-y-3 p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                      <div>
+                        <div className="text-center mb-1">
+                          <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">Paso 4</span>
+                          <strong className="text-xs text-slate-900 block">Supervivencia</strong>
+                        </div>
+                        {/* Viven */}
+                        <PairDigitBox
+                          label="Viven"
+                          value={baselineData.viven}
+                          onChange={(val) => setBaselineData({ ...baselineData, viven: val })}
+                          variant={baselineData.viven < baselineData.nacidosVivos ? "yellow" : "default"}
+                          badge={baselineData.viven < baselineData.nacidosVivos ? "Pérdida infantil" : undefined}
+                        />
+                      </div>
+
+                      <div className="w-full border-t border-slate-200 pt-2 space-y-2.5">
+                        {/* Muerto - 1ra semana */}
+                        <PairDigitBox
+                          label="Muerto - 1ra sem."
+                          value={baselineData.deadFirstWeek ?? 0}
+                          onChange={(val) => setBaselineData({ ...baselineData, deadFirstWeek: val })}
+                          variant={(baselineData.deadFirstWeek ?? 0) > 0 ? "yellow" : "default"}
+                          badge={(baselineData.deadFirstWeek ?? 0) > 0 ? "Precoz ≤7d" : undefined}
+                        />
+
+                        {/* Después - 1ra semana */}
+                        <PairDigitBox
+                          label="Después - 1ra sem."
+                          value={baselineData.deadAfterFirstWeek ?? 0}
+                          onChange={(val) => setBaselineData({ ...baselineData, deadAfterFirstWeek: val })}
+                          variant={(baselineData.deadAfterFirstWeek ?? 0) > 0 ? "yellow" : "default"}
+                          badge={(baselineData.deadAfterFirstWeek ?? 0) > 0 ? "Tardía >7d" : undefined}
+                        />
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* 2.3 CAMPO INFERIOR: RN DE MAYOR PESO (4 CASILLAS) */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-200 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
+                        RN de mayor peso:
+                      </span>
+                      <DigitGrid
+                        value={String(baselineData.rnMayorPesoGramos || 0).padStart(4, "0")}
+                        length={4}
+                      />
+                      <span className="text-xs font-bold text-slate-600">gramos</span>
+                      <input
+                        type="number"
+                        min={500}
+                        max={6500}
+                        step={50}
+                        value={baselineData.rnMayorPesoGramos || ""}
+                        onChange={(e) =>
+                          setBaselineData({
+                            ...baselineData,
+                            rnMayorPesoGramos: parseInt(e.target.value, 10) || 0,
+                          })
+                        }
+                        placeholder="ej. 3400"
+                        className="w-24 px-2.5 py-1 text-xs font-mono font-bold text-center rounded-lg border border-slate-300 bg-slate-50 focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {baselineData.rnMayorPesoGramos && baselineData.rnMayorPesoGramos >= 4000 ? (
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                          ⚠️ Alerta: Macrosomía Fetal (≥ 4000g)
+                        </span>
+                      ) : baselineData.rnMayorPesoGramos && baselineData.rnMayorPesoGramos > 0 && baselineData.rnMayorPesoGramos < 2500 ? (
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                          ⚠️ Alerta: Bajo Peso al Nacer (&lt; 2500g)
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-slate-400">
+                          Rango estándar esperado: 2500g - 3999g
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            )}
+          </div>
+
+          {/* =========================================================================
+              ACORDEÓN 3: GESTACIÓN ANTERIOR (EN COLA)
+              ========================================================================= */}
+          <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
+            <button
+              type="button"
+              onClick={() => toggleSection("gestacionAnterior" as any)}
+              className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="w-6 h-6 rounded-md bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center shrink-0">
+                  3
+                </span>
+                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
+                  GESTACIÓN ANTERIOR (TERMINACIÓN, ABORTO & LACTANCIA)
+                </span>
+              </div>
+              {(openSections as any).gestacionAnterior ? (
+                <ChevronUp className="w-4 h-4 text-muted" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-muted" />
+              )}
+            </button>
+
+            {(openSections as any).gestacionAnterior && (
               <div className="p-5 text-center space-y-2 border-t border-border bg-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-bold border border-amber-200">
                   <span>Próximo Desplegable a Implementar</span>
                 </div>
                 <p className="text-xs font-bold text-slate-800">
-                  Diagrama Oficial Gestas, Abortos, Vaginales, Cesáreas, Nacidos Vivos/Muertos y Terminación Anterior
+                  Fecha, Terminación (Vaginal/Cesárea/Aborto/Ectópico/Molar), Tipo de Aborto, Lactancia Materna y Lugar del Parto
                 </p>
                 <p className="text-[11px] text-muted max-w-lg mx-auto">
-                  En cuanto verifiquemos la Sección [ 1 ] de Filiación, procederemos a desplegar este bloque tal como figura en la ficha del Dr. Patrick.
+                  En cuanto verifiquemos los Antecedentes Obstétricos, procederemos a desplegar este bloque tal como figura en la ficha del Dr. Patrick.
                 </p>
               </div>
             )}
           </div>
 
           {/* =========================================================================
-              ACORDEÓN 3: ANTECEDENTES FAMILIARES, PERSONALES & VACUNAS (EN COLA)
+              ACORDEÓN 4: ANTECEDENTES FAMILIARES, PERSONALES & VACUNAS (EN COLA)
               ========================================================================= */}
           <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
             <button
@@ -1091,8 +1514,8 @@ export function PrenatalCardModal({
               className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center shrink-0">
-                  3
+                <span className="w-6 h-6 rounded-md bg-rose-100 text-rose-800 font-bold text-xs flex items-center justify-center shrink-0">
+                  4
                 </span>
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
                   ANTECEDENTES FAMILIARES, PERSONALES & VACUNAS
@@ -1107,8 +1530,8 @@ export function PrenatalCardModal({
 
             {openSections.antecedentes && (
               <div className="p-5 text-center space-y-2 border-t border-border bg-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-bold border border-amber-200">
-                  <span>Paso 3 en Cola</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-800 text-xs font-bold border border-rose-200">
+                  <span>Paso 4 en Cola</span>
                 </div>
                 <p className="text-xs font-bold text-slate-800">
                   Matriz de Antecedentes Familiares, Personales, Vacunas Previas, Antitetánica y Somatometría
@@ -1121,7 +1544,7 @@ export function PrenatalCardModal({
           </div>
 
           {/* =========================================================================
-              ACORDEÓN 4: DATOS BASALES DEL EMBARAZO ACTUAL (FUM, ECOGRAFÍA, FPP)
+              ACORDEÓN 5: DATOS BASALES DEL EMBARAZO ACTUAL (FUM, ECOGRAFÍA, FPP)
               ========================================================================= */}
           <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
             <button
@@ -1130,8 +1553,8 @@ export function PrenatalCardModal({
               className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-rose-100 text-rose-800 font-bold text-xs flex items-center justify-center shrink-0">
-                  4
+                <span className="w-6 h-6 rounded-md bg-sky-100 text-sky-800 font-bold text-xs flex items-center justify-center shrink-0">
+                  5
                 </span>
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
                   DATOS BASALES DEL EMBARAZO ACTUAL (FUM, ECOGRAFÍA, FPP)
@@ -1146,8 +1569,8 @@ export function PrenatalCardModal({
 
             {openSections.embarazo && (
               <div className="p-5 text-center space-y-2 border-t border-border bg-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-800 text-xs font-bold border border-rose-200">
-                  <span>Paso 4 en Cola</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-sky-800 text-xs font-bold border border-sky-200">
+                  <span>Paso 5 en Cola</span>
                 </div>
                 <p className="text-xs font-bold text-slate-800">
                   Cálculo de Regla de Naegele, Duda de FUM, Ecografía Precoz, Hospitalización y Emergencias
@@ -1157,7 +1580,7 @@ export function PrenatalCardModal({
           </div>
 
           {/* =========================================================================
-              ACORDEÓN 5: EXAMEN FÍSICO BASAL & EXÁMENES DE LABORATORIO
+              ACORDEÓN 6: EXAMEN FÍSICO BASAL & EXÁMENES DE LABORATORIO
               ========================================================================= */}
           <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
             <button
@@ -1166,8 +1589,8 @@ export function PrenatalCardModal({
               className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-sky-100 text-sky-800 font-bold text-xs flex items-center justify-center shrink-0">
-                  5
+                <span className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-800 font-bold text-xs flex items-center justify-center shrink-0">
+                  6
                 </span>
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
                   EXAMEN FÍSICO BASAL & EXÁMENES DE LABORATORIO
@@ -1182,8 +1605,8 @@ export function PrenatalCardModal({
 
             {openSections.laboratorio && (
               <div className="p-5 text-center space-y-2 border-t border-border bg-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-sky-800 text-xs font-bold border border-sky-200">
-                  <span>Paso 5 en Cola</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 text-xs font-bold border border-indigo-200">
+                  <span>Paso 6 en Cola</span>
                 </div>
                 <p className="text-xs font-bold text-slate-800">
                   Examen Físico Basal (Mamas, Cuello Uterino, Pelvis) y Batería de Laboratorio (Hemoglobina, Glucosa, VDRL, VIH, PAP, etc.)
@@ -1193,7 +1616,7 @@ export function PrenatalCardModal({
           </div>
 
           {/* =========================================================================
-              ACORDEÓN 6: REGISTRO DE ATENCIONES PRENATALES LONGITUDINALES (9 CONSULTAS)
+              ACORDEÓN 7: REGISTRO DE ATENCIONES PRENATALES LONGITUDINALES (9 CONSULTAS)
               ========================================================================= */}
           <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
             <button
@@ -1202,8 +1625,8 @@ export function PrenatalCardModal({
               className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-800 font-bold text-xs flex items-center justify-center shrink-0">
-                  6
+                <span className="w-6 h-6 rounded-md bg-teal-100 text-teal-800 font-bold text-xs flex items-center justify-center shrink-0">
+                  7
                 </span>
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
                   REGISTRO DE ATENCIONES PRENATALES LONGITUDINALES (CONSULTAS)
@@ -1218,8 +1641,8 @@ export function PrenatalCardModal({
 
             {openSections.atenciones && (
               <div className="p-5 text-center space-y-2 border-t border-border bg-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 text-xs font-bold border border-indigo-200">
-                  <span>Paso 6 en Cola</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 text-teal-800 text-xs font-bold border border-teal-200">
+                  <span>Paso 7 en Cola</span>
                 </div>
                 <p className="text-xs font-bold text-slate-800">
                   Matriz Longitudinal de 9 Atenciones Prenatales MINSA (EG, Peso, PA, AU, FCF, Mov. Fetales, etc.)
@@ -1229,7 +1652,7 @@ export function PrenatalCardModal({
           </div>
 
           {/* =========================================================================
-              ACORDEÓN 7: EVALUACIÓN DE RIESGO OBSTÉTRICO & CONDUCTA MÉDICA
+              ACORDEÓN 8: EVALUACIÓN DE RIESGO OBSTÉTRICO (ARO) & CONDUCTA
               ========================================================================= */}
           <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
             <button
@@ -1238,8 +1661,8 @@ export function PrenatalCardModal({
               className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-teal-100 text-teal-800 font-bold text-xs flex items-center justify-center shrink-0">
-                  7
+                <span className="w-6 h-6 rounded-md bg-slate-800 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                  8
                 </span>
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
                   EVALUACIÓN DE RIESGO OBSTÉTRICO (ARO) & CONDUCTA
@@ -1254,8 +1677,8 @@ export function PrenatalCardModal({
 
             {openSections.riesgos && (
               <div className="p-5 text-center space-y-2 border-t border-border bg-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 text-teal-800 text-xs font-bold border border-teal-200">
-                  <span>Paso 7 en Cola</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300">
+                  <span>Paso 8 en Cola</span>
                 </div>
                 <p className="text-xs font-bold text-slate-800">
                   Semáforo de Riesgo Obstétrico (Bajo Riesgo / Alto Riesgo / Muy Alto Riesgo) y Criterios Activos

@@ -64,8 +64,12 @@ export interface PrenatalBaselineData {
   nacidosMuertos: number;
   viven: number;
   rnMayorPesoGramos?: number;
+  lowWeightHistory?: boolean;
   multipleHistory?: boolean;
   pretermHistory?: boolean;
+  parityRisk0or3?: boolean;
+  deadFirstWeek?: number;
+  deadAfterFirstWeek?: number;
   previousDeliveryDate?: string;
   previousDeliveryType?: "Parto Vaginal" | "Cesárea" | "Aborto" | "Ectópico" | "Molar";
   previousAbortionType?: "Incompleto" | "Completo" | "Frustro/Retenido" | "Séptico" | "No Aplica";
