@@ -109,10 +109,15 @@ export interface PrenatalBaselineData {
   emergencyHistory?: { date?: string; diagnosis?: string; cie10?: string };
   violenceScreening?: { screeningDone?: boolean; violenceDetected?: boolean; date?: string };
   clinicalExam: "Normal" | "Patológico" | "Sin Examen" | string;
+  clinicalExamDetail?: string;
   breastsExam: "Normal" | "Patológico" | "Sin Examen" | string;
+  breastsExamDetail?: string;
   cervixExam: "Normal" | "Patológico" | "Sin Examen" | string;
-  pelvisExam: "Normal" | "Anormal" | "Sin Examen" | string;
+  cervixExamDetail?: string;
+  pelvisExam: "Normal" | "Patológico" | "Sin Examen" | string;
+  pelvisExamDetail?: string;
   dentalExam: "Normal" | "Patológico" | "Sin Examen" | string;
+  dentalExamDetail?: string;
   hemoglobin1?: number;
   hemoglobin1Date?: string;
   hemoglobin2?: number;
