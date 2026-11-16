@@ -478,6 +478,8 @@ export const INITIAL_CHECKUPS: ClinicalCheckup[] = [
     uterusMeasurements: "65 x 35 x 42 mm (Vol: 50 cc)",
     endometriumThicknessMm: 6.2,
     ovariesFindings: "Ovario derecho 28 x 18 mm. Ovario izquierdo 30 x 20 mm. Ambos con ecotextura normal.",
+    colposcopyFindings: "Colposcopía adecuada satisfactoria. Zona de transformación Tipo 1. Test de Schiller negativo (Lugol caoba homogéneo). Sin lesiones acetoblancas.",
+    colposcopyResult: "Normal / Sin lesión intraepitelial",
     papResult: "Normal (Negativo para lesión intraepitelial o malignidad)",
     vphResult: "Negativo para 23 genotipos",
     conclusions: "Chequeo ginecológico y mamario preventivo dentro de límites normales. Apta para LARC.",
@@ -496,6 +498,8 @@ export const INITIAL_CHECKUPS: ClinicalCheckup[] = [
     uterusMeasurements: "78 x 46 x 42 mm (Vol: 79 cc)",
     endometriumThicknessMm: 8.4,
     ovariesFindings: "Endometrioma ovárico izquierdo de 42 mm y derecho de 38 mm. Kissing Ovaries positivo.",
+    colposcopyFindings: "Colposcopía satisfactoria adecuada. Zona de transformación Tipo 1, epitelio escamoso maduro eutrófico. Sin signos de lesión escamosa. Cérvix doloroso a la movilización pélvica.",
+    colposcopyResult: "Normal / Cervicitis inespecífica leve",
     papResult: "Normal (Negativo para neoplasia)",
     vphResult: "Negativo",
     conclusions: "1. Endometriosis ovárica bilateral severa estadio IV (Kissing Ovaries).\n2. Adenomiosis uterina posterior focal.\n3. Dismenorrea secundaria severa y dolor pélvico crónico.",
@@ -514,6 +518,8 @@ export const INITIAL_CHECKUPS: ClinicalCheckup[] = [
     uterusMeasurements: "58 x 28 x 34 mm (Vol: 29 cc)",
     endometriumThicknessMm: 2.4,
     ovariesFindings: "Ovario derecho 18 x 10 mm. Ovario izquierdo 16 x 9 mm. Ambos de aspecto atrófico fisiológico.",
+    colposcopyFindings: "Colposcopía adecuada. Zona de transformación Tipo 3 retraída al canal endocervical. Epitelio pálido atrófico con petequias subepiteliales difusas. Lugol pálido heterogéneo.",
+    colposcopyResult: "Atrofia epitelial senil / Negativo para neoplasia",
     papResult: "Frotis atrófico con flora disminuida, negativo para malignidad",
     vphResult: "Negativo",
     conclusions: "1. Síndrome climatérico y menopausia establecida.\n2. Endometrio atrófico normal (2.4 mm) apto para TRH.\n3. Quiste simple mama derecha BI-RADS 2.\n4. Atrofia vulvovaginal sintomática.",
@@ -3196,21 +3202,24 @@ export const useMedicalStore = create<MedicalStoreState>()(
     }),
     {
       name: "cendo-storage",
-      version: 10,
+      version: 11,
       migrate: (persistedState: any, version: number) => {
         const state = persistedState || {};
         if (!state.cie10Catalog || state.cie10Catalog.length === 0) {
           state.cie10Catalog = CIE10_GYN_CATALOG;
         }
-        if (version < 10) {
+        if (!state.clinicalCheckups || state.clinicalCheckups.length === 0) {
+          state.clinicalCheckups = INITIAL_CHECKUPS;
+        }
+        if (version < 11) {
           return {
             ...state,
+            clinicalCheckups: (!state.clinicalCheckups || state.clinicalCheckups.length === 0) ? INITIAL_CHECKUPS : state.clinicalCheckups,
             doctorsList: state.doctorsList || INITIAL_DOCTORS,
             doctorProfile: state.doctorProfile || INITIAL_DOCTOR,
             patients: state.patients || INITIAL_PATIENTS,
             backgrounds: state.backgrounds || INITIAL_BACKGROUNDS,
             colposcopyReports: state.colposcopyReports || INITIAL_COLPOSCOPY,
-            clinicalCheckups: state.clinicalCheckups || INITIAL_CHECKUPS,
             prescriptions: state.prescriptions || INITIAL_PRESCRIPTIONS,
             labOrders: state.labOrders || INITIAL_LAB_ORDERS,
             prenatalCards: state.prenatalCards || INITIAL_PRENATAL_CARDS,

@@ -19,18 +19,26 @@ import {
   Sparkles,
   ShieldAlert,
   Printer,
+  Eye,
+  MessageCircle,
+  X,
 } from "lucide-react";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { ClinicalCheckup } from "@/types/medical";
 import { CheckupModal } from "@/components/chequeos/CheckupModal";
+import { CheckupPrintView } from "@/components/export/CheckupPrintView";
+import { printHtmlElement } from "@/lib/pdfGenerator";
+import { generateCheckupWhatsAppUrl } from "@/lib/whatsappShare";
 
 export default function ChequeosPage() {
-  const { clinicalCheckups, patients, deleteClinicalCheckup } = useMedicalStore();
+  const { clinicalCheckups, patients, doctorProfile, deleteClinicalCheckup } = useMedicalStore();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCheckupId, setSelectedCheckupId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCheckup, setEditingCheckup] = useState<ClinicalCheckup | null>(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [viewingCheckup, setViewingCheckup] = useState<ClinicalCheckup | null>(null);
 
   // Filtrado de chequeos
   const filteredCheckups = useMemo(() => {
@@ -61,6 +69,12 @@ export default function ChequeosPage() {
     return patients.find((p) => p.id === activeCheckup.patientId) || null;
   }, [activeCheckup, patients]);
 
+  // Paciente para el informe de impresión
+  const printPatient = useMemo(() => {
+    if (!viewingCheckup) return null;
+    return patients.find((p) => p.id === viewingCheckup.patientId) || activePatient || null;
+  }, [viewingCheckup, patients, activePatient]);
+
   // Handlers
   const handleOpenCreate = () => {
     setEditingCheckup(null);
@@ -70,6 +84,11 @@ export default function ChequeosPage() {
   const handleOpenEdit = (checkup: ClinicalCheckup) => {
     setEditingCheckup(checkup);
     setIsModalOpen(true);
+  };
+
+  const handleOpenPrint = (checkup: ClinicalCheckup) => {
+    setViewingCheckup(checkup);
+    setIsPrintModalOpen(true);
   };
 
   const handleDelete = (checkup: ClinicalCheckup) => {
@@ -123,7 +142,7 @@ export default function ChequeosPage() {
             </h1>
           </div>
           <p className="text-xs text-muted mt-1">
-            Evaluación pélvica, ecografía transvaginal doppler y ecografía mamaria bilateral
+            Evaluación pélvica, ecografía transvaginal Doppler, ecografía mamaria bilateral y colposcopía
           </p>
         </div>
 
@@ -167,7 +186,7 @@ export default function ChequeosPage() {
               No hay chequeos ni ecografías registradas
             </h3>
             <p className="text-xs text-muted">
-              Inicie una nueva evaluación ginecológica para registrar ecografías mamarias, doppler transvaginal y recetas médicas con plantillas inteligentes.
+              Inicie una nueva evaluación ginecológica para registrar ecografías mamarias, doppler transvaginal, colposcopía y recetas médicas con plantillas inteligentes.
             </p>
           </div>
           <button
@@ -283,14 +302,15 @@ export default function ChequeosPage() {
 
                   {/* Acciones */}
                   <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-                    <Link
-                      href="/reportes"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-primary/30 bg-primary/5 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors shadow-2xs"
+                    <button
+                      type="button"
+                      onClick={() => handleOpenPrint(activeCheckup)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-primary/30 bg-primary/5 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors shadow-2xs cursor-pointer"
                       title="Emitir Informe en PDF"
                     >
                       <Printer className="w-3.5 h-3.5 text-primary" />
                       <span>Emitir PDF</span>
-                    </Link>
+                    </button>
 
                     {activePatient && (
                       <Link
@@ -330,7 +350,7 @@ export default function ChequeosPage() {
                     <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                       <h3 className="font-bold text-heading text-xs uppercase tracking-wider flex items-center gap-1.5">
                         <Stethoscope className="w-3.5 h-3.5 text-primary" />
-                        Ecografía Mamaria Bilateral
+                        1. Ecografía Mamaria Bilateral
                       </h3>
                       <span
                         className={`text-xs font-bold px-2 py-0.5 rounded-md border ${getBiradsBadgeClass(
@@ -365,7 +385,7 @@ export default function ChequeosPage() {
                     <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                       <h3 className="font-bold text-heading text-xs uppercase tracking-wider flex items-center gap-1.5">
                         <Layers className="w-3.5 h-3.5 text-primary" />
-                        Ecografía Transvaginal Doppler
+                        2. Ecografía Transvaginal Doppler
                       </h3>
                       <span className="text-xs font-mono font-bold text-primary bg-white px-2 py-0.5 rounded-md border border-primary/20">
                         Endo: {activeCheckup.endometriumThicknessMm} mm
@@ -403,21 +423,42 @@ export default function ChequeosPage() {
                   </div>
                 </div>
 
-                {/* Sección 2: Tamizaje Cervical (PAP & VPH) */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-border space-y-2">
-                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-primary" />
-                    Tamizaje Cervical Complementario
-                  </h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-0.5">
-                      <span className="text-[10px] font-bold uppercase text-muted">Resultado Papanicolaou (PAP)</span>
-                      <p className="text-heading font-medium">{activeCheckup.papResult}</p>
+                {/* Sección 2: Colposcopía Digital & Tamizaje Cervical */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Colposcopía Digital */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-border space-y-2 text-xs">
+                    <div className="flex items-center justify-between border-b border-border pb-1.5">
+                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <Eye className="w-3.5 h-3.5 text-primary" />
+                        3. Colposcopía Digital
+                      </h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-900 border border-indigo-200">
+                        {activeCheckup.colposcopyResult || "Normal / Sin lesión"}
+                      </span>
                     </div>
-                    <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-0.5">
-                      <span className="text-[10px] font-bold uppercase text-muted">Resultado Tipificación VPH PCR</span>
-                      <p className="text-heading font-medium">{activeCheckup.vphResult}</p>
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold uppercase text-muted">Hallazgos Cérvix & ZT</span>
+                      <p className="text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200 leading-relaxed">
+                        {activeCheckup.colposcopyFindings || "Colposcopía adecuada satisfactoria. Zona de transformación Tipo 1. Test de Schiller negativo."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Tamizaje PAP & VPH */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-border space-y-2 text-xs">
+                    <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 border-b border-border pb-1.5">
+                      <FileText className="w-3.5 h-3.5 text-primary" />
+                      4. Tamizaje Citológico & Molecular
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                      <div className="p-2.5 rounded-lg bg-white border border-slate-200 space-y-0.5">
+                        <span className="text-[10px] font-bold uppercase text-muted">Papanicolaou (PAP)</span>
+                        <p className="text-heading font-medium truncate">{activeCheckup.papResult}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-white border border-slate-200 space-y-0.5">
+                        <span className="text-[10px] font-bold uppercase text-muted">Test VPH PCR</span>
+                        <p className="text-heading font-medium truncate">{activeCheckup.vphResult}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -427,7 +468,7 @@ export default function ChequeosPage() {
                   {/* Conclusiones */}
                   <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2 text-xs">
                     <span className="font-bold text-primary uppercase text-[10px] tracking-wider block">
-                      Conclusiones Diagnósticas
+                      Conclusiones Diagnósticas Globales
                     </span>
                     <p className="text-slate-800 leading-relaxed font-medium">
                       {activeCheckup.conclusions}
@@ -465,6 +506,57 @@ export default function ChequeosPage() {
         initialData={editingCheckup}
         defaultPatientId={activePatient?.id}
       />
+
+      {/* Modal de Vista de Impresión del Informe Consolidado A4 */}
+      {isPrintModalOpen && viewingCheckup && printPatient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[96vh]">
+            <div className="p-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-secondary" />
+                <h3 className="font-heading font-bold text-sm">
+                  Informe Consolidado de Chequeo Preventivo &bull; CENDO A4
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = generateCheckupWhatsAppUrl(printPatient, viewingCheckup, doctorProfile);
+                    window.open(url, "_blank");
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => printHtmlElement("checkup-print-sheet", `Chequeo_${printPatient.lastName}_${printPatient.firstName}`)}
+                  className="px-4 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir / Guardar PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPrintModalOpen(false)}
+                  className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center flex-1">
+              <CheckupPrintView
+                checkup={viewingCheckup}
+                patient={printPatient}
+                doctor={doctorProfile}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

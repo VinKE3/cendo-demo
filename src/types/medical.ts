@@ -24,6 +24,8 @@ export interface ClinicalCheckup {
   uterusMeasurements: string;
   endometriumThicknessMm: number;
   ovariesFindings: string;
+  colposcopyFindings?: string;
+  colposcopyResult?: string;
   papResult: string;
   vphResult: string;
   conclusions: string;
