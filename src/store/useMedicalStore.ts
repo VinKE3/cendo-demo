@@ -3202,7 +3202,7 @@ export const useMedicalStore = create<MedicalStoreState>()(
     }),
     {
       name: "cendo-storage",
-      version: 11,
+      version: 12,
       migrate: (persistedState: any, version: number) => {
         const state = persistedState || {};
         if (!state.cie10Catalog || state.cie10Catalog.length === 0) {
@@ -3211,7 +3211,24 @@ export const useMedicalStore = create<MedicalStoreState>()(
         if (!state.clinicalCheckups || state.clinicalCheckups.length === 0) {
           state.clinicalCheckups = INITIAL_CHECKUPS;
         }
-        if (version < 11) {
+        if (state.patients && Array.isArray(state.patients)) {
+          state.patients = state.patients.map((p: any) => {
+            if ((!p.age || p.age <= 0) && p.birthDate) {
+              const birth = new Date(p.birthDate);
+              const today = new Date();
+              let age = today.getFullYear() - birth.getFullYear();
+              const m = today.getMonth() - birth.getMonth();
+              if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+              p.age = age > 0 ? age : 25;
+            }
+            if (!p.occupation || p.occupation === "Sin ocupación") {
+              const init = INITIAL_PATIENTS.find((ip) => ip.id === p.id || ip.dni === p.dni);
+              if (init) p.occupation = init.occupation;
+            }
+            return p;
+          });
+        }
+        if (version < 12) {
           return {
             ...state,
             clinicalCheckups: (!state.clinicalCheckups || state.clinicalCheckups.length === 0) ? INITIAL_CHECKUPS : state.clinicalCheckups,

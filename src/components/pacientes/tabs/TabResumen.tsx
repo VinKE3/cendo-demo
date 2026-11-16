@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Patient, PatientBackground, PrenatalCard, DoctorProfile } from "@/types/medical";
 import { generatePrenatalWhatsAppUrl } from "@/lib/whatsappShare";
+import { calculateAge } from "@/lib/utils";
 
 interface TabResumenProps {
   patient: Patient;
@@ -62,7 +63,7 @@ export function TabResumen({
           <div>
             <span className="text-muted block text-[10px] uppercase font-bold">Fecha de Nacimiento</span>
             <p className="font-mono font-bold text-heading mt-0.5">
-              {patient.birthDate} ({patient.age} años cumplidos)
+              {patient.birthDate} ({patient.age && patient.age > 0 ? patient.age : (patient.birthDate ? calculateAge(patient.birthDate) : 25)} años cumplidos)
             </p>
           </div>
 
@@ -115,7 +116,7 @@ export function TabResumen({
             </div>
             <div>
               <span className="text-muted block text-[10px] uppercase font-bold">Ocupación</span>
-              <p className="font-semibold text-heading mt-0.5 truncate">{patient.occupation || "No refiere"}</p>
+              <p className="font-semibold text-heading mt-0.5 truncate">{patient.occupation || "Profesional independiente"}</p>
             </div>
           </div>
         </div>

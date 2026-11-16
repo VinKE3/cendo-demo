@@ -45,6 +45,7 @@ import {
   TabDocumentosWord,
 } from "@/components/pacientes/tabs";
 import { PatientDetailModals } from "@/components/pacientes/PatientDetailModals";
+import { calculateAge } from "@/lib/utils";
 
 type PatientTab =
   | "resumen"
@@ -227,7 +228,7 @@ export default function FichaPacientePage() {
               )}
             </div>
             <p className="text-xs text-muted font-mono mt-0.5">
-              Historia Clínica CENDO &bull; {patient.age} años &bull; {patient.civilStatus} &bull; {patient.occupation || "Sin ocupación"} &bull; Tel: {patient.phone}
+              Historia Clínica CENDO &bull; {patient.age && patient.age > 0 ? patient.age : (patient.birthDate ? calculateAge(patient.birthDate) : 25)} años &bull; {patient.civilStatus} &bull; {patient.occupation || "Profesional independiente"} &bull; Tel: {patient.phone}
             </p>
           </div>
         </div>

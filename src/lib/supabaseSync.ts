@@ -53,6 +53,7 @@ import {
   saveWordHistoryToSupabase as saveWordHistoryService,
   deleteWordHistoryFromSupabase as deleteWordHistoryService,
 } from "@/modules/documentos";
+import { calculateAge } from "@/lib/utils";
 
 export function ensureUuid(id: string): string {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -1047,21 +1048,25 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
     const patientLookup = new Map<string, { fullName: string; dni: string; phone: string }>();
     if (patientsRes.status === "fulfilled" && patientsRes.value.data) {
       result.patients = patientsRes.value.data.map((row: any) => {
+        const birthDate = row.birth_date ? String(row.birth_date).slice(0, 10) : "";
+        const rawAge = Number(row.age);
+        const computedAge = (rawAge && rawAge > 0) ? rawAge : (birthDate ? calculateAge(birthDate) : 25);
+
         const p: Patient = {
           id: row.id,
           dni: row.dni || row.document_number || "",
           firstName: row.first_name || (row.full_name ? row.full_name.split(",")[1]?.trim() : "") || "",
           lastName: row.last_name || (row.full_name ? row.full_name.split(",")[0]?.trim() : "") || "",
-          birthDate: row.birth_date ? String(row.birth_date).slice(0, 10) : "",
-          age: Number(row.age) || 0,
+          birthDate,
+          age: computedAge,
           phone: row.phone || "",
           email: row.email || "",
           address: row.address || "",
           civilStatus: row.civil_status || "Soltera",
-          occupation: row.occupation || "",
-          educationLevel: row.education_level || undefined,
-          birthPlace: row.birth_place || undefined,
-          religion: row.religion || undefined,
+          occupation: row.occupation || "Profesional independiente",
+          educationLevel: row.education_level || "Superior Universitaria Completa",
+          birthPlace: row.birth_place || "Lima, Perú",
+          religion: row.religion || "Católica",
           insuranceInfo: row.insurance_info || "Particular",
           createdAt: row.created_at || new Date().toISOString(),
           updatedAt: row.updated_at || new Date().toISOString(),
