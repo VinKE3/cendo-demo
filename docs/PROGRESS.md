@@ -430,6 +430,45 @@ flowchart LR
 - [x] **4.4.** Rediseño interactivo del modal de Carnet Prenatal (`PrenatalCardModal.tsx`) con 4 sub-secciones estructuradas idénticas a las capturas físicas del MINSA y botón `✨ Auto-completar desde HC` (paridad G_ P____, FUM, antecedentes y somatometría).
 - [x] **4.5.** Certificación: Build Next.js 14 exitoso (14/14 rutas, 0 errores) y suite completa de pruebas unitarias prenatal (`npm run test:prenatal`) 5/5 PASS (100%).
 
+#### 🟣 NIVEL 5: Optimización de UX en Carnet Prenatal MINSA & Leyenda Global
+- [x] **5.1.** Remoción de sub-encabezados repetitivos (`= ALERTA`, `= Seguimiento continuo`) del interior de los 9 acordeones.
+- [x] **5.2.** Consolidación de la leyenda semántica única en la barra superior del modal (`CENDO • FICHA DE CONTROL MATERNO PERINATAL (CPN)`).
+- [x] **5.3.** Limpieza visual en el acordeón de antecedentes obstétricos eliminando repeticiones innecesarias.
+- [x] **5.4.** Verificación de apertura y cierre fluido de acordeones sin interferencias de scroll o redibujado.
+
+#### 🔵 NIVEL 6: Integridad de Casos Clínicos Demo & Cálculo Dinámico de Edad
+- [x] **6.1.** Saneamiento de las 5 pacientes demo con historias gineco-obstétricas completas:
+  - Luciana María Ramos Figueroa (25 años, Comunicadora, Soltera)
+  - Fiorella Beatríz Mendoza Chávez (30 años, Administradora, Casada)
+  - Gabriela Alejandra Paredes Navarro (32 años, Arquitecta, Soltera)
+  - Daniela Patricia Castro Villavicencio (34 años, Abogada, Conviviente)
+  - Carmen Rosa Huamán Sotomayor (52 años, Docente, Casada)
+- [x] **6.2.** Corrección del cálculo de edad cronológica en `src/lib/utils.ts` (`calculateAge`) resolviendo el bug de "0 años" y eliminando textos residuales de "Sin ocupación".
+- [x] **6.3.** Consolidación de la sábana de Chequeos Preventivos Integrales (unión de Ecografía Transvaginal, Mamaria, PAP ThinPrep y Colposcopía) en `/chequeos`.
+
+#### 🛡️ NIVEL 7: Suite de Auditoría Clínica & Auto-Reparación Automatizada
+- [x] **7.1.** Creación de `scripts/audit_clinical_integrity.mjs` accesible con `npm run audit:clinical`.
+- [x] **7.2.** Fase 1 a Fase 6 de verificación automatizada:
+  - Fase 1: Filiación, edades > 0 y ocupaciones reales en Supabase.
+  - Fase 2: Antecedentes gineco-obstétricos completos.
+  - Fase 3: Chequeos preventivos integrales con BI-RADS y grosor endometrial.
+  - Fase 4: Informes de colposcopía digital IFCPC.
+  - Fase 5: Credenciales médicas oficiales del Dr. Patrick Jacinto (CMP 61693 | RNE 38657).
+  - Fase 6: Zona horaria oficial de Perú (America/Lima UTC-5).
+- [x] **7.3.** 100% de certificación alcanzada con emisión de Certificado de Calidad Clínica CENDO.
+
+#### 🇵🇪 NIVEL 8: Estandarización de Zona Horaria Oficial de Perú (America/Lima UTC-5)
+- [x] **8.1.** Implementación de utilitarios de tiempo `getPeruDateString()`, `getPeruTimeString()`, `shiftPeruDate()` y `formatPeruDateText()` en `src/lib/utils.ts`.
+- [x] **8.2.** Blindaje de la agenda contra el salto de día UTC de las 7:00 PM (19:00 hora de Lima).
+- [x] **8.3.** Sincronización oficial con Google Calendar con parámetro inamovible `&ctz=America/Lima`.
+- [x] **8.4.** Exportación RFC 5545 para iPhone y Apple Calendar con bloque formal `VTIMEZONE America/Lima`.
+- [x] **8.5.** Estandarización de fechas por defecto en todos los modales clínicos (Citas, Consultas, Chequeos, Colposcopías, Ecografías, Recetas, Laboratorio, Procedimientos y Carnet Prenatal).
+
+#### 📄 NIVEL 9: Informe Ejecutivo Médico para el Dr. Patrick Jacinto Gomero
+- [x] **9.1.** Creación de `INFORME_DR_PATRICK.html` (documento A4 imprimible con diseño médico institucional).
+- [x] **9.2.** Redacción 100% clínica y ejecutiva con cero jerga técnica, nombres de componentes o tablas de base de datos.
+- [x] **9.3.** Desglose detallado de los 11 puntos clínicos solicitados y su resolución práctica.
+
 ---
 
-*Última actualización de progreso: 2026-11-15T23:35:00-05:00*
+*Última actualización de progreso: 2026-11-16T12:26:00-05:00*
