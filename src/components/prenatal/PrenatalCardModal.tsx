@@ -29,6 +29,9 @@ import {
   Heart,
   Scale,
   FlaskConical,
+  Plus,
+  Trash2,
+  HeartHandshake,
 } from "lucide-react";
 import {
   PrenatalCard,
@@ -583,6 +586,12 @@ export function PrenatalCardModal({
 
   // Drawer de antecedentes (idéntico al de Colposcopía)
   const [showHistoryDrawer, setShowHistoryDrawer] = useState(false);
+
+  // Pestañas superiores del Carnet Prenatal solicitadas por Kevin
+  // Pestaña 1: Ficha Basal (Acordeones 1 al 9)
+  // Pestaña 2: Matriz de 9 Consultas
+  // Pestaña 3: Riesgo ARO
+  const [activeMainTab, setActiveMainTab] = useState<"basal" | "consultas" | "aro">("basal");
 
   // Médico y fecha de procedimiento
   const [procedureDate, setProcedureDate] = useState(todayStr);
@@ -1851,6 +1860,74 @@ export function PrenatalCardModal({
     onClose();
   };
 
+  // Agregar nueva atención prenatal a la matriz longitudinal (Norma MINSA)
+  const handleAddQuickVisit = () => {
+    if (visitsList.length >= 9) {
+      Swal.fire({
+        icon: "info",
+        title: "Límite de Atenciones Alcanzado",
+        text: "El carnet oficial MINSA contempla un máximo de 9 atenciones prenatales.",
+      });
+      return;
+    }
+
+    const nextVisitNum = visitsList.length + 1;
+    const gestAgeAtVisit = calculateGestationalAge(baselineData.fum, procedureDate || todayStr);
+
+    // Próxima cita en 4 semanas por defecto
+    const nextAppt = new Date();
+    nextAppt.setDate(nextAppt.getDate() + 28);
+    const nextApptStr = nextAppt.toISOString().split("T")[0];
+
+    const newVisit: PrenatalVisitItem = {
+      visitNumber: nextVisitNum,
+      visitDate: procedureDate || todayStr,
+      visitTime: "11:00",
+      gestationalAgeWeeks: gestAgeAtVisit.weeks,
+      gestationalAgeDays: gestAgeAtVisit.days,
+      maternalWeightKg: baselineData.usualWeightKg || 0,
+      temperature: 36.5,
+      bloodPressure: "110/70",
+      maternalPulse: 76,
+      uterineHeightCm: gestAgeAtVisit.weeks >= 13 ? Math.max(gestAgeAtVisit.weeks - 2, 0) : 0,
+      fetusSituation: gestAgeAtVisit.weeks >= 28 ? "L" : "NA",
+      fetusPresentation: gestAgeAtVisit.weeks >= 28 ? "C" : "NA",
+      fetusPosition: gestAgeAtVisit.weeks >= 28 ? "D" : "NA",
+      fetalHeartRate: gestAgeAtVisit.weeks >= 12 ? 140 : 0,
+      fetalMovements: gestAgeAtVisit.weeks >= 20 ? "++" : "NA",
+      proteinuria: "-",
+      edema: "SE",
+      tendonReflex: "+",
+      ironFolicAcidGiven: gestAgeAtVisit.weeks >= 14,
+      calciumGiven: gestAgeAtVisit.weeks >= 20,
+      counselingGiven: "NUT / ITS",
+      nextAppointmentDate: nextApptStr,
+      attendingDoctorName: `DR. ${attendingDoctor}`,
+      notes: `Atención prenatal N° ${nextVisitNum}. Evolución materna y fetal adecuada.`,
+    };
+
+    setVisitsList([...visitsList, newVisit]);
+  };
+
+  // Eliminar atención prenatal de la matriz y renumerar
+  const handleDeleteVisit = (index: number) => {
+    Swal.fire({
+      title: `¿Eliminar Atención N° ${index + 1}?`,
+      text: "Esta acción quitará el registro de la matriz prenatal.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        const updated = visitsList.filter((_, idx) => idx !== index);
+        const renumbered = updated.map((v, i) => ({ ...v, visitNumber: i + 1 }));
+        setVisitsList(renumbered);
+      }
+    });
+  };
+
   // Helper de renderizado para cada fila de laboratorio del Carnet MINSA (Estructura en 2 líneas para cero solapamiento)
   const renderLabRow = ({
     label,
@@ -2328,6 +2405,79 @@ export function PrenatalCardModal({
             </div>
           </div>
 
+          {/* =========================================================================
+              BARRA DE PESTAÑAS SUPERIORES (SOLICITADAS POR KEVIN)
+              Pestaña 1: Ficha Basal (Acordeones 1 al 9)
+              Pestaña 2: Matriz de 9 Consultas
+              Pestaña 3: Riesgo ARO
+              ========================================================================= */}
+          <div className="bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/90 flex flex-wrap items-center gap-2 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setActiveMainTab("basal")}
+              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+                activeMainTab === "basal"
+                  ? "bg-white text-purple-900 shadow-xs border border-purple-200/80"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              }`}
+            >
+              <FileText className={`w-4 h-4 ${activeMainTab === "basal" ? "text-purple-600" : "text-slate-500"}`} />
+              <span>Pestaña 1: Ficha Basal (Acordeones 1 al 9)</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                activeMainTab === "basal" ? "bg-purple-100 text-purple-800" : "bg-slate-200/70 text-slate-700"
+              }`}>
+                9 Acordeones
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveMainTab("consultas")}
+              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+                activeMainTab === "consultas"
+                  ? "bg-white text-teal-900 shadow-xs border border-teal-200/80"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              }`}
+            >
+              <Activity className={`w-4 h-4 ${activeMainTab === "consultas" ? "text-teal-600" : "text-slate-500"}`} />
+              <span>Pestaña 2: Matriz de 9 Consultas</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                activeMainTab === "consultas" ? "bg-teal-100 text-teal-800" : "bg-slate-200/70 text-slate-700"
+              }`}>
+                {visitsList.length}/9
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveMainTab("aro")}
+              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+                activeMainTab === "aro"
+                  ? risksReport.isHighRisk
+                    ? "bg-white text-red-900 shadow-xs border border-red-300"
+                    : "bg-white text-emerald-900 shadow-xs border border-emerald-300"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              }`}
+            >
+              <AlertTriangle className={`w-4 h-4 ${
+                activeMainTab === "aro"
+                  ? risksReport.isHighRisk ? "text-red-600" : "text-emerald-600"
+                  : "text-amber-500"
+              }`} />
+              <span>Pestaña 3: Riesgo ARO</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                risksReport.isHighRisk ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
+              }`}>
+                {risksReport.isHighRisk ? "ALTO RIESGO" : "BAJO RIESGO"}
+              </span>
+            </button>
+          </div>
+
+          {/* =========================================================================
+              PESTAÑA 1: FICHA BASAL (ACORDEONES 1 AL 9)
+              ========================================================================= */}
+          {activeMainTab === "basal" && (
+            <div className="space-y-5">
           {/* =========================================================================
               ACORDEÓN 1: FILIACIÓN DE LA GESTANTE & UBIGEO
               ========================================================================= */}
@@ -6241,90 +6391,668 @@ export function PrenatalCardModal({
               </div>
             )}
           </div>
+          </div>
+          )}
 
           {/* =========================================================================
-              ACORDEÓN 10: REGISTRO DE ATENCIONES PRENATALES LONGITUDINALES (CONSULTAS)
+              PESTAÑA 2: MATRIZ DE 9 CONSULTAS PRENATALES (MINSA / CLAP)
               ========================================================================= */}
-          <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
-            <button
-              type="button"
-              onClick={() => toggleSection("atenciones")}
-              className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-teal-100 text-teal-800 font-bold text-xs flex items-center justify-center shrink-0">
-                  10
-                </span>
-                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
-                  REGISTRO DE ATENCIONES PRENATALES LONGITUDINALES (CONSULTAS)
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-                  Paso 10 en Cola
-                </span>
-                {openSections.atenciones ? (
-                  <ChevronUp className="w-4 h-4 text-muted" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-muted" />
-                )}
-              </div>
-            </button>
-
-            {openSections.atenciones && (
-              <div className="p-5 text-center space-y-2 border-t border-border bg-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 text-teal-800 text-xs font-bold border border-teal-200">
-                  <Activity className="w-3.5 h-3.5 text-teal-600" />
-                  <span>Matriz Longitudinal de Atenciones Prenatales MINSA</span>
+          {activeMainTab === "consultas" && (
+            <div className="space-y-5">
+              {/* Barra de Título y Acción Rápida */}
+              <div className="p-4 rounded-xl bg-teal-50/70 border border-teal-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-md bg-teal-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                      2
+                    </span>
+                    <h3 className="text-sm font-heading font-extrabold text-teal-950 uppercase tracking-wide">
+                      Matriz Longitudinal de 9 Consultas Prenatales (Norma Técnica MINSA)
+                    </h3>
+                  </div>
+                  <p className="text-xs text-teal-800">
+                    Registre y monitoree la evolución clínica, biometría fetal, hemodinamia y suplementación en cada una de las 9 visitas normadas.
+                  </p>
                 </div>
-                <p className="text-xs font-bold text-slate-800">
-                  Matriz Longitudinal de 9 Consultas (Fecha, EG, Peso, PA, Altura Uterina, Presentación, FCF, Movimientos Fetales, Edema, Albuminuria, Sulfato Ferroso, etc.)
-                </p>
+
+                <button
+                  type="button"
+                  onClick={handleAddQuickVisit}
+                  disabled={visitsList.length >= 9}
+                  className="px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ Registrar Atención N° {visitsList.length + 1}</span>
+                </button>
               </div>
-            )}
-          </div>
+
+              {/* Indicadores KPI de Control Prenatal */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Atenciones Realizadas</span>
+                  <div className="mt-1 flex items-baseline gap-1.5">
+                    <span className="text-xl font-heading font-black text-heading">{visitsList.length}</span>
+                    <span className="text-xs font-bold text-muted">/ 9 normadas</span>
+                  </div>
+                  <div className="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-teal-600 h-full rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min((visitsList.length / 9) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Última Presión Arterial</span>
+                  <div className="mt-1 flex items-baseline gap-1.5">
+                    <span className="text-lg font-heading font-bold text-heading">
+                      {visitsList[visitsList.length - 1]?.bloodPressure || "—"}
+                    </span>
+                    <span className="text-[10px] text-muted">mmHg</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 block mt-1">
+                    Meta: &lt; 140/90 mmHg
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Última F.C.F. Fetal</span>
+                  <div className="mt-1 flex items-baseline gap-1.5">
+                    <span className="text-lg font-heading font-bold text-heading">
+                      {visitsList[visitsList.length - 1]?.fetalHeartRate ? `${visitsList[visitsList.length - 1].fetalHeartRate} lpm` : "—"}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 block mt-1">
+                    Rango normal: 120 - 160 lpm
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Próxima Cita Prevista</span>
+                  <div className="mt-1 flex items-baseline gap-1.5">
+                    <span className="text-sm font-heading font-bold text-primary truncate">
+                      {visitsList[visitsList.length - 1]?.nextAppointmentDate || "Pendiente"}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 block mt-1">
+                    Control cada 4 sem (&lt; 28s)
+                  </span>
+                </div>
+              </div>
+
+              {/* Tabla de Matriz Longitudinal Oficial */}
+              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200 text-[11px]">
+                        <th className="p-3 w-48 sticky left-0 bg-slate-100 z-10 border-r border-slate-200">
+                          Parámetro Clínico MINSA
+                        </th>
+                        {Array.from({ length: 9 }).map((_, idx) => (
+                          <th
+                            key={idx}
+                            className={`p-3 text-center min-w-[130px] border-r border-slate-200 ${
+                              idx < visitsList.length
+                                ? "bg-teal-50/70 text-teal-900 font-extrabold"
+                                : "text-slate-400 bg-slate-50/40"
+                            }`}
+                          >
+                            <div className="flex items-center justify-center gap-1.5">
+                              <span>Atención {idx + 1}</span>
+                              {idx < visitsList.length && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteVisit(idx)}
+                                  className="text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                                  title="Eliminar atención"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-800 text-xs">
+                      {/* Fecha de Atención */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Fecha de Atención
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100 font-mono">
+                              {v ? (
+                                <input
+                                  type="date"
+                                  value={v.visitDate}
+                                  onChange={(e) => {
+                                    const updated = [...visitsList];
+                                    updated[idx].visitDate = e.target.value;
+                                    setVisitsList(updated);
+                                  }}
+                                  className="text-xs text-center border border-slate-300 rounded px-1.5 py-1 w-28 font-mono bg-white focus:ring-1 focus:ring-teal-500"
+                                />
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Edad Gestacional */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Edad Gestacional (sem)
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100 font-mono font-bold text-teal-800">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-1">
+                                  <input
+                                    type="number"
+                                    value={v.gestationalAgeWeeks}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].gestationalAgeWeeks = parseInt(e.target.value, 10) || 0;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="w-12 text-center border border-slate-300 rounded py-0.5 text-xs font-bold bg-white"
+                                  />
+                                  <span>sem</span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Peso Madre */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Peso Madre (kg)
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100 font-mono">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-1">
+                                  <input
+                                    type="number"
+                                    step="0.1"
+                                    value={v.maternalWeightKg}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].maternalWeightKg = parseFloat(e.target.value) || 0;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="w-14 text-center border border-slate-300 rounded py-0.5 text-xs bg-white"
+                                  />
+                                  <span>kg</span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Presión Arterial */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Presión Arterial (mmHg)
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          const isHigh = v && parseInt(v.bloodPressure.split("/")[1] || "0", 10) >= 90;
+                          return (
+                            <td key={idx} className={`p-2 text-center border-r border-slate-100 font-mono ${isHigh ? "bg-red-50" : ""}`}>
+                              {v ? (
+                                <input
+                                  type="text"
+                                  value={v.bloodPressure}
+                                  onChange={(e) => {
+                                    const updated = [...visitsList];
+                                    updated[idx].bloodPressure = e.target.value;
+                                    setVisitsList(updated);
+                                  }}
+                                  placeholder="110/70"
+                                  className={`w-20 text-center border rounded py-0.5 text-xs font-bold ${
+                                    isHigh ? "border-red-500 text-red-700 bg-red-100" : "border-slate-300 bg-white"
+                                  }`}
+                                />
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Altura Uterina */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Altura Uterina (cm)
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100 font-mono">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-1">
+                                  <input
+                                    type="number"
+                                    value={v.uterineHeightCm}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].uterineHeightCm = parseInt(e.target.value, 10) || 0;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="w-12 text-center border border-slate-300 rounded py-0.5 text-xs bg-white"
+                                  />
+                                  <span>cm</span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* FCF (Latidos/min) */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          F.C.F. Fetal (lpm)
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          const isFcfAbnormal = v && v.fetalHeartRate > 0 && (v.fetalHeartRate < 120 || v.fetalHeartRate > 160);
+                          return (
+                            <td key={idx} className={`p-2 text-center border-r border-slate-100 font-mono ${isFcfAbnormal ? "bg-red-50" : ""}`}>
+                              {v ? (
+                                <input
+                                  type="number"
+                                  value={v.fetalHeartRate || ""}
+                                  onChange={(e) => {
+                                    const updated = [...visitsList];
+                                    updated[idx].fetalHeartRate = parseInt(e.target.value, 10) || 0;
+                                    setVisitsList(updated);
+                                  }}
+                                  placeholder="140"
+                                  className={`w-14 text-center border rounded py-0.5 text-xs font-bold ${
+                                    isFcfAbnormal ? "border-red-500 text-red-700 bg-red-100" : "text-emerald-700 border-slate-300 bg-white"
+                                  }`}
+                                />
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Presentación / Posición */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Presentación / Situación
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100 text-[11px]">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-1 font-mono">
+                                  <select
+                                    value={v.fetusPresentation || "C"}
+                                    onChange={(e) => {
+                                      const updated = [...visitsList];
+                                      updated[idx].fetusPresentation = e.target.value as any;
+                                      setVisitsList(updated);
+                                    }}
+                                    className="border border-slate-300 rounded px-1 py-0.5 text-[11px] bg-white"
+                                  >
+                                    <option value="C">Cefálico (C)</option>
+                                    <option value="P">Pelviano (P)</option>
+                                    <option value="T">Transverso (T)</option>
+                                    <option value="NA">N/A (&lt;28s)</option>
+                                  </select>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Mov. Fetales & Edema */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Mov. Fetales / Edema
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-1 text-[11px] font-mono">
+                                  <span title="Movimientos Fetales">MF: {v.fetalMovements || "++"}</span>
+                                  <span>&bull;</span>
+                                  <span title="Edema">Ed: {v.edema || "SE"}</span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Proteinuria */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Proteinuria Cualitativa
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100 font-mono">
+                              {v ? (
+                                <select
+                                  value={v.proteinuria || "-"}
+                                  onChange={(e) => {
+                                    const updated = [...visitsList];
+                                    updated[idx].proteinuria = e.target.value as "-" | "+" | "++" | "+++" | "NSH";
+                                    setVisitsList(updated);
+                                  }}
+                                  className="border border-slate-300 rounded px-1.5 py-0.5 text-[11px] bg-white font-mono"
+                                >
+                                  <option value="-">(-) Negativa</option>
+                                  <option value="+">(+) 30 mg/dL</option>
+                                  <option value="++">(++) 100 mg/dL</option>
+                                  <option value="+++">(+++) 300 mg/dL</option>
+                                  <option value="NSH">NSH (No se hizo)</option>
+                                </select>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Suplementación Hierro / Calcio */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Suplementación (Fe / Ca)
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100 text-[11px]">
+                              {v ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <label className="flex items-center gap-1 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={v.ironFolicAcidGiven}
+                                      onChange={(e) => {
+                                        const updated = [...visitsList];
+                                        updated[idx].ironFolicAcidGiven = e.target.checked;
+                                        setVisitsList(updated);
+                                      }}
+                                      className="rounded text-teal-600 focus:ring-teal-500"
+                                    />
+                                    <span className="font-bold text-teal-900">Fe</span>
+                                  </label>
+                                  <label className="flex items-center gap-1 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={v.calciumGiven}
+                                      onChange={(e) => {
+                                        const updated = [...visitsList];
+                                        updated[idx].calciumGiven = e.target.checked;
+                                        setVisitsList(updated);
+                                      }}
+                                      className="rounded text-teal-600 focus:ring-teal-500"
+                                    />
+                                    <span className="font-bold text-teal-900">Ca</span>
+                                  </label>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* Próxima Cita */}
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700 bg-slate-50/80 sticky left-0 z-10 border-r border-slate-200">
+                          Próxima Cita
+                        </td>
+                        {Array.from({ length: 9 }).map((_, idx) => {
+                          const v = visitsList[idx];
+                          return (
+                            <td key={idx} className="p-2 text-center border-r border-slate-100 font-mono">
+                              {v ? (
+                                <input
+                                  type="date"
+                                  value={v.nextAppointmentDate}
+                                  onChange={(e) => {
+                                    const updated = [...visitsList];
+                                    updated[idx].nextAppointmentDate = e.target.value;
+                                    setVisitsList(updated);
+                                  }}
+                                  className="text-[11px] text-center border border-slate-300 rounded px-1 py-1 w-28 font-mono font-bold text-teal-800 bg-white"
+                                />
+                              ) : (
+                                <span className="text-slate-300">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {visitsList.length === 0 && (
+                <div className="p-8 text-center rounded-2xl border-2 border-dashed border-teal-200 bg-teal-50/30 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-teal-100 text-teal-700 mx-auto flex items-center justify-center">
+                    <Activity className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-heading font-extrabold text-sm text-teal-950">
+                      No hay atenciones prenatales registradas aún
+                    </h4>
+                    <p className="text-xs text-teal-700 max-w-md mx-auto mt-1">
+                      Haga clic en <strong>"+ Registrar Atención N° 1"</strong> para abrir la primera visita médica con cálculo automático de edad gestacional y parámetros basales.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddQuickVisit}
+                    className="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Registrar Primera Atención Ahora</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* =========================================================================
-              ACORDEÓN 11: EVALUACIÓN DE RIESGO OBSTÉTRICO (ARO) & CONDUCTA
+              PESTAÑA 3: EVALUACIÓN DE RIESGO OBSTÉTRICO (ARO) & PLAN INSTITUCIONAL
               ========================================================================= */}
-          <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
-            <button
-              type="button"
-              onClick={() => toggleSection("riesgos")}
-              className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-slate-800 text-white font-bold text-xs flex items-center justify-center shrink-0">
-                  11
-                </span>
-                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
-                  EVALUACIÓN DE RIESGO OBSTÉTRICO (ARO) & CONDUCTA
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300">
-                  Paso 11 en Cola
-                </span>
-                {openSections.riesgos ? (
-                  <ChevronUp className="w-4 h-4 text-muted" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-muted" />
-                )}
-              </div>
-            </button>
-
-            {openSections.riesgos && (
-              <div className="p-5 text-center space-y-2 border-t border-border bg-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300">
-                  <ShieldAlert className="w-3.5 h-3.5 text-slate-700" />
-                  <span>Evaluación ARO & Conducta Integral</span>
+          {activeMainTab === "aro" && (
+            <div className="space-y-5">
+              {/* Banner Semáforo ARO */}
+              <div
+                className={`p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs ${
+                  risksReport.isHighRisk
+                    ? "bg-red-50/80 border-red-300 text-red-950"
+                    : "bg-emerald-50/80 border-emerald-300 text-emerald-950"
+                }`}
+              >
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
+                      risksReport.isHighRisk
+                        ? "bg-red-100 border-red-300 text-red-600"
+                        : "bg-emerald-100 border-emerald-300 text-emerald-600"
+                    }`}
+                  >
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base font-heading font-black tracking-tight">
+                        {risksReport.riskCategory}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
+                          risksReport.isHighRisk
+                            ? "bg-red-200/70 text-red-900 border-red-300"
+                            : "bg-emerald-200/70 text-emerald-900 border-emerald-300"
+                        }`}
+                      >
+                        NTS N° 105 MINSA
+                      </span>
+                    </div>
+                    <p className="text-xs leading-relaxed max-w-2xl">
+                      {risksReport.isHighRisk
+                        ? "Esta gestante presenta factores clínicos, antecedentes sociodemográficos o hallazgos paraclínicos que incrementan el riesgo materno-perinatal. Requiere atención médica especializada por Ginecología y Obstetricia, controles más frecuentes y plan de parto en establecimiento FONE/FONP."
+                        : "Gestación de curso fisiológico sin factores de riesgo activos detectados al momento de la evaluación. Continúa control prenatal normado en establecimiento Nivel I / II."}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs font-bold text-slate-800">
-                  Semáforo de Riesgo Obstétrico (Bajo Riesgo / Alto Riesgo / Muy Alto Riesgo) y Criterios Activos.
-                </p>
+
+                <div className="px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 text-center shrink-0 self-stretch sm:self-auto flex sm:flex-col justify-between items-center sm:items-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    Criterios Detectados
+                  </span>
+                  <span
+                    className={`text-2xl font-heading font-black ${
+                      risksReport.isHighRisk ? "text-red-700" : "text-emerald-700"
+                    }`}
+                  >
+                    {risksReport.warningFlags.length}
+                  </span>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Lista de Criterios y Factores de Alerta Activos */}
+              <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
+                <div className="p-4 bg-slate-50/80 border-b border-border flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-amber-600" />
+                    <h4 className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
+                      Factores de Alerta y Riesgo Identificados en esta Paciente
+                    </h4>
+                  </div>
+                  <span className="text-[11px] font-mono font-bold text-muted">
+                    {risksReport.warningFlags.length} alerta(s)
+                  </span>
+                </div>
+
+                <div className="p-4">
+                  {risksReport.warningFlags.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                      {risksReport.warningFlags.map((flag, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/90 flex items-start gap-2.5 text-xs text-amber-950"
+                        >
+                          <span className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                          <div className="space-y-0.5">
+                            <strong className="block font-bold">{flag}</strong>
+                            <span className="text-[11px] text-amber-800/90 block">
+                              Monitoreo continuo en cada atención prenatal y registro en historia clínica.
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-emerald-800 space-y-1 bg-emerald-50/40 rounded-xl border border-emerald-200/60">
+                      <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto" />
+                      <p className="text-xs font-bold">Sin factores de riesgo obstétrico detectados</p>
+                      <p className="text-[11px] text-emerald-700">
+                        La gestante califica como Bajo Riesgo Obstétrico (BRO). Mantener controles periódicos cada 4 semanas.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Plan de Parto Institucional & Signos de Alarma MINSA */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Plan de Parto */}
+                <div className="p-4 rounded-xl border border-border bg-white shadow-2xs space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-primary" />
+                    <h4 className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
+                      Plan de Parto Institucional
+                    </h4>
+                  </div>
+                  <div className="space-y-2 text-xs text-slate-700">
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">Lugar Previsto para el Parto:</span>
+                      <strong className="text-slate-900 block">
+                        {risksReport.isHighRisk
+                          ? "Establecimiento FONE / Hospital Nivel II-2 o III (Capacidad quirúrgica y UCI neonatal)"
+                          : "Establecimiento FONP / Centro Quirúrgico CENDO o Institucional Nivel II"}
+                      </strong>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">Médico Especialista Responsable:</span>
+                      <strong className="text-slate-900 block">DR. {attendingDoctor} &bull; Gineco-Obstetra</strong>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">Acompañante Elegido:</span>
+                      <strong className="text-slate-900 block">Familiar directo / Pareja autorizada en triaje</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Signos de Alarma Obstétrica */}
+                <div className="p-4 rounded-xl border border-red-200/80 bg-red-50/30 shadow-2xs space-y-3">
+                  <div className="flex items-center gap-2 text-red-900">
+                    <HeartHandshake className="w-4 h-4 text-red-600" />
+                    <h4 className="text-xs font-heading font-extrabold uppercase tracking-wider">
+                      Signos de Alarma para la Gestante (Emergencia 24h)
+                    </h4>
+                  </div>
+                  <ul className="text-xs text-red-950 space-y-1.5 list-disc list-inside">
+                    <li>Sangrado vaginal de cualquier cuantía o pérdida de líquido amniótico.</li>
+                    <li>Dolor abdominal intenso tipo contracción uterina antes de tiempo.</li>
+                    <li>Disminución o ausencia de movimientos fetales (&gt; 20 semanas).</li>
+                    <li>Dolor de cabeza intenso (cefalea), zumbido de oídos (tinnitus) o visión borrosa.</li>
+                    <li>Hinchazón repentina de manos, pies o cara (edema súbito).</li>
+                    <li>Fiebre (&gt; 38°C) o escalofríos persistentes.</li>
+                  </ul>
+                  <div className="pt-1 text-[11px] font-bold text-red-800">
+                    &bull; Ante cualquiera de estos signos, acudir de inmediato al Servicio de Emergencia Obstétrica más cercano o llamar al SAMU 106.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
 
