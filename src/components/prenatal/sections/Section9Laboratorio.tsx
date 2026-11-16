@@ -222,13 +222,12 @@ export function Section9Laboratorio({
 
     return (
       <div
-        className={`p-3 rounded-xl border transition-all space-y-2.5 ${
-          isAlert
+        className={`p-3 rounded-xl border transition-all space-y-2.5 ${isAlert
             ? "bg-amber-50/80 border-amber-400 ring-1 ring-amber-300 shadow-2xs"
             : isNotDone
-            ? "bg-amber-50/30 border-amber-200"
-            : "bg-white border-slate-200 hover:border-slate-300"
-        }`}
+              ? "bg-amber-50/30 border-amber-200"
+              : "bg-white border-slate-200 hover:border-slate-300"
+          }`}
       >
         {/* Línea 1: Nombre de la prueba y estado actual */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
@@ -271,11 +270,10 @@ export function Section9Laboratorio({
             <button
               type="button"
               onClick={() => onChange(safeText)}
-              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                isSafe
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isSafe
                   ? "bg-emerald-100 border-emerald-500 text-emerald-950 shadow-2xs ring-1 ring-emerald-300"
                   : "bg-white hover:bg-slate-50 border-slate-300 text-slate-700"
-              }`}
+                }`}
             >
               <span className="w-3 h-3 rounded-xs bg-white border border-slate-400 inline-block shrink-0" />
               <span>{safeText}</span>
@@ -286,11 +284,10 @@ export function Section9Laboratorio({
             <button
               type="button"
               onClick={() => onChange(alertText)}
-              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                isAlert
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isAlert
                   ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
                   : "bg-amber-50/60 hover:bg-amber-100 border-amber-200 text-amber-900"
-              }`}
+                }`}
             >
               <span className="w-3 h-3 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
               <span>{alertText}</span>
@@ -301,11 +298,10 @@ export function Section9Laboratorio({
             <button
               type="button"
               onClick={() => onChange("No se Hizo")}
-              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                isNotDone
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isNotDone
                   ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
                   : "bg-amber-50/60 hover:bg-amber-100 border-amber-200 text-amber-900"
-              }`}
+                }`}
             >
               <span className="w-3 h-3 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
               <span>No se Hizo</span>
@@ -317,11 +313,10 @@ export function Section9Laboratorio({
               <button
                 type="button"
                 onClick={() => onChange("No se Aplica")}
-                className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  isNoApplies
+                className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isNoApplies
                     ? "bg-slate-200 border-slate-500 text-slate-900 shadow-2xs ring-1 ring-slate-400"
                     : "bg-white hover:bg-slate-50 border-slate-300 text-slate-600"
-                }`}
+                  }`}
               >
                 <span className="w-3 h-3 rounded-xs bg-white border border-slate-400 inline-block shrink-0" />
                 <span>No Aplica</span>
@@ -385,28 +380,26 @@ export function Section9Laboratorio({
 
     return (
       <div
-        className={`p-3.5 rounded-xl border transition-all space-y-2.5 ${
-          isSevereAnemia
+        className={`p-3.5 rounded-xl border transition-all space-y-2.5 ${isSevereAnemia
             ? "bg-rose-50 border-rose-400 ring-1 ring-rose-300 shadow-2xs"
             : isAnemia
-            ? "bg-amber-50/80 border-amber-400 ring-1 ring-amber-300 shadow-2xs"
-            : notDone
-            ? "bg-amber-50/30 border-amber-200"
-            : "bg-white border-slate-200 hover:border-slate-300"
-        }`}
+              ? "bg-amber-50/80 border-amber-400 ring-1 ring-amber-300 shadow-2xs"
+              : notDone
+                ? "bg-amber-50/30 border-amber-200"
+                : "bg-white border-slate-200 hover:border-slate-300"
+          }`}
       >
         {/* Línea 1: Etiqueta y estado */}
         <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
           <span className="text-xs font-bold text-slate-900">{label}</span>
           {!notDone && typeof val === "number" ? (
             <span
-              className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                isSevereAnemia
+              className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${isSevereAnemia
                   ? "bg-rose-500 text-white"
                   : isAnemia
-                  ? "bg-amber-400 text-amber-950"
-                  : "bg-emerald-100 text-emerald-800"
-              }`}
+                    ? "bg-amber-400 text-amber-950"
+                    : "bg-emerald-100 text-emerald-800"
+                }`}
             >
               {isSevereAnemia ? "Severa (<7 g/dL) [🟥]" : isAnemia ? "Anemia Gestacional (<11 g/dL) [🟨]" : "Normal (≥11 g/dL)"}
             </span>
@@ -439,11 +432,10 @@ export function Section9Laboratorio({
             <button
               type="button"
               onClick={() => onNotDoneChange(!notDone)}
-              className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                notDone
+              className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${notDone
                   ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
                   : "bg-amber-50/60 hover:bg-amber-100 border-amber-200 text-amber-900"
-              }`}
+                }`}
             >
               <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
               <span>No se Hizo</span>
@@ -467,560 +459,560 @@ export function Section9Laboratorio({
   };
 
   return (
-          <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
-            <button
-              type="button"
-              onClick={() => onToggle}
-              className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-md bg-cyan-100 text-cyan-800 font-bold text-xs flex items-center justify-center shrink-0">
-                  9
-                </span>
-                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
-                  EXÁMENES DE LABORATORIO BASALES (MINSA / CLAP)
-                </span>
-                <span className="hidden md:inline-block px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-cyan-50 text-cyan-800 border border-cyan-200">
-                  Batería Gestacional Completa
-                </span>
+    <div className="rounded-xl border border-border bg-white overflow-hidden shadow-2xs">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full p-4 bg-slate-50/70 hover:bg-slate-100 flex items-center justify-between text-left transition-colors cursor-pointer"
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="w-6 h-6 rounded-md bg-cyan-100 text-cyan-800 font-bold text-xs flex items-center justify-center shrink-0">
+            9
+          </span>
+          <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider">
+            EXÁMENES DE LABORATORIO BASALES (MINSA / CLAP)
+          </span>
+          <span className="hidden md:inline-block px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-cyan-50 text-cyan-800 border border-cyan-200">
+            Batería Gestacional Completa
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {labPathologicalAlerts.length > 0 ? (
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+              {labPathologicalAlerts.length} {labPathologicalAlerts.length === 1 ? "Alerta Patológica" : "Alertas Patológicas"} [🟨]
+            </span>
+          ) : labPendingCount > 0 ? (
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
+              {labPendingCount} Pruebas Sin Realizar
+            </span>
+          ) : (
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+              Panel Basal Completo Normal
+            </span>
+          )}
+          {isOpen ? (
+            <ChevronUp className="w-4 h-4 text-muted" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-muted" />
+          )}
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
+
+          {/* 9.1 Barra Superior de Resumen y Acciones Rápidas */}
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-800 flex items-center justify-center font-bold text-xs shrink-0">
+                <FlaskConical className="w-4 h-4" />
               </div>
-              <div className="flex items-center gap-2">
-                {labPathologicalAlerts.length > 0 ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                    {labPathologicalAlerts.length} {labPathologicalAlerts.length === 1 ? "Alerta Patológica" : "Alertas Patológicas"} [🟨]
-                  </span>
-                ) : labPendingCount > 0 ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
-                    {labPendingCount} Pruebas Sin Realizar
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    Panel Basal Completo Normal
-                  </span>
-                )}
-                {isOpen ? (
-                  <ChevronUp className="w-4 h-4 text-muted" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-muted" />
-                )}
+              <div>
+                <div className="text-xs font-heading font-extrabold text-heading uppercase">
+                  Batería de Laboratorio Gestacional (MINSA / CLAP)
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  Monitoreo hematológico, metabólico, tamizaje de ITS (Sífilis / VIH), urológico, infeccioso y cervical.
+                </div>
               </div>
-            </button>
+            </div>
 
-            {isOpen && (
-              <div className="p-4 sm:p-6 space-y-5 text-xs border-t border-border bg-white">
-                
-                {/* 9.1 Barra Superior de Resumen y Acciones Rápidas */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-800 flex items-center justify-center font-bold text-xs shrink-0">
-                      <FlaskConical className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-heading font-extrabold text-heading uppercase">
-                        Batería de Laboratorio Gestacional (MINSA / CLAP)
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        Monitoreo hematológico, metabólico, tamizaje de ITS (Sífilis / VIH), urológico, infeccioso y cervical.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={handleFillNormalLabPanel}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
-                      title="Cargar resultados negativos y normales en el panel basal"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>✓ Cargar Panel Basal Normal</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleResetLabPanel}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition-all cursor-pointer"
-                      title="Restablecer todas las pruebas a No se Hizo"
-                    >
-                      <span>Restablecer Todo</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 9.2 Leyenda idéntica al Carnet MINSA */}
-                <div className="flex items-center gap-4 px-3 py-2 rounded-lg bg-slate-50/70 border border-slate-200/80 text-[11px] text-slate-600 flex-wrap">
-                  <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Leyenda de Colores MINSA:</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3.5 h-3.5 rounded-xs bg-white border border-slate-400 inline-block" />
-                    <span><strong>Casilla Blanca [ ]:</strong> Normal / Negativo / No reactivo / No Aplica</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-600 shadow-2xs inline-block" />
-                    <span><strong>Casilla Amarilla [🟨]:</strong> ALERTA (Anormal, Reactivo, Positivo o No se Hizo)</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3.5 h-3.5 rounded-xs bg-rose-500 border border-rose-700 shadow-2xs inline-block" />
-                    <span><strong>Casilla Roja [🟥]:</strong> Seguimiento Continuo (Hb &lt; 7.0 g/dL Anemia Severa)</span>
-                  </div>
-                </div>
-
-                {/* 9.3 Bloques de Laboratorio en Cascada (Uno debajo del otro para máxima legibilidad y cero solapamiento) */}
-                <div className="space-y-5">
-                    
-                    {/* BLOQUE A: HEMOGLOBINA Hg(%) */}
-                    <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
-                      <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
-                        <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
-                          <Activity className="w-3.5 h-3.5 text-cyan-600" />
-                          Hemoglobina Hg(%) & Descarte de Anemia
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">Punto de corte: 11.0 g/dL</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {renderHemoglobinRow({
-                          label: "Hemoglobina 1:",
-                          val: baselineData.hemoglobin1,
-                          onValChange: (v) => setBaselineData({ ...baselineData, hemoglobin1: v }),
-                          notDone: baselineData.hemoglobin1NotDone,
-                          onNotDoneChange: (nd) => setBaselineData({ ...baselineData, hemoglobin1NotDone: nd }),
-                          dateVal: baselineData.hemoglobin1Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, hemoglobin1Date: d }),
-                        })}
-
-                        {renderHemoglobinRow({
-                          label: "Hemoglobina 2:",
-                          val: baselineData.hemoglobin2,
-                          onValChange: (v) => setBaselineData({ ...baselineData, hemoglobin2: v }),
-                          notDone: baselineData.hemoglobin2NotDone,
-                          onNotDoneChange: (nd) => setBaselineData({ ...baselineData, hemoglobin2NotDone: nd }),
-                          dateVal: baselineData.hemoglobin2Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, hemoglobin2Date: d }),
-                        })}
-
-                        {renderHemoglobinRow({
-                          label: "Hemogl. al Alta :",
-                          val: baselineData.hemoglobinDischarge,
-                          onValChange: (v) => setBaselineData({ ...baselineData, hemoglobinDischarge: v }),
-                          notDone: baselineData.hemoglobinDischargeNotDone,
-                          onNotDoneChange: (nd) => setBaselineData({ ...baselineData, hemoglobinDischargeNotDone: nd }),
-                          dateVal: baselineData.hemoglobinDischargeDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, hemoglobinDischargeDate: d }),
-                        })}
-                      </div>
-                    </div>
-
-                    {/* BLOQUE B: GLICEMIA & TOLERANCIA A LA GLUCOSA */}
-                    <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
-                      <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
-                        <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
-                          <FlaskConical className="w-3.5 h-3.5 text-cyan-600" />
-                          Glicemia & Tolerancia a la Glucosa
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">Descarte Diabetes Gestacional</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {renderLabRow({
-                          label: "Glicemia 1:",
-                          value: baselineData.glucose1Result || "Normal",
-                          onChange: (val) => setBaselineData({ ...baselineData, glucose1Result: val }),
-                          dateValue: baselineData.glucose1Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, glucose1Date: d }),
-                          numericVal: baselineData.glucose1Value,
-                          onNumericChange: (v) => setBaselineData({ ...baselineData, glucose1Value: v }),
-                          numericUnit: "mg/dL",
-                          safeText: "Normal",
-                          alertText: "Anormal",
-                        })}
-
-                        {renderLabRow({
-                          label: "Glicemia 2:",
-                          value: baselineData.glucose2Result || "Normal",
-                          onChange: (val) => setBaselineData({ ...baselineData, glucose2Result: val }),
-                          dateValue: baselineData.glucose2Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, glucose2Date: d }),
-                          numericVal: baselineData.glucose2Value,
-                          onNumericChange: (v) => setBaselineData({ ...baselineData, glucose2Value: v }),
-                          numericUnit: "mg/dL",
-                          safeText: "Normal",
-                          alertText: "Anormal",
-                        })}
-
-                        {renderLabRow({
-                          label: "Tolerancia Glucosa:",
-                          badge: "Sobrecarga 75g",
-                          value: baselineData.glucoseToleranceResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, glucoseToleranceResult: val }),
-                          dateValue: baselineData.glucoseToleranceDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, glucoseToleranceDate: d }),
-                          numericVal: baselineData.glucoseToleranceValue,
-                          onNumericChange: (v) => setBaselineData({ ...baselineData, glucoseToleranceValue: v }),
-                          numericUnit: "mg/dL",
-                          safeText: "Normal",
-                          alertText: "Anormal",
-                          hasNoApplies: true,
-                        })}
-                      </div>
-                    </div>
-
-                    {/* BLOQUE C: SÍFILIS & TAMIZAJE VIH */}
-                    <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
-                      <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
-                        <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
-                          <ShieldAlert className="w-3.5 h-3.5 text-cyan-600" />
-                          Sífilis & Tamizaje VIH (Prevención Transmisión Vertical)
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">Serología Obligatoria</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {renderLabRow({
-                          label: "VDRL/RPR 1 :",
-                          value: baselineData.vdrlRpr1Result || "No reactivo",
-                          onChange: (val) => setBaselineData({ ...baselineData, vdrlRpr1Result: val, vdrlRpr1: val }),
-                          dateValue: baselineData.vdrlRpr1Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, vdrlRpr1Date: d }),
-                          safeText: "No reactivo",
-                          alertText: "Reactivo",
-                        })}
-
-                        {renderLabRow({
-                          label: "VDRL/RPR 2 :",
-                          value: baselineData.vdrlRpr2Result || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, vdrlRpr2Result: val }),
-                          dateValue: baselineData.vdrlRpr2Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, vdrlRpr2Date: d }),
-                          safeText: "No reactivo",
-                          alertText: "Reactivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "FTA Abs. :",
-                          badge: "Treponémica",
-                          value: baselineData.ftaAbsResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, ftaAbsResult: val }),
-                          dateValue: baselineData.ftaAbsDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, ftaAbsDate: d }),
-                          safeText: "No reactivo",
-                          alertText: "Reactivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "TPHA :",
-                          badge: "Hemaglutinación",
-                          value: baselineData.tphaResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, tphaResult: val }),
-                          dateValue: baselineData.tphaDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, tphaDate: d }),
-                          safeText: "No reactivo",
-                          alertText: "Reactivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "Prueba Rap. Sifilis :",
-                          value: baselineData.rapidSyphilisResult || "No reactivo",
-                          onChange: (val) => setBaselineData({ ...baselineData, rapidSyphilisResult: val }),
-                          dateValue: baselineData.rapidSyphilisDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, rapidSyphilisDate: d }),
-                          safeText: "No reactivo",
-                          alertText: "Reactivo",
-                        })}
-
-                        {renderLabRow({
-                          label: "VIH Prueba Rap. 1 :",
-                          value: baselineData.hivRapid1Result || "No reactivo",
-                          onChange: (val) => setBaselineData({ ...baselineData, hivRapid1Result: val }),
-                          dateValue: baselineData.hivRapid1Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, hivRapid1Date: d }),
-                          safeText: "No reactivo",
-                          alertText: "Reactivo",
-                        })}
-
-                        {renderLabRow({
-                          label: "Prueba Rap. 2 :",
-                          badge: "VIH 3er Trim.",
-                          value: baselineData.hivRapid2Result || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, hivRapid2Result: val }),
-                          dateValue: baselineData.hivRapid2Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, hivRapid2Date: d }),
-                          safeText: "No reactivo",
-                          alertText: "Reactivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "ELISA :",
-                          badge: "VIH Confirmatoria",
-                          value: baselineData.hivElisaResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, hivElisaResult: val }),
-                          dateValue: baselineData.hivElisaDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, hivElisaDate: d }),
-                          safeText: "No reactivo",
-                          alertText: "Reactivo",
-                          hasNoApplies: true,
-                        })}
-                      </div>
-                    </div>
-
-                    {/* BLOQUE D: INFECCIONES ESPECIALES & VECTORES */}
-                    <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
-                      <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
-                        <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
-                          <Activity className="w-3.5 h-3.5 text-cyan-600" />
-                          Infecciones Especiales & Zoonosis / Vectores
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">Western Blot, HTLV, TORCH, Malaria</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {renderLabRow({
-                          label: "IFI / Western Blot:",
-                          badge: "Inmunofluorescencia",
-                          value: baselineData.westernBlotResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, westernBlotResult: val }),
-                          dateValue: baselineData.westernBlotDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, westernBlotDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "HTLV I:",
-                          value: baselineData.htlv1Result || "Negativo",
-                          onChange: (val) => setBaselineData({ ...baselineData, htlv1Result: val }),
-                          dateValue: baselineData.htlv1Date,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, htlv1Date: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "TORCH:",
-                          badge: "Toxo, Rubeola, CMV, Herpes",
-                          value: baselineData.torchResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, torchResult: val }),
-                          dateValue: baselineData.torchDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, torchDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "Gota Gruesa:",
-                          badge: "Malaria Endémica",
-                          value: baselineData.thickBloodSmearResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, thickBloodSmearResult: val }),
-                          dateValue: baselineData.thickBloodSmearDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, thickBloodSmearDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "Malaria Prueba Ráp:",
-                          value: baselineData.malariaRapidResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, malariaRapidResult: val }),
-                          dateValue: baselineData.malariaRapidDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, malariaRapidDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "Fluorec. Malaria:",
-                          value: baselineData.malariaFluorescenceResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, malariaFluorescenceResult: val }),
-                          dateValue: baselineData.malariaFluorescenceDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, malariaFluorescenceDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-                      </div>
-                    </div>
-
-                    {/* BLOQUE E: EXAMEN DE ORINA, UROCULTIVO & OTRAS INFECCIONES */}
-                    <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
-                      <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
-                        <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
-                          <FlaskConical className="w-3.5 h-3.5 text-cyan-600" />
-                          Examen de Orina, Urocultivo & Hepatitis B
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">Prevención de Prematuridad</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {renderLabRow({
-                          label: "Ex. Comp. Orina:",
-                          value: baselineData.completeUrineExamResult || "Negativo",
-                          onChange: (val) => setBaselineData({ ...baselineData, completeUrineExamResult: val }),
-                          dateValue: baselineData.completeUrineExamDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, completeUrineExamDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                        })}
-
-                        {renderLabRow({
-                          label: "Leucocituria:",
-                          value: baselineData.leukocyturiaResult || "Negativo",
-                          onChange: (val) => setBaselineData({ ...baselineData, leukocyturiaResult: val }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                        })}
-
-                        {renderLabRow({
-                          label: "Nitritos:",
-                          value: baselineData.nitritesResult || "Negativo",
-                          onChange: (val) => setBaselineData({ ...baselineData, nitritesResult: val }),
-                          dateValue: baselineData.nitritesDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, nitritesDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                        })}
-
-                        {renderLabRow({
-                          label: "Urocultivo:",
-                          badge: "Bacteriuria Asintomática",
-                          value: baselineData.urineCultureResult || "Negativo",
-                          onChange: (val) => setBaselineData({ ...baselineData, urineCultureResult: val }),
-                          dateValue: baselineData.urineCultureDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, urineCultureDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "BK en Espuro:",
-                          badge: "BK Esputo / TBC",
-                          value: baselineData.bkSputumResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, bkSputumResult: val }),
-                          dateValue: baselineData.bkSputumDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, bkSputumDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "Listeria:",
-                          value: baselineData.listeriaResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, listeriaResult: val }),
-                          dateValue: baselineData.listeriaDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, listeriaDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "Tamizaje: Hepatitis B:",
-                          badge: "HBsAg",
-                          value: baselineData.hepatitisBResult || "Negativo",
-                          onChange: (val) => setBaselineData({ ...baselineData, hepatitisBResult: val }),
-                          dateValue: baselineData.hepatitisBDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, hepatitisBDate: d }),
-                          safeText: "Negativo",
-                          alertText: "Positivo",
-                          hasNoApplies: true,
-                        })}
-                      </div>
-                    </div>
-
-                    {/* BLOQUE F: TAMIZAJE CERVICAL EN GESTANTES */}
-                    <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
-                      <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
-                        <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
-                          <Stethoscope className="w-3.5 h-3.5 text-cyan-600" />
-                          Tamizaje de Cáncer de Cuello Uterino en Gestantes
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">Descarte Neoplasia Cervical</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {renderLabRow({
-                          label: "PAP:",
-                          badge: "Papanicolaou",
-                          value: baselineData.papTestResult || "Normal",
-                          onChange: (val) => setBaselineData({ ...baselineData, papTestResult: val }),
-                          dateValue: baselineData.papTestDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, papTestDate: d }),
-                          safeText: "Normal",
-                          alertText: "Anormal",
-                        })}
-
-                        {renderLabRow({
-                          label: "IVAA:",
-                          badge: "Ácido Acético",
-                          value: baselineData.ivaaResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, ivaaResult: val }),
-                          dateValue: baselineData.ivaaDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, ivaaDate: d }),
-                          safeText: "Normal",
-                          alertText: "Anormal",
-                          hasNoApplies: true,
-                        })}
-
-                        {renderLabRow({
-                          label: "Colposcopia:",
-                          value: baselineData.colposcopyResult || "No se Aplica",
-                          onChange: (val) => setBaselineData({ ...baselineData, colposcopyResult: val }),
-                          dateValue: baselineData.colposcopyDate,
-                          onDateChange: (d) => setBaselineData({ ...baselineData, colposcopyDate: d }),
-                          safeText: "Normal",
-                          alertText: "Anormal",
-                          hasNoApplies: true,
-                        })}
-                      </div>
-                    </div>
-
-                </div>
-
-                {/* 9.4 Banners de Protocolo Clínico & Alertas Patológicas */}
-                {labPathologicalAlerts.length > 0 && (
-                  <div className="p-4 rounded-xl bg-amber-100 border border-amber-300 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-800 shrink-0" />
-                      <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
-                        Alertas Patológicas Detectadas en Laboratorio ({labPathologicalAlerts.length}):
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {labPathologicalAlerts.map((al) => (
-                        <span key={al} className="px-2.5 py-1 rounded-md text-xs font-black bg-amber-300 border border-amber-500 text-amber-950 shadow-2xs">
-                          {al}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-[11px] text-amber-900 pt-1">
-                      <strong>Conducta Inmediata:</strong> Si VDRL/Sífilis reactivo, iniciar Penicilina Benzatínica 2.4 MUI según esquema MINSA para gestante y pareja. Si Urocultivo positivo, iniciar antibioticoterapia para prevención de parto prematuro y corioamnionitis. Si VIH reactivo, activar protocolo TARV materno.
-                    </p>
-                  </div>
-                )}
-
-                {/* Nota Normativa MINSA NTS N° 105 */}
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5 text-[11px] text-slate-600">
-                  <BookOpen className="w-4 h-4 text-cyan-700 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-slate-800 uppercase text-[10px] block">
-                      Norma Técnica de Salud MINSA &bull; Batería de Laboratorio CPN (NTS N° 105)
-                    </span>
-                    <p className="mt-0.5">
-                      Toda gestante debe contar en su primera atención prenatal con hemoglobina basal, glicemia en ayunas, tamizaje de sífilis (VDRL/PR), prueba rápida de VIH con consejería previa, tamizaje de Hepatitis B (HBsAg), urocultivo o examen de orina completo para despistaje de bacteriuria asintomática, y tamizaje de cáncer de cuello uterino (PAP).
-                    </p>
-                  </div>
-                </div>
-
-              </div>
-            )}
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              <button
+                type="button"
+                onClick={handleFillNormalLabPanel}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Cargar resultados negativos y normales en el panel basal"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>✓ Cargar Panel Basal Normal</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleResetLabPanel}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition-all cursor-pointer"
+                title="Restablecer todas las pruebas a No se Hizo"
+              >
+                <span>Restablecer Todo</span>
+              </button>
+            </div>
           </div>
+
+          {/* 9.2 Leyenda idéntica al Carnet MINSA */}
+          <div className="flex items-center gap-4 px-3 py-2 rounded-lg bg-slate-50/70 border border-slate-200/80 text-[11px] text-slate-600 flex-wrap">
+            <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Leyenda de Colores MINSA:</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-xs bg-white border border-slate-400 inline-block" />
+              <span><strong>Casilla Blanca [ ]:</strong> Normal / Negativo / No reactivo / No Aplica</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-600 shadow-2xs inline-block" />
+              <span><strong>Casilla Amarilla [🟨]:</strong> ALERTA (Anormal, Reactivo, Positivo o No se Hizo)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-xs bg-rose-500 border border-rose-700 shadow-2xs inline-block" />
+              <span><strong>Casilla Roja [🟥]:</strong> Seguimiento Continuo (Hb &lt; 7.0 g/dL Anemia Severa)</span>
+            </div>
+          </div>
+
+          {/* 9.3 Bloques de Laboratorio en Cascada (Uno debajo del otro para máxima legibilidad y cero solapamiento) */}
+          <div className="space-y-5">
+
+            {/* BLOQUE A: HEMOGLOBINA Hg(%) */}
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
+              <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-cyan-600" />
+                  Hemoglobina Hg(%) & Descarte de Anemia
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Punto de corte: 11.0 g/dL</span>
+              </div>
+
+              <div className="space-y-2">
+                {renderHemoglobinRow({
+                  label: "Hemoglobina 1:",
+                  val: baselineData.hemoglobin1,
+                  onValChange: (v) => setBaselineData({ ...baselineData, hemoglobin1: v }),
+                  notDone: baselineData.hemoglobin1NotDone,
+                  onNotDoneChange: (nd) => setBaselineData({ ...baselineData, hemoglobin1NotDone: nd }),
+                  dateVal: baselineData.hemoglobin1Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hemoglobin1Date: d }),
+                })}
+
+                {renderHemoglobinRow({
+                  label: "Hemoglobina 2:",
+                  val: baselineData.hemoglobin2,
+                  onValChange: (v) => setBaselineData({ ...baselineData, hemoglobin2: v }),
+                  notDone: baselineData.hemoglobin2NotDone,
+                  onNotDoneChange: (nd) => setBaselineData({ ...baselineData, hemoglobin2NotDone: nd }),
+                  dateVal: baselineData.hemoglobin2Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hemoglobin2Date: d }),
+                })}
+
+                {renderHemoglobinRow({
+                  label: "Hemogl. al Alta :",
+                  val: baselineData.hemoglobinDischarge,
+                  onValChange: (v) => setBaselineData({ ...baselineData, hemoglobinDischarge: v }),
+                  notDone: baselineData.hemoglobinDischargeNotDone,
+                  onNotDoneChange: (nd) => setBaselineData({ ...baselineData, hemoglobinDischargeNotDone: nd }),
+                  dateVal: baselineData.hemoglobinDischargeDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hemoglobinDischargeDate: d }),
+                })}
+              </div>
+            </div>
+
+            {/* BLOQUE B: GLICEMIA & TOLERANCIA A LA GLUCOSA */}
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
+              <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
+                  <FlaskConical className="w-3.5 h-3.5 text-cyan-600" />
+                  Glicemia & Tolerancia a la Glucosa
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Descarte Diabetes Gestacional</span>
+              </div>
+
+              <div className="space-y-2">
+                {renderLabRow({
+                  label: "Glicemia 1:",
+                  value: baselineData.glucose1Result || "Normal",
+                  onChange: (val) => setBaselineData({ ...baselineData, glucose1Result: val }),
+                  dateValue: baselineData.glucose1Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, glucose1Date: d }),
+                  numericVal: baselineData.glucose1Value,
+                  onNumericChange: (v) => setBaselineData({ ...baselineData, glucose1Value: v }),
+                  numericUnit: "mg/dL",
+                  safeText: "Normal",
+                  alertText: "Anormal",
+                })}
+
+                {renderLabRow({
+                  label: "Glicemia 2:",
+                  value: baselineData.glucose2Result || "Normal",
+                  onChange: (val) => setBaselineData({ ...baselineData, glucose2Result: val }),
+                  dateValue: baselineData.glucose2Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, glucose2Date: d }),
+                  numericVal: baselineData.glucose2Value,
+                  onNumericChange: (v) => setBaselineData({ ...baselineData, glucose2Value: v }),
+                  numericUnit: "mg/dL",
+                  safeText: "Normal",
+                  alertText: "Anormal",
+                })}
+
+                {renderLabRow({
+                  label: "Tolerancia Glucosa:",
+                  badge: "Sobrecarga 75g",
+                  value: baselineData.glucoseToleranceResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, glucoseToleranceResult: val }),
+                  dateValue: baselineData.glucoseToleranceDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, glucoseToleranceDate: d }),
+                  numericVal: baselineData.glucoseToleranceValue,
+                  onNumericChange: (v) => setBaselineData({ ...baselineData, glucoseToleranceValue: v }),
+                  numericUnit: "mg/dL",
+                  safeText: "Normal",
+                  alertText: "Anormal",
+                  hasNoApplies: true,
+                })}
+              </div>
+            </div>
+
+            {/* BLOQUE C: SÍFILIS & TAMIZAJE VIH */}
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
+              <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5 text-cyan-600" />
+                  Sífilis & Tamizaje VIH (Prevención Transmisión Vertical)
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Serología Obligatoria</span>
+              </div>
+
+              <div className="space-y-2">
+                {renderLabRow({
+                  label: "VDRL/RPR 1 :",
+                  value: baselineData.vdrlRpr1Result || "No reactivo",
+                  onChange: (val) => setBaselineData({ ...baselineData, vdrlRpr1Result: val, vdrlRpr1: val }),
+                  dateValue: baselineData.vdrlRpr1Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, vdrlRpr1Date: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                })}
+
+                {renderLabRow({
+                  label: "VDRL/RPR 2 :",
+                  value: baselineData.vdrlRpr2Result || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, vdrlRpr2Result: val }),
+                  dateValue: baselineData.vdrlRpr2Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, vdrlRpr2Date: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "FTA Abs. :",
+                  badge: "Treponémica",
+                  value: baselineData.ftaAbsResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, ftaAbsResult: val }),
+                  dateValue: baselineData.ftaAbsDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, ftaAbsDate: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "TPHA :",
+                  badge: "Hemaglutinación",
+                  value: baselineData.tphaResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, tphaResult: val }),
+                  dateValue: baselineData.tphaDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, tphaDate: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Prueba Rap. Sifilis :",
+                  value: baselineData.rapidSyphilisResult || "No reactivo",
+                  onChange: (val) => setBaselineData({ ...baselineData, rapidSyphilisResult: val }),
+                  dateValue: baselineData.rapidSyphilisDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, rapidSyphilisDate: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                })}
+
+                {renderLabRow({
+                  label: "VIH Prueba Rap. 1 :",
+                  value: baselineData.hivRapid1Result || "No reactivo",
+                  onChange: (val) => setBaselineData({ ...baselineData, hivRapid1Result: val }),
+                  dateValue: baselineData.hivRapid1Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hivRapid1Date: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                })}
+
+                {renderLabRow({
+                  label: "Prueba Rap. 2 :",
+                  badge: "VIH 3er Trim.",
+                  value: baselineData.hivRapid2Result || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, hivRapid2Result: val }),
+                  dateValue: baselineData.hivRapid2Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hivRapid2Date: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "ELISA :",
+                  badge: "VIH Confirmatoria",
+                  value: baselineData.hivElisaResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, hivElisaResult: val }),
+                  dateValue: baselineData.hivElisaDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hivElisaDate: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                  hasNoApplies: true,
+                })}
+              </div>
+            </div>
+
+            {/* BLOQUE D: INFECCIONES ESPECIALES & VECTORES */}
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
+              <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-cyan-600" />
+                  Infecciones Especiales & Zoonosis / Vectores
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Western Blot, HTLV, TORCH, Malaria</span>
+              </div>
+
+              <div className="space-y-2">
+                {renderLabRow({
+                  label: "IFI / Western Blot:",
+                  badge: "Inmunofluorescencia",
+                  value: baselineData.westernBlotResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, westernBlotResult: val }),
+                  dateValue: baselineData.westernBlotDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, westernBlotDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "HTLV I:",
+                  value: baselineData.htlv1Result || "Negativo",
+                  onChange: (val) => setBaselineData({ ...baselineData, htlv1Result: val }),
+                  dateValue: baselineData.htlv1Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, htlv1Date: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "TORCH:",
+                  badge: "Toxo, Rubeola, CMV, Herpes",
+                  value: baselineData.torchResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, torchResult: val }),
+                  dateValue: baselineData.torchDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, torchDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Gota Gruesa:",
+                  badge: "Malaria Endémica",
+                  value: baselineData.thickBloodSmearResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, thickBloodSmearResult: val }),
+                  dateValue: baselineData.thickBloodSmearDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, thickBloodSmearDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Malaria Prueba Ráp:",
+                  value: baselineData.malariaRapidResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, malariaRapidResult: val }),
+                  dateValue: baselineData.malariaRapidDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, malariaRapidDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Fluorec. Malaria:",
+                  value: baselineData.malariaFluorescenceResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, malariaFluorescenceResult: val }),
+                  dateValue: baselineData.malariaFluorescenceDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, malariaFluorescenceDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+              </div>
+            </div>
+
+            {/* BLOQUE E: EXAMEN DE ORINA, UROCULTIVO & OTRAS INFECCIONES */}
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
+              <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
+                  <FlaskConical className="w-3.5 h-3.5 text-cyan-600" />
+                  Examen de Orina, Urocultivo & Hepatitis B
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Prevención de Prematuridad</span>
+              </div>
+
+              <div className="space-y-2">
+                {renderLabRow({
+                  label: "Ex. Comp. Orina:",
+                  value: baselineData.completeUrineExamResult || "Negativo",
+                  onChange: (val) => setBaselineData({ ...baselineData, completeUrineExamResult: val }),
+                  dateValue: baselineData.completeUrineExamDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, completeUrineExamDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                })}
+
+                {renderLabRow({
+                  label: "Leucocituria:",
+                  value: baselineData.leukocyturiaResult || "Negativo",
+                  onChange: (val) => setBaselineData({ ...baselineData, leukocyturiaResult: val }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                })}
+
+                {renderLabRow({
+                  label: "Nitritos:",
+                  value: baselineData.nitritesResult || "Negativo",
+                  onChange: (val) => setBaselineData({ ...baselineData, nitritesResult: val }),
+                  dateValue: baselineData.nitritesDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, nitritesDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                })}
+
+                {renderLabRow({
+                  label: "Urocultivo:",
+                  badge: "Bacteriuria Asintomática",
+                  value: baselineData.urineCultureResult || "Negativo",
+                  onChange: (val) => setBaselineData({ ...baselineData, urineCultureResult: val }),
+                  dateValue: baselineData.urineCultureDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, urineCultureDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "BK en Espuro:",
+                  badge: "BK Esputo / TBC",
+                  value: baselineData.bkSputumResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, bkSputumResult: val }),
+                  dateValue: baselineData.bkSputumDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, bkSputumDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Listeria:",
+                  value: baselineData.listeriaResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, listeriaResult: val }),
+                  dateValue: baselineData.listeriaDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, listeriaDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Tamizaje: Hepatitis B:",
+                  badge: "HBsAg",
+                  value: baselineData.hepatitisBResult || "Negativo",
+                  onChange: (val) => setBaselineData({ ...baselineData, hepatitisBResult: val }),
+                  dateValue: baselineData.hepatitisBDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hepatitisBDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+              </div>
+            </div>
+
+            {/* BLOQUE F: TAMIZAJE CERVICAL EN GESTANTES */}
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
+              <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
+                  <Stethoscope className="w-3.5 h-3.5 text-cyan-600" />
+                  Tamizaje de Cáncer de Cuello Uterino en Gestantes
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Descarte Neoplasia Cervical</span>
+              </div>
+
+              <div className="space-y-2">
+                {renderLabRow({
+                  label: "PAP:",
+                  badge: "Papanicolaou",
+                  value: baselineData.papTestResult || "Normal",
+                  onChange: (val) => setBaselineData({ ...baselineData, papTestResult: val }),
+                  dateValue: baselineData.papTestDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, papTestDate: d }),
+                  safeText: "Normal",
+                  alertText: "Anormal",
+                })}
+
+                {renderLabRow({
+                  label: "IVAA:",
+                  badge: "Ácido Acético",
+                  value: baselineData.ivaaResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, ivaaResult: val }),
+                  dateValue: baselineData.ivaaDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, ivaaDate: d }),
+                  safeText: "Normal",
+                  alertText: "Anormal",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Colposcopia:",
+                  value: baselineData.colposcopyResult || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, colposcopyResult: val }),
+                  dateValue: baselineData.colposcopyDate,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, colposcopyDate: d }),
+                  safeText: "Normal",
+                  alertText: "Anormal",
+                  hasNoApplies: true,
+                })}
+              </div>
+            </div>
+
+          </div>
+
+          {/* 9.4 Banners de Protocolo Clínico & Alertas Patológicas */}
+          {labPathologicalAlerts.length > 0 && (
+            <div className="p-4 rounded-xl bg-amber-100 border border-amber-300 space-y-2">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-800 shrink-0" />
+                <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                  Alertas Patológicas Detectadas en Laboratorio ({labPathologicalAlerts.length}):
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {labPathologicalAlerts.map((al) => (
+                  <span key={al} className="px-2.5 py-1 rounded-md text-xs font-black bg-amber-300 border border-amber-500 text-amber-950 shadow-2xs">
+                    {al}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[11px] text-amber-900 pt-1">
+                <strong>Conducta Inmediata:</strong> Si VDRL/Sífilis reactivo, iniciar Penicilina Benzatínica 2.4 MUI según esquema MINSA para gestante y pareja. Si Urocultivo positivo, iniciar antibioticoterapia para prevención de parto prematuro y corioamnionitis. Si VIH reactivo, activar protocolo TARV materno.
+              </p>
+            </div>
+          )}
+
+          {/* Nota Normativa MINSA NTS N° 105 */}
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5 text-[11px] text-slate-600">
+            <BookOpen className="w-4 h-4 text-cyan-700 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-slate-800 uppercase text-[10px] block">
+                Norma Técnica de Salud MINSA &bull; Batería de Laboratorio CPN (NTS N° 105)
+              </span>
+              <p className="mt-0.5">
+                Toda gestante debe contar en su primera atención prenatal con hemoglobina basal, glicemia en ayunas, tamizaje de sífilis (VDRL/PR), prueba rápida de VIH con consejería previa, tamizaje de Hepatitis B (HBsAg), urocultivo o examen de orina completo para despistaje de bacteriuria asintomática, y tamizaje de cáncer de cuello uterino (PAP).
+              </p>
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
   );
 }
