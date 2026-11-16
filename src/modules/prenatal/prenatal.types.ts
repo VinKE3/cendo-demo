@@ -35,12 +35,27 @@ export interface PrenatalVisitItem {
 }
 
 export interface PrenatalBaselineData {
+  // Sección 1: Filiación y Ubigeo
+  establishmentOrigin?: string;
+  originNoApplies?: boolean;
+  originReferral?: boolean;
   insuranceType: "SIS" | "ESSALUD" | "PRIVADO" | "No Aplica";
   insuranceCode?: string;
+  insuranceAffiliationCode?: string;
   educationLevel: "Analfabeta" | "Primaria" | "Secundaria" | "Superior No Univ" | "Superior Univ";
+  approvedEducationYears?: number;
   civilStatus: "Soltera" | "Casada" | "Conviviente" | "Otro";
   fatherName?: string;
   fatherDni?: string;
+  locality?: string;
+  healthSectorCode?: string;
+  department?: string;
+  province?: string;
+  district?: string;
+  patientAddress?: string;
+  patientPhone?: string;
+  patientEmail?: string;
+  patientOccupation?: string;
   gestas: number;
   abortos: number;
   partosVaginales: number;
