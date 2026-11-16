@@ -1851,7 +1851,7 @@ export function PrenatalCardModal({
     onClose();
   };
 
-  // Helper de renderizado para cada fila de laboratorio del Carnet MINSA
+  // Helper de renderizado para cada fila de laboratorio del Carnet MINSA (Estructura en 2 líneas para cero solapamiento)
   const renderLabRow = ({
     label,
     value,
@@ -1886,119 +1886,147 @@ export function PrenatalCardModal({
 
     return (
       <div
-        className={`p-2.5 rounded-lg border transition-all flex flex-col md:flex-row md:items-center justify-between gap-2.5 ${
+        className={`p-3 rounded-xl border transition-all space-y-2.5 ${
           isAlert
-            ? "bg-amber-100/70 border-amber-400 ring-1 ring-amber-300 shadow-2xs"
+            ? "bg-amber-50/80 border-amber-400 ring-1 ring-amber-300 shadow-2xs"
             : isNotDone
-            ? "bg-amber-50/40 border-amber-200"
+            ? "bg-amber-50/30 border-amber-200"
             : "bg-white border-slate-200 hover:border-slate-300"
         }`}
       >
-        {/* Etiqueta del examen */}
-        <div className="flex items-center gap-1.5 min-w-[130px] shrink-0">
-          <span className="text-xs font-bold text-slate-800">{label}</span>
-          {badge && (
-            <span className="text-[10px] text-slate-500 font-mono italic">({badge})</span>
-          )}
+        {/* Línea 1: Nombre de la prueba y estado actual */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-900">{label}</span>
+            {badge && (
+              <span className="text-[10px] text-slate-500 font-mono italic">({badge})</span>
+            )}
+          </div>
+
+          <div>
+            {isSafe && (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                {safeText} [ ]
+              </span>
+            )}
+            {isAlert && (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-300 text-amber-950 border border-amber-500 shadow-2xs">
+                {alertText} [🟨 ALERTA]
+              </span>
+            )}
+            {isNotDone && (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                No se Hizo [🟨 ALERTA]
+              </span>
+            )}
+            {isNoApplies && (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
+                No Aplica [ ]
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Segmented Selector idéntico a las casillas del Carnet */}
-        <div className="flex items-center gap-1 flex-wrap shrink-0">
-          {/* Opción 1: Seguro (Normal / Negativo / No reactivo) */}
-          <button
-            type="button"
-            onClick={() => onChange(safeText)}
-            className={`px-2 py-1 rounded border text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
-              isSafe
-                ? "bg-emerald-100 border-emerald-500 text-emerald-950 shadow-2xs"
-                : "bg-white hover:bg-slate-50 border-slate-300 text-slate-700"
-            }`}
-          >
-            <span className="w-2.5 h-2.5 rounded-xs bg-white border border-slate-400 inline-block shrink-0" />
-            <span>{safeText}</span>
-            <span className="text-[9px] font-mono text-slate-500">[ ]</span>
-          </button>
-
-          {/* Opción 2: Alerta (Anormal / Positivo / Reactivo) */}
-          <button
-            type="button"
-            onClick={() => onChange(alertText)}
-            className={`px-2 py-1 rounded border text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
-              isAlert
-                ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
-                : "bg-amber-50/50 hover:bg-amber-100 border-amber-200 text-amber-900"
-            }`}
-          >
-            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
-            <span>{alertText}</span>
-            <span className="text-[9px] font-mono text-amber-900">[🟨]</span>
-          </button>
-
-          {/* Opción 3: No se Hizo */}
-          <button
-            type="button"
-            onClick={() => onChange("No se Hizo")}
-            className={`px-2 py-1 rounded border text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
-              isNotDone
-                ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
-                : "bg-amber-50/50 hover:bg-amber-100 border-amber-200 text-amber-900"
-            }`}
-          >
-            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
-            <span>No se Hizo</span>
-            <span className="text-[9px] font-mono text-amber-900">[🟨]</span>
-          </button>
-
-          {/* Opción 4: No se Aplica */}
-          {hasNoApplies && (
+        {/* Línea 2: Casillas de selección + Valor Numérico + Fecha */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-0.5">
+          {/* Botones de selección directa */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Opción 1: Seguro (Normal / Negativo / No reactivo) */}
             <button
               type="button"
-              onClick={() => onChange("No se Aplica")}
-              className={`px-2 py-1 rounded border text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                isNoApplies
-                  ? "bg-slate-200 border-slate-500 text-slate-900 shadow-2xs"
-                  : "bg-white hover:bg-slate-50 border-slate-300 text-slate-600"
+              onClick={() => onChange(safeText)}
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                isSafe
+                  ? "bg-emerald-100 border-emerald-500 text-emerald-950 shadow-2xs ring-1 ring-emerald-300"
+                  : "bg-white hover:bg-slate-50 border-slate-300 text-slate-700"
               }`}
             >
-              <span className="w-2.5 h-2.5 rounded-xs bg-white border border-slate-400 inline-block shrink-0" />
-              <span>No Aplica</span>
-              <span className="text-[9px] font-mono text-slate-500">[ ]</span>
+              <span className="w-3 h-3 rounded-xs bg-white border border-slate-400 inline-block shrink-0" />
+              <span>{safeText}</span>
+              <span className="text-[10px] font-mono text-slate-500">[ ]</span>
             </button>
-          )}
-        </div>
 
-        {/* Input Numérico Opcional y Fecha */}
-        <div className="flex items-center gap-2 shrink-0">
-          {numericUnit && (
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                value={numericVal !== undefined ? numericVal : ""}
-                onChange={(e) => onNumericChange?.(e.target.value ? parseFloat(e.target.value) : undefined)}
-                placeholder="0"
-                className="w-14 text-xs font-mono font-bold px-1.5 py-1 rounded border border-slate-300 bg-slate-50 text-slate-800 text-center"
-              />
-              <span className="text-[10px] text-slate-500 font-mono">{numericUnit}</span>
-            </div>
-          )}
+            {/* Opción 2: Alerta (Anormal / Positivo / Reactivo) */}
+            <button
+              type="button"
+              onClick={() => onChange(alertText)}
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                isAlert
+                  ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
+                  : "bg-amber-50/60 hover:bg-amber-100 border-amber-200 text-amber-900"
+              }`}
+            >
+              <span className="w-3 h-3 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
+              <span>{alertText}</span>
+              <span className="text-[10px] font-mono text-amber-900">[🟨]</span>
+            </button>
 
-          {onDateChange && (
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-slate-500 font-mono">Fecha:</span>
-              <input
-                type="date"
-                value={dateValue || ""}
-                onChange={(e) => onDateChange(e.target.value)}
-                className="text-[11px] font-mono px-1.5 py-0.5 rounded border border-slate-300 bg-slate-50 text-slate-800"
-              />
-            </div>
-          )}
+            {/* Opción 3: No se Hizo */}
+            <button
+              type="button"
+              onClick={() => onChange("No se Hizo")}
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                isNotDone
+                  ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
+                  : "bg-amber-50/60 hover:bg-amber-100 border-amber-200 text-amber-900"
+              }`}
+            >
+              <span className="w-3 h-3 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
+              <span>No se Hizo</span>
+              <span className="text-[10px] font-mono text-amber-900">[🟨]</span>
+            </button>
+
+            {/* Opción 4: No se Aplica */}
+            {hasNoApplies && (
+              <button
+                type="button"
+                onClick={() => onChange("No se Aplica")}
+                className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isNoApplies
+                    ? "bg-slate-200 border-slate-500 text-slate-900 shadow-2xs ring-1 ring-slate-400"
+                    : "bg-white hover:bg-slate-50 border-slate-300 text-slate-600"
+                }`}
+              >
+                <span className="w-3 h-3 rounded-xs bg-white border border-slate-400 inline-block shrink-0" />
+                <span>No Aplica</span>
+                <span className="text-[10px] font-mono text-slate-500">[ ]</span>
+              </button>
+            )}
+          </div>
+
+          {/* Input Numérico Opcional y Fecha */}
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {numericUnit && (
+              <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">
+                <input
+                  type="number"
+                  value={numericVal !== undefined ? numericVal : ""}
+                  onChange={(e) => onNumericChange?.(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="0"
+                  className="w-16 text-xs font-mono font-bold px-1.5 py-0.5 rounded border border-slate-300 bg-white text-slate-800 text-center"
+                />
+                <span className="text-[11px] text-slate-600 font-mono font-semibold">{numericUnit}</span>
+              </div>
+            )}
+
+            {onDateChange && (
+              <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">
+                <span className="text-xs text-slate-600 font-mono">Fecha:</span>
+                <input
+                  type="date"
+                  value={dateValue || ""}
+                  onChange={(e) => onDateChange(e.target.value)}
+                  className="text-xs font-mono px-2 py-0.5 rounded border border-slate-300 bg-white text-slate-800"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
   };
 
-  // Helper de renderizado para Hemoglobina con casillas Hg(%)
+  // Helper de renderizado para Hemoglobina con casillas Hg(%) (Estructura en 2 líneas)
   const renderHemoglobinRow = ({
     label,
     val,
@@ -2021,21 +2049,22 @@ export function PrenatalCardModal({
 
     return (
       <div
-        className={`p-3 rounded-lg border transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+        className={`p-3.5 rounded-xl border transition-all space-y-2.5 ${
           isSevereAnemia
-            ? "bg-rose-50 border-rose-400 ring-1 ring-rose-300"
+            ? "bg-rose-50 border-rose-400 ring-1 ring-rose-300 shadow-2xs"
             : isAnemia
-            ? "bg-amber-50/80 border-amber-400 ring-1 ring-amber-300"
+            ? "bg-amber-50/80 border-amber-400 ring-1 ring-amber-300 shadow-2xs"
             : notDone
-            ? "bg-amber-50/40 border-amber-200"
-            : "bg-white border-slate-200"
+            ? "bg-amber-50/30 border-amber-200"
+            : "bg-white border-slate-200 hover:border-slate-300"
         }`}
       >
-        <div className="flex items-center gap-2 min-w-[140px] shrink-0">
-          <span className="text-xs font-bold text-slate-800">{label}</span>
-          {!notDone && typeof val === "number" && (
+        {/* Línea 1: Etiqueta y estado */}
+        <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
+          <span className="text-xs font-bold text-slate-900">{label}</span>
+          {!notDone && typeof val === "number" ? (
             <span
-              className={`text-[10px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider ${
+              className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
                 isSevereAnemia
                   ? "bg-rose-500 text-white"
                   : isAnemia
@@ -2043,15 +2072,20 @@ export function PrenatalCardModal({
                   : "bg-emerald-100 text-emerald-800"
               }`}
             >
-              {isSevereAnemia ? "Severa (<7)" : isAnemia ? "Anemia (<11)" : "Normal"}
+              {isSevereAnemia ? "Severa (<7 g/dL) [🟥]" : isAnemia ? "Anemia Gestacional (<11 g/dL) [🟨]" : "Normal (≥11 g/dL)"}
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+              No se Hizo [🟨 ALERTA]
             </span>
           )}
         </div>
 
-        {/* 3 Casillas [ ][ ].[ ] Hg(%) */}
-        <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] font-mono text-slate-500 font-bold">Hg(%):</span>
+        {/* Línea 2: Casillas Hg(%) + Botón No se Hizo + Fecha */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5">
+          {/* Casillas [ ][ ].[ ] Hg(%) */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold text-slate-700">Hg(%):</span>
             <input
               type="number"
               step="0.1"
@@ -2059,35 +2093,37 @@ export function PrenatalCardModal({
               value={val !== undefined ? val : ""}
               onChange={(e) => onValChange(e.target.value ? parseFloat(e.target.value) : undefined)}
               placeholder="12.0"
-              className="w-18 text-xs font-mono font-black text-center px-2 py-1 rounded border border-slate-300 bg-slate-50 disabled:bg-slate-100 disabled:text-slate-400"
+              className="w-20 text-xs font-mono font-black text-center px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 disabled:bg-slate-100 disabled:text-slate-400 shadow-2xs"
             />
-            <span className="text-[10px] text-slate-500 font-mono">g/dL</span>
+            <span className="text-xs font-mono text-slate-500 font-bold">g/dL</span>
           </div>
 
-          {/* No se Hizo [🟨] */}
-          <button
-            type="button"
-            onClick={() => onNotDoneChange(!notDone)}
-            className={`px-2.5 py-1 rounded border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-              notDone
-                ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
-                : "bg-amber-50/60 hover:bg-amber-100 border-amber-200 text-amber-900"
-            }`}
-          >
-            <span className="w-3 h-3 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
-            <span>No se Hizo</span>
-            <span className="text-[10px] font-mono text-amber-900">[🟨]</span>
-          </button>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* No se Hizo [🟨] */}
+            <button
+              type="button"
+              onClick={() => onNotDoneChange(!notDone)}
+              className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                notDone
+                  ? "bg-amber-300 border-amber-500 text-amber-950 shadow-2xs ring-1 ring-amber-400"
+                  : "bg-amber-50/60 hover:bg-amber-100 border-amber-200 text-amber-900"
+              }`}
+            >
+              <span className="w-3.5 h-3.5 rounded-xs bg-amber-400 border border-amber-600 inline-block shrink-0 shadow-2xs" />
+              <span>No se Hizo</span>
+              <span className="text-[10px] font-mono text-amber-900">[🟨]</span>
+            </button>
 
-          {/* Fecha */}
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] text-slate-500 font-mono">Fecha:</span>
-            <input
-              type="date"
-              value={dateVal || ""}
-              onChange={(e) => onDateChange(e.target.value)}
-              className="text-[11px] font-mono px-2 py-1 rounded border border-slate-300 bg-slate-50 text-slate-800"
-            />
+            {/* Fecha */}
+            <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">
+              <span className="text-xs text-slate-600 font-mono">Fecha:</span>
+              <input
+                type="date"
+                value={dateVal || ""}
+                onChange={(e) => onDateChange(e.target.value)}
+                className="text-xs font-mono px-2 py-0.5 rounded border border-slate-300 bg-white text-slate-800"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -5746,13 +5782,8 @@ export function PrenatalCardModal({
                   </div>
                 </div>
 
-                {/* 9.3 Grid de Laboratorio (2 Grandes Columnas para Cero Solapamiento) */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                  
-                  {/* ========================================================
-                      COLUMNA IZQUIERDA: HEMOGLOBINA, GLICEMIA & ITS (SÍFILIS/VIH)
-                      ======================================================== */}
-                  <div className="space-y-4">
+                {/* 9.3 Bloques de Laboratorio en Cascada (Uno debajo del otro para máxima legibilidad y cero solapamiento) */}
+                <div className="space-y-5">
                     
                     {/* BLOQUE A: HEMOGLOBINA Hg(%) */}
                     <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
@@ -5953,13 +5984,6 @@ export function PrenatalCardModal({
                       </div>
                     </div>
 
-                  </div>
-
-                  {/* ========================================================
-                      COLUMNA DERECHA: INFECCIONES ESPECIALES, ORINA & CUELLO
-                      ======================================================== */}
-                  <div className="space-y-4">
-                    
                     {/* BLOQUE D: INFECCIONES ESPECIALES & VECTORES */}
                     <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
                       <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
@@ -6176,8 +6200,6 @@ export function PrenatalCardModal({
                         })}
                       </div>
                     </div>
-
-                  </div>
 
                 </div>
 
