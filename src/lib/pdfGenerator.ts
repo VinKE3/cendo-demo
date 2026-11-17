@@ -100,14 +100,12 @@ export function printHtmlElement(elementId: string, documentTitle: string) {
           }
           .page-sheet {
             width: 210mm !important;
-            height: 297mm !important;
-            max-height: 297mm !important;
+            min-height: 297mm !important;
             box-sizing: border-box !important;
-            page-break-after: always !important;
-            break-after: page !important;
+            page-break-after: auto !important;
+            break-after: auto !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-            overflow: hidden !important;
           }
           .page-sheet:last-child {
             page-break-after: avoid !important;

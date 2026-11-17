@@ -36,7 +36,7 @@ import {
   LabTemplateType,
   LabSpecimenDetails,
 } from "@/types/medical";
-import { useMedicalStore } from "@/store/useMedicalStore";
+import { useMedicalStore, INITIAL_DOCTOR } from "@/store/useMedicalStore";
 import { validateLabOrderInput } from "@/modules/laboratorio";
 import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
 import { getPeruDateString } from "@/lib/utils";
@@ -217,7 +217,57 @@ export function LabOrderModal({
 
   const todayStr = getPeruDateString();
 
-  const defaultDoctorId = doctorProfile?.id || doctorsList[0]?.id || "doc-patrick-jacinto";
+  // Lista unificada de médicos disponibles asegurando al Director Médico
+  const availableDoctors = React.useMemo(() => {
+    const list = doctorsList && doctorsList.length > 0 ? [...doctorsList] : [];
+    if (doctorProfile && !list.some((d) => d.id === doctorProfile.id || d.email === doctorProfile.email)) {
+      list.unshift(doctorProfile);
+    }
+    if (list.length === 0 && INITIAL_DOCTOR) {
+      list.push(INITIAL_DOCTOR);
+    }
+    return list;
+  }, [doctorsList, doctorProfile]);
+
+  const resolveDoctorId = React.useCallback(
+    (candidateId?: string, candidateName?: string): string => {
+      if (!availableDoctors.length) return "doc-patrick-jacinto";
+
+      // 1. Coincidencia exacta por ID
+      if (candidateId) {
+        const byId = availableDoctors.find((d) => d.id === candidateId);
+        if (byId) return byId.id;
+      }
+
+      // 2. Si candidateId es el alias inicial "doc-patrick-jacinto" o vacío
+      if (candidateId === "doc-patrick-jacinto" || !candidateId) {
+        const patrick = availableDoctors.find(
+          (d) =>
+            d.id === "doc-patrick-jacinto" ||
+            d.fullName.toLowerCase().includes("patrick") ||
+            d.email.toLowerCase().includes("cendo")
+        );
+        if (patrick) return patrick.id;
+      }
+
+      // 3. Coincidencia por nombre de médico
+      if (candidateName) {
+        const clean = candidateName.replace(/^dr\.?\s+/i, "").toLowerCase().trim();
+        const byName = availableDoctors.find(
+          (d) =>
+            d.fullName.toLowerCase().includes(clean) ||
+            clean.includes(d.fullName.toLowerCase())
+        );
+        if (byName) return byName.id;
+      }
+
+      // 4. Fallback al médico activo o al primero
+      return doctorProfile?.id || availableDoctors[0]?.id || "doc-patrick-jacinto";
+    },
+    [availableDoctors, doctorProfile]
+  );
+
+  const defaultDoctorId = resolveDoctorId(doctorProfile?.id, doctorProfile?.fullName);
 
   const {
     register,
@@ -249,9 +299,10 @@ export function LabOrderModal({
   // Cargar datos en edición o modo nuevo
   useEffect(() => {
     if (initialData) {
+      const resolvedDocId = resolveDoctorId(initialData.doctorId, initialData.doctorName);
       reset({
         patientId: initialData.patientId,
-        doctorId: initialData.doctorId || defaultDoctorId,
+        doctorId: resolvedDocId,
         orderDate: initialData.orderDate || todayStr,
         diagnosis: initialData.diagnosis || "",
         cie10Code: initialData.cie10Code || "Z01.4",
@@ -326,7 +377,10 @@ export function LabOrderModal({
   if (!isOpen) return null;
 
   const currentPatient = patients.find((p) => p.id === selectedPatientId);
-  const currentDoctor = doctorsList.find((d) => d.id === selectedDoctorId) || doctorProfile;
+  const currentDoctor =
+    availableDoctors.find((d) => d.id === selectedDoctorId) ||
+    doctorProfile ||
+    availableDoctors[0];
 
   const toggleTest = (test: CatalogTest) => {
     const isAlreadySelected = selectedItems.some((item) => item.testName === test.name);
@@ -593,7 +647,7 @@ export function LabOrderModal({
                   {...register("doctorId")}
                   className="w-full px-3 py-2 text-xs font-semibold rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
                 >
-                  {doctorsList.map((doc) => (
+                  {availableDoctors.map((doc) => (
                     <option key={doc.id} value={doc.id}>
                       {doc.doctorTitle || "Dr."} {doc.fullName} (CMP {doc.cmp})
                     </option>

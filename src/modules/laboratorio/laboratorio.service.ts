@@ -54,7 +54,7 @@ export async function fetchLabOrdersFromSupabase(
     return {
       id: row.id,
       patientId: row.patient_id,
-      doctorId: row.doctor_id || "",
+      doctorId: row.doctor_id || "doc-patrick-jacinto",
       doctorName: row.doctor_name,
       doctorCmp: row.doctor_cmp,
       doctorRne: row.doctor_rne || undefined,

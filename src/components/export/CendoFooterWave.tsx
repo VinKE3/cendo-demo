@@ -7,15 +7,17 @@ interface CendoFooterWaveProps {
   address?: string;
   email?: string;
   phone?: string;
+  className?: string;
 }
 
 export function CendoFooterWave({
   address = "Alfredo Benavides N° 2975, Of. 405 / Miraflores - Lima",
   email = "cendoperu@gmail.com",
   phone = "985 945 697",
+  className,
 }: CendoFooterWaveProps) {
   return (
-    <div className="w-full mt-6 relative select-none">
+    <div className={`w-full relative select-none ${className || "mt-6"}`}>
       {/* Línea decorativa curva o franja dorada superior */}
       <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 rounded-t-full shadow-xs" />
 
