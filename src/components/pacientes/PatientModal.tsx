@@ -29,49 +29,17 @@ import {
 } from "@/modules/pacientes";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { getPeruDateString } from "@/lib/utils";
+import {
+  EDUCATION_LEVEL_CATALOG,
+  CIVIL_STATUS_CATALOG,
+  resolveEducationLevel,
+  resolveCivilStatus,
+} from "@/constants/clinicalCatalogs";
 
-export const EDUCATION_LEVEL_OPTIONS = [
-  "Superior Universitaria Completa",
-  "Superior Universitaria Incompleta",
-  "Superior Técnica Completa",
-  "Superior Técnica Incompleta",
-  "Posgrado / Maestría",
-  "Secundaria Completa",
-  "Secundaria Incompleta",
-  "Primaria Completa",
-  "Primaria Incompleta",
-  "Sin Instrucción",
-] as const;
+export const EDUCATION_LEVEL_OPTIONS = EDUCATION_LEVEL_CATALOG.map((item) => item.label);
 
 export function normalizeEducationLevel(val?: string | null): string {
-  if (!val) return "Superior Universitaria Completa";
-  const clean = val.trim();
-  if (EDUCATION_LEVEL_OPTIONS.includes(clean as any)) return clean;
-
-  const lower = clean.toLowerCase();
-  if (lower.includes("postgrado") || lower.includes("posgrado") || lower.includes("maestr") || lower.includes("doctorado")) {
-    return "Posgrado / Maestría";
-  }
-  if (lower.includes("universitaria") || lower.includes("superior univ")) {
-    if (lower.includes("incompleta")) return "Superior Universitaria Incompleta";
-    return "Superior Universitaria Completa";
-  }
-  if (lower.includes("téc") || lower.includes("tec") || lower.includes("no univ")) {
-    if (lower.includes("incompleta")) return "Superior Técnica Incompleta";
-    return "Superior Técnica Completa";
-  }
-  if (lower.includes("secundaria")) {
-    if (lower.includes("incompleta")) return "Secundaria Incompleta";
-    return "Secundaria Completa";
-  }
-  if (lower.includes("primaria")) {
-    if (lower.includes("incompleta")) return "Primaria Incompleta";
-    return "Primaria Completa";
-  }
-  if (lower.includes("analfabeta") || lower.includes("sin instrucc")) {
-    return "Sin Instrucción";
-  }
-  return clean;
+  return resolveEducationLevel(val).label;
 }
 
 interface PatientModalProps {
@@ -134,9 +102,9 @@ export function PatientModal({
           phone: initialData.phone || "",
           email: initialData.email || "",
           address: initialData.address || "",
-          civilStatus: initialData.civilStatus || "Soltera",
+          civilStatus: resolveCivilStatus(initialData.civilStatus).label,
           occupation: initialData.occupation || "",
-          educationLevel: normalizeEducationLevel(initialData.educationLevel),
+          educationLevel: resolveEducationLevel(initialData.educationLevel).label,
           birthPlace: initialData.birthPlace || "",
           religion: initialData.religion || "Católica",
         });
@@ -151,7 +119,7 @@ export function PatientModal({
           address: "",
           civilStatus: "Soltera",
           occupation: "",
-          educationLevel: "Superior Universitaria Completa",
+          educationLevel: resolveEducationLevel("Superior Universitaria Completa").label,
           birthPlace: "Lima, Perú",
           religion: "Católica",
         });
@@ -503,11 +471,11 @@ export function PatientModal({
                 {...register("civilStatus")}
                 className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-xs font-medium text-heading focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
-                <option value="Soltera">Soltera</option>
-                <option value="Casada">Casada</option>
-                <option value="Conviviente">Conviviente</option>
-                <option value="Divorciada">Divorciada</option>
-                <option value="Viuda">Viuda</option>
+                {CIVIL_STATUS_CATALOG.map((status) => (
+                  <option key={status.id} value={status.label}>
+                    {status.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -539,12 +507,12 @@ export function PatientModal({
                   {...register("educationLevel")}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-xs font-medium text-heading focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
-                  {watchEducation && !EDUCATION_LEVEL_OPTIONS.includes(watchEducation as any) && (
+                  {watchEducation && !EDUCATION_LEVEL_CATALOG.some((item) => item.label === watchEducation) && (
                     <option value={watchEducation}>{watchEducation}</option>
                   )}
-                  {EDUCATION_LEVEL_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
+                  {EDUCATION_LEVEL_CATALOG.map((item) => (
+                    <option key={item.id} value={item.label}>
+                      {item.label}
                     </option>
                   ))}
                 </select>

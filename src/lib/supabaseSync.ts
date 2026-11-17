@@ -40,6 +40,13 @@ import {
   deleteUltrasoundReportFromSupabase,
 } from "@/modules/ecografias";
 import {
+  resolveEducationLevel,
+  resolveCivilStatus,
+  resolveInsurance,
+  resolveContraceptive,
+  resolveAnesthesia,
+} from "@/constants/clinicalCatalogs";
+import {
   saveMinorProcedureToSupabase,
   deleteMinorProcedureFromSupabase as deleteMinorProcedureService,
 } from "@/modules/procedimientos";
@@ -1073,12 +1080,12 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
           phone: row.phone || "",
           email: row.email || "",
           address: row.address || "",
-          civilStatus: row.civil_status || "Soltera",
+          civilStatus: resolveCivilStatus(row.civil_status).label,
           occupation: row.occupation || "Profesional independiente",
-          educationLevel: row.education_level || "Superior Universitaria Completa",
+          educationLevel: resolveEducationLevel(row.education_level).label,
           birthPlace: row.birth_place || "Lima, Perú",
           religion: row.religion || "Católica",
-          insuranceInfo: row.insurance_info || "Particular",
+          insuranceInfo: resolveInsurance(row.insurance_info).label,
           createdAt: row.created_at || new Date().toISOString(),
           updatedAt: row.updated_at || new Date().toISOString(),
         };
@@ -1104,7 +1111,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
           catamenialRegimen: row.catamenial_regimen || "28/4",
           stiHistory: row.sti_history || "Niega ITS",
           obstetricFormula: row.obstetric_formula || "G0 P0000",
-          contraceptiveMethod: row.contraceptive_method || "Ninguno",
+          contraceptiveMethod: resolveContraceptive(row.contraceptive_method).label,
           lastMenstrualPeriod: row.last_menstrual_period ? String(row.last_menstrual_period).slice(0, 10) : "",
           papHistory: row.pap_history || "Sin antecedentes",
           vphTestHistory: row.vph_test_history || "Sin antecedentes",
@@ -1282,7 +1289,7 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
         preOpDiagnosis: row.pre_op_diagnosis || "",
         postOpDiagnosis: row.post_op_diagnosis || "",
         cie10Code: row.cie10_code || undefined,
-        anesthesiaType: row.anesthesia_type || "Local (Lidocaína 2%)",
+        anesthesiaType: resolveAnesthesia(row.anesthesia_type).label as any,
         procedureDetails: typeof row.procedure_details === "string" ? JSON.parse(row.procedure_details) : (row.procedure_details || {
           asepsisTechnique: "Asepsia y antisepsia con povidona yodada.",
           specimenSentToPathology: true,

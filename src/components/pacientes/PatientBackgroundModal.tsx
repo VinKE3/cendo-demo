@@ -24,6 +24,10 @@ import {
   STANDARD_CONTRACEPTIVE_OPTIONS,
   calculateGestationalAgeFromFur,
 } from "@/modules/antecedentes";
+import {
+  CONTRACEPTIVE_CATALOG,
+  resolveContraceptive,
+} from "@/constants/clinicalCatalogs";
 import { useMedicalStore } from "@/store/useMedicalStore";
 
 interface PatientBackgroundModalProps {
@@ -78,11 +82,12 @@ export function PatientBackgroundModal({
 
   // Lista dinámica de opciones que asegura que el valor actual de la paciente nunca quede vacío
   const availableMacOptions = useMemo(() => {
-    const current = initialData?.contraceptiveMethod?.trim();
-    if (current && !STANDARD_CONTRACEPTIVE_OPTIONS.some((o) => o.toLowerCase() === current.toLowerCase())) {
-      return [current, ...STANDARD_CONTRACEPTIVE_OPTIONS];
+    const catalogOptions = CONTRACEPTIVE_CATALOG.filter((c) => c.id !== "OTRO").map((c) => c.label);
+    const resolved = resolveContraceptive(initialData?.contraceptiveMethod);
+    if (resolved.id === "OTRO" && resolved.label && !catalogOptions.includes(resolved.label)) {
+      return [resolved.label, ...catalogOptions];
     }
-    return STANDARD_CONTRACEPTIVE_OPTIONS;
+    return catalogOptions;
   }, [initialData?.contraceptiveMethod]);
 
   // Calculadora Automática de Semanas / Días por FUR
@@ -101,7 +106,7 @@ export function PatientBackgroundModal({
           sexualPartnersCount: initialData.sexualPartnersCount ?? 1,
           catamenialRegimen: initialData.catamenialRegimen || "28/4",
           stiHistory: initialData.stiHistory || "Niega ITS",
-          contraceptiveMethod: initialData.contraceptiveMethod || "Ninguno",
+          contraceptiveMethod: resolveContraceptive(initialData.contraceptiveMethod).label,
           lastMenstrualPeriod: initialData.lastMenstrualPeriod || "",
           papHistory: initialData.papHistory || "No refiere",
           vphTestHistory: initialData.vphTestHistory || "No realizado",

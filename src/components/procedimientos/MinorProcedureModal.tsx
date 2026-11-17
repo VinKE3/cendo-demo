@@ -21,6 +21,14 @@ import {
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateMinorProcedureWhatsAppUrl } from "@/lib/whatsappShare";
 import { getPeruDateString } from "@/lib/utils";
+import {
+  ANESTHESIA_CATALOG,
+  BLEEDING_CATALOG,
+  HEMOSTASIS_CATALOG,
+  resolveAnesthesia,
+  resolveBleeding,
+  resolveHemostasis,
+} from "@/constants/clinicalCatalogs";
 
 interface MinorProcedureModalProps {
   isOpen: boolean;
@@ -112,13 +120,13 @@ export function MinorProcedureModal({
       setPreOpDiagnosis(procedureToEdit.preOpDiagnosis);
       setPostOpDiagnosis(procedureToEdit.postOpDiagnosis);
       setCie10Code(procedureToEdit.cie10Code || "");
-      setAnesthesiaType(procedureToEdit.anesthesiaType);
+      setAnesthesiaType(resolveAnesthesia(procedureToEdit.anesthesiaType).label as any);
       setAsepsisTechnique(procedureToEdit.procedureDetails.asepsisTechnique);
       setBiopsySites(procedureToEdit.procedureDetails.biopsySites || "");
       setSpecimenSentToPathology(procedureToEdit.procedureDetails.specimenSentToPathology);
       setSpecimenDescription(procedureToEdit.procedureDetails.specimenDescription || "");
-      setBleedingAmount(procedureToEdit.procedureDetails.bleedingAmount);
-      setHemostasisMethod(procedureToEdit.procedureDetails.hemostasisMethod);
+      setBleedingAmount(resolveBleeding(procedureToEdit.procedureDetails.bleedingAmount).label as any);
+      setHemostasisMethod(resolveHemostasis(procedureToEdit.procedureDetails.hemostasisMethod).label as any);
       setComplications(procedureToEdit.procedureDetails.complications || "Ninguna.");
       setPostOpIndications(procedureToEdit.postOpIndications);
       setMedicationsPrescribed(procedureToEdit.medicationsPrescribed || "");
@@ -328,10 +336,11 @@ export function MinorProcedureModal({
                   onChange={(e) => setAnesthesiaType(e.target.value as any)}
                   className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs focus:border-rose-600"
                 >
-                  <option value="Local (Lidocaína 2%)">Local (Lidocaína 2%)</option>
-                  <option value="Sedación">Sedación</option>
-                  <option value="Sin Anestesia">Sin Anestesia</option>
-                  <option value="Tópica">Tópica</option>
+                  {ANESTHESIA_CATALOG.map((a) => (
+                    <option key={a.id} value={a.label}>
+                      {a.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -342,9 +351,11 @@ export function MinorProcedureModal({
                   onChange={(e) => setBleedingAmount(e.target.value as any)}
                   className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs focus:border-rose-600"
                 >
-                  <option value="Mínimo (< 10 ml)">Mínimo (&lt; 10 ml)</option>
-                  <option value="Escaso">Escaso</option>
-                  <option value="Moderado">Moderado</option>
+                  {BLEEDING_CATALOG.map((b) => (
+                    <option key={b.id} value={b.label}>
+                      {b.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -355,10 +366,11 @@ export function MinorProcedureModal({
                   onChange={(e) => setHemostasisMethod(e.target.value as any)}
                   className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs focus:border-rose-600"
                 >
-                  <option value="Solución de Monsel">Solución de Monsel</option>
-                  <option value="Electrocoagulación">Electrocoagulación</option>
-                  <option value="Compresión">Compresión</option>
-                  <option value="Sutura">Sutura</option>
+                  {HEMOSTASIS_CATALOG.map((h) => (
+                    <option key={h.id} value={h.label}>
+                      {h.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 

@@ -27,6 +27,11 @@ import {
 } from "@/lib/prenatalCalculators";
 import { getPeruDateString, shiftPeruDate } from "@/lib/utils";
 import { CLINIC_DOCTORS, parseObstetricFormula, DigitGrid } from "./prenatalHelpers";
+import {
+  toPrenatalEducationLevel,
+  toPrenatalCivilStatus,
+  toPrenatalInsuranceType,
+} from "@/constants/clinicalCatalogs";
 
 import { Section1Filiacion } from "./sections/Section1Filiacion";
 import { Section2Obstetricos } from "./sections/Section2Obstetricos";
@@ -102,12 +107,12 @@ export function PrenatalCardModal({
     establishmentOrigin: "CENDO - Miraflores",
     originNoApplies: true,
     originReferral: false,
-    insuranceType: patient.insuranceInfo?.toUpperCase().includes("EPS") ? "PRIVADO" : "SIS",
+    insuranceType: toPrenatalInsuranceType(patient.insuranceInfo),
     insuranceCode: `CENDO-${patient.dni}`,
     insuranceAffiliationCode: `CENDO-${patient.dni}`,
-    educationLevel: "Superior Univ",
+    educationLevel: toPrenatalEducationLevel(patient.educationLevel),
     approvedEducationYears: 5,
-    civilStatus: (patient.civilStatus === "Casada" || patient.civilStatus === "Conviviente" || patient.civilStatus === "Soltera" ? patient.civilStatus : "Soltera") as any,
+    civilStatus: toPrenatalCivilStatus(patient.civilStatus),
     fatherName: "",
     fatherDni: "",
     locality: "Miraflores",
@@ -259,10 +264,9 @@ export function PrenatalCardModal({
     const fum = bg?.lastMenstrualPeriod || baselineData.fum || "2026-09-26";
     const fpp = calculateNaegeleFPP(fum);
 
-    const validCivilStatus: "Soltera" | "Casada" | "Conviviente" | "Otro" =
-      patient.civilStatus === "Casada" || patient.civilStatus === "Conviviente" || patient.civilStatus === "Soltera"
-        ? patient.civilStatus
-        : "Soltera";
+    const validCivilStatus = toPrenatalCivilStatus(patient.civilStatus);
+    const validEducationLevel = toPrenatalEducationLevel(patient.educationLevel);
+    const validInsuranceType = toPrenatalInsuranceType(patient.insuranceInfo);
 
     const initialFamilyHistory: string[] = [];
     const initialFamilyDetails: Record<string, string> = {};
@@ -293,6 +297,8 @@ export function PrenatalCardModal({
       patientEmail: patient.email || prev.patientEmail,
       patientOccupation: patient.occupation || prev.patientOccupation,
       civilStatus: validCivilStatus,
+      educationLevel: validEducationLevel,
+      insuranceType: validInsuranceType,
       gestas: formula.gestas,
       abortos: formula.abortos,
       partosVaginales: formula.partosVaginales,
