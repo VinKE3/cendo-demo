@@ -30,6 +30,50 @@ import {
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { getPeruDateString } from "@/lib/utils";
 
+export const EDUCATION_LEVEL_OPTIONS = [
+  "Superior Universitaria Completa",
+  "Superior Universitaria Incompleta",
+  "Superior Técnica Completa",
+  "Superior Técnica Incompleta",
+  "Posgrado / Maestría",
+  "Secundaria Completa",
+  "Secundaria Incompleta",
+  "Primaria Completa",
+  "Primaria Incompleta",
+  "Sin Instrucción",
+] as const;
+
+export function normalizeEducationLevel(val?: string | null): string {
+  if (!val) return "Superior Universitaria Completa";
+  const clean = val.trim();
+  if (EDUCATION_LEVEL_OPTIONS.includes(clean as any)) return clean;
+
+  const lower = clean.toLowerCase();
+  if (lower.includes("postgrado") || lower.includes("posgrado") || lower.includes("maestr") || lower.includes("doctorado")) {
+    return "Posgrado / Maestría";
+  }
+  if (lower.includes("universitaria") || lower.includes("superior univ")) {
+    if (lower.includes("incompleta")) return "Superior Universitaria Incompleta";
+    return "Superior Universitaria Completa";
+  }
+  if (lower.includes("téc") || lower.includes("tec") || lower.includes("no univ")) {
+    if (lower.includes("incompleta")) return "Superior Técnica Incompleta";
+    return "Superior Técnica Completa";
+  }
+  if (lower.includes("secundaria")) {
+    if (lower.includes("incompleta")) return "Secundaria Incompleta";
+    return "Secundaria Completa";
+  }
+  if (lower.includes("primaria")) {
+    if (lower.includes("incompleta")) return "Primaria Incompleta";
+    return "Primaria Completa";
+  }
+  if (lower.includes("analfabeta") || lower.includes("sin instrucc")) {
+    return "Sin Instrucción";
+  }
+  return clean;
+}
+
 interface PatientModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -64,11 +108,13 @@ export function PatientModal({
       address: "",
       civilStatus: "Soltera",
       occupation: "",
-      educationLevel: "Superior Universitaria",
+      educationLevel: "Superior Universitaria Completa",
       birthPlace: "Lima, Perú",
       religion: "Católica",
     },
   });
+
+  const watchEducation = watch("educationLevel");
 
   // Escuchar fecha de nacimiento para cálculo reactivo de edad
   const birthDateValue = watch("birthDate");
@@ -90,7 +136,7 @@ export function PatientModal({
           address: initialData.address || "",
           civilStatus: initialData.civilStatus || "Soltera",
           occupation: initialData.occupation || "",
-          educationLevel: initialData.educationLevel || "Superior Universitaria",
+          educationLevel: normalizeEducationLevel(initialData.educationLevel),
           birthPlace: initialData.birthPlace || "",
           religion: initialData.religion || "Católica",
         });
@@ -105,7 +151,7 @@ export function PatientModal({
           address: "",
           civilStatus: "Soltera",
           occupation: "",
-          educationLevel: "Superior Universitaria",
+          educationLevel: "Superior Universitaria Completa",
           birthPlace: "Lima, Perú",
           religion: "Católica",
         });
@@ -493,12 +539,14 @@ export function PatientModal({
                   {...register("educationLevel")}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-xs font-medium text-heading focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
-                  <option value="Superior Universitaria">Superior Universitaria</option>
-                  <option value="Superior Técnica">Superior Técnica</option>
-                  <option value="Posgrado / Maestría">Posgrado / Maestría</option>
-                  <option value="Secundaria Completa">Secundaria Completa</option>
-                  <option value="Secundaria Incompleta">Secundaria Incompleta</option>
-                  <option value="Primaria">Primaria</option>
+                  {watchEducation && !EDUCATION_LEVEL_OPTIONS.includes(watchEducation as any) && (
+                    <option value={watchEducation}>{watchEducation}</option>
+                  )}
+                  {EDUCATION_LEVEL_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

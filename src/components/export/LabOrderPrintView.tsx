@@ -5,6 +5,7 @@ import { Patient, DoctorProfile, LabOrder } from "@/types/medical";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { CendoFooterWave } from "@/components/export/CendoFooterWave";
 import { FlaskConical, AlertCircle, Info, Calendar, User, Microscope, FileCheck } from "lucide-react";
+import { formatPeruDateDisplay } from "@/lib/utils";
 
 interface LabOrderPrintViewProps {
   labOrder: LabOrder;
@@ -66,7 +67,7 @@ export function LabOrderPrintView({
                 N° LAB-{labOrder.id.replace("lab-", "").slice(0, 8)}
               </p>
               <p className="text-[9.5px] text-slate-700 font-bold">
-                Fecha: {labOrder.orderDate}
+                Fecha: {formatPeruDateDisplay(labOrder.orderDate)}
               </p>
               <span
                 className={`inline-block mt-0.5 px-1.5 py-0.2 rounded text-[8.5px] font-bold uppercase font-mono ${
@@ -165,7 +166,7 @@ export function LabOrderPrintView({
                 <div className="pt-1 border-t border-purple-200 grid grid-cols-3 gap-1.5 text-[9.5px]">
                   <div>
                     <strong className="text-slate-600">FUR: </strong>
-                    <span className="font-mono font-semibold text-slate-900">{labOrder.specimenDetails.fur || "—"}</span>
+                    <span className="font-mono font-semibold text-slate-900">{formatPeruDateDisplay(labOrder.specimenDetails.fur)}</span>
                   </div>
                   <div>
                     <strong className="text-slate-600">Fórmula Obstétrica: </strong>

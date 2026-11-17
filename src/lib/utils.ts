@@ -64,6 +64,21 @@ export function formatPeruDateText(dateStr: string, includeDayOfWeek = true): st
 }
 
 /**
+ * Convierte una fecha YYYY-MM-DD a formato peruano DD/MM/AAAA.
+ * Si es texto clínico (ej. "Menopausia", "No recuerda", "Dudosa"), lo devuelve tal cual.
+ */
+export function formatPeruDateDisplay(dateStr?: string | null): string {
+  if (!dateStr) return "—";
+  const trimmed = dateStr.trim();
+  const match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const [, y, m, d] = match;
+    return `${d}/${m}/${y}`;
+  }
+  return trimmed;
+}
+
+/**
  * Formatea valores numéricos a moneda Soles (S/ #,##0.00)
  */
 export function formatCurrency(amount: number): string {
