@@ -84,6 +84,7 @@ export default function FichaPacientePage() {
   const [viewingLabOrder, setViewingLabOrder] = useState<LabOrder | null>(null);
   const [isLabPrintModalOpen, setIsLabPrintModalOpen] = useState(false);
   const [isPrenatalModalOpen, setIsPrenatalModalOpen] = useState(false);
+  const [prenatalInitialTab, setPrenatalInitialTab] = useState<"basal" | "consultas" | "aro">("basal");
   const [viewingPrenatalCard, setViewingPrenatalCard] = useState<PrenatalCard | null>(null);
   const [isPrenatalPrintModalOpen, setIsPrenatalPrintModalOpen] = useState(false);
   const [isUploadDocModalOpen, setIsUploadDocModalOpen] = useState(false);
@@ -402,7 +403,10 @@ export default function FichaPacientePage() {
             patient={patient}
             prenatalCard={prenatalCard}
             doctorProfile={doctorProfile}
-            onOpenPrenatalModal={() => setIsPrenatalModalOpen(true)}
+            onOpenPrenatalModal={(tab) => {
+              setPrenatalInitialTab(tab || "basal");
+              setIsPrenatalModalOpen(true);
+            }}
             onOpenPrenatalPrint={(card) => {
               setViewingPrenatalCard(card);
               setIsPrenatalPrintModalOpen(true);
@@ -516,6 +520,7 @@ export default function FichaPacientePage() {
         setIsLabPrintModalOpen={setIsLabPrintModalOpen}
         isPrenatalModalOpen={isPrenatalModalOpen}
         setIsPrenatalModalOpen={setIsPrenatalModalOpen}
+        prenatalInitialTab={prenatalInitialTab}
         viewingPrenatalCard={viewingPrenatalCard}
         setViewingPrenatalCard={setViewingPrenatalCard}
         isPrenatalPrintModalOpen={isPrenatalPrintModalOpen}

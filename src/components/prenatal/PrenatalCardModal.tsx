@@ -45,6 +45,7 @@ interface PrenatalCardModalProps {
   onClose: () => void;
   patient: Patient;
   onPrintRequested?: (card: PrenatalCard) => void;
+  initialTab?: "basal" | "consultas" | "aro";
 }
 
 export function PrenatalCardModal({
@@ -52,6 +53,7 @@ export function PrenatalCardModal({
   onClose,
   patient,
   onPrintRequested,
+  initialTab = "basal",
 }: PrenatalCardModalProps) {
   const {
     doctorProfile,
@@ -301,8 +303,8 @@ export function PrenatalCardModal({
         prev.familyHistory && prev.familyHistory.length > 0 && prev.familyHistory[0] !== "Ninguno"
           ? prev.familyHistory
           : initialFamilyHistory.length > 0
-          ? initialFamilyHistory
-          : ["Ninguno"],
+            ? initialFamilyHistory
+            : ["Ninguno"],
       familyHistoryDetails:
         prev.familyHistoryDetails && Object.keys(prev.familyHistoryDetails).length > 0
           ? prev.familyHistoryDetails
@@ -311,8 +313,8 @@ export function PrenatalCardModal({
         prev.personalHistory && prev.personalHistory.length > 0 && prev.personalHistory[0] !== "Ninguno"
           ? prev.personalHistory
           : initialPersonalHistory.length > 0
-          ? initialPersonalHistory
-          : ["Ninguno"],
+            ? initialPersonalHistory
+            : ["Ninguno"],
       personalHistoryDetails:
         prev.personalHistoryDetails && Object.keys(prev.personalHistoryDetails).length > 0
           ? prev.personalHistoryDetails
@@ -337,9 +339,16 @@ export function PrenatalCardModal({
     }
   };
 
+  // Tab principal activa: "basal" | "consultas" | "aro"
+  const [activeMainTab, setActiveMainTab] = useState<"basal" | "consultas" | "aro">(initialTab);
+
   // Carga inicial al abrir modal
   useEffect(() => {
     if (!isOpen) return;
+
+    if (initialTab) {
+      setActiveMainTab(initialTab);
+    }
 
     if (existingCard) {
       setBaselineData(existingCard.baseline);
@@ -353,10 +362,7 @@ export function PrenatalCardModal({
       autoFillFromPatientAndBackground(false);
       setVisitsList([]);
     }
-  }, [existingCard, patient, isOpen]);
-
-  // Tab principal activa: "basal" | "consultas" | "aro"
-  const [activeMainTab, setActiveMainTab] = useState<"basal" | "consultas" | "aro">("basal");
+  }, [existingCard, patient, isOpen, initialTab]);
 
   // Drawer / Resumen de Antecedentes de HC
   const [showHistoryDrawer, setShowHistoryDrawer] = useState(false);
@@ -508,7 +514,7 @@ export function PrenatalCardModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col overflow-hidden">
-        
+
         {/* =========================================================================
             1. HEADER OFICIAL (ESTILO COLPOSCOPÍA MODAL)
             ========================================================================= */}
@@ -631,7 +637,7 @@ export function PrenatalCardModal({
             2. CONTENIDO PRINCIPAL CON SCROLL
             ========================================================================= */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/30">
-          
+
           {/* Panel de Paciente Evaluada & Fechas Clave */}
           <div className="p-4 rounded-2xl bg-white border border-border shadow-xs space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -712,17 +718,15 @@ export function PrenatalCardModal({
             <button
               type="button"
               onClick={() => setActiveMainTab("basal")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-                activeMainTab === "basal"
-                  ? "bg-white text-purple-900 shadow-xs border border-purple-200/80"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-              }`}
+              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "basal"
+                ? "bg-white text-purple-900 shadow-xs border border-purple-200/80"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                }`}
             >
               <FileText className={`w-4 h-4 ${activeMainTab === "basal" ? "text-purple-600" : "text-slate-500"}`} />
-              <span>Pestaña 1: Ficha Basal (Acordeones 1 al 9)</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                activeMainTab === "basal" ? "bg-purple-100 text-purple-800" : "bg-slate-200/70 text-slate-700"
-              }`}>
+              <span>📋 CARA 1: FICHA BASAL & ANTECEDENTES</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeMainTab === "basal" ? "bg-purple-100 text-purple-800" : "bg-slate-200/70 text-slate-700"
+                }`}>
                 9 Acordeones
               </span>
             </button>
@@ -730,17 +734,15 @@ export function PrenatalCardModal({
             <button
               type="button"
               onClick={() => setActiveMainTab("consultas")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-                activeMainTab === "consultas"
-                  ? "bg-white text-teal-900 shadow-xs border border-teal-200/80"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-              }`}
+              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "consultas"
+                ? "bg-white text-teal-900 shadow-xs border border-teal-200/80"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                }`}
             >
               <Activity className={`w-4 h-4 ${activeMainTab === "consultas" ? "text-teal-600" : "text-slate-500"}`} />
-              <span>Pestaña 2: Matriz de 9 Consultas</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                activeMainTab === "consultas" ? "bg-teal-100 text-teal-800" : "bg-slate-200/70 text-slate-700"
-              }`}>
+              <span>🩺 CARA 2: CONTROLES PRENATALES</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeMainTab === "consultas" ? "bg-teal-100 text-teal-800" : "bg-slate-200/70 text-slate-700"
+                }`}>
                 {visitsList.length}/9
               </span>
             </button>
@@ -748,23 +750,20 @@ export function PrenatalCardModal({
             <button
               type="button"
               onClick={() => setActiveMainTab("aro")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-                activeMainTab === "aro"
-                  ? risksReport.isHighRisk
-                    ? "bg-white text-red-900 shadow-xs border border-red-300"
-                    : "bg-white text-emerald-900 shadow-xs border border-emerald-300"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-              }`}
+              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "aro"
+                ? risksReport.isHighRisk
+                  ? "bg-white text-red-900 shadow-xs border border-red-300"
+                  : "bg-white text-emerald-900 shadow-xs border border-emerald-300"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                }`}
             >
-              <AlertTriangle className={`w-4 h-4 ${
-                activeMainTab === "aro"
-                  ? risksReport.isHighRisk ? "text-red-600" : "text-emerald-600"
-                  : "text-amber-500"
-              }`} />
+              <AlertTriangle className={`w-4 h-4 ${activeMainTab === "aro"
+                ? risksReport.isHighRisk ? "text-red-600" : "text-emerald-600"
+                : "text-amber-500"
+                }`} />
               <span>Pestaña 3: Riesgo ARO</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                risksReport.isHighRisk ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
-              }`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${risksReport.isHighRisk ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
+                }`}>
                 {risksReport.isHighRisk ? "ALTO RIESGO" : "BAJO RIESGO"}
               </span>
             </button>

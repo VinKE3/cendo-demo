@@ -99,6 +99,7 @@ interface PatientDetailModalsProps {
   // Prenatal Modals
   isPrenatalModalOpen: boolean;
   setIsPrenatalModalOpen: (open: boolean) => void;
+  prenatalInitialTab?: "basal" | "consultas" | "aro";
   viewingPrenatalCard: PrenatalCard | null;
   setViewingPrenatalCard: (card: PrenatalCard | null) => void;
   isPrenatalPrintModalOpen: boolean;
@@ -188,6 +189,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
     setIsLabPrintModalOpen,
     isPrenatalModalOpen,
     setIsPrenatalModalOpen,
+    prenatalInitialTab = "basal",
     viewingPrenatalCard,
     setViewingPrenatalCard,
     isPrenatalPrintModalOpen,
@@ -492,6 +494,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
         isOpen={isPrenatalModalOpen}
         onClose={() => setIsPrenatalModalOpen(false)}
         patient={patient}
+        initialTab={prenatalInitialTab}
         onPrintRequested={(savedCard) => {
           setViewingPrenatalCard(savedCard);
           setIsPrenatalPrintModalOpen(true);

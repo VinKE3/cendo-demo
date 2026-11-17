@@ -26,7 +26,7 @@ interface TabControlPrenatalProps {
   patient: Patient;
   prenatalCard?: PrenatalCard | null;
   doctorProfile?: DoctorProfile | null;
-  onOpenPrenatalModal: () => void;
+  onOpenPrenatalModal: (tab?: "basal" | "consultas" | "aro") => void;
   onOpenPrenatalPrint: (card: PrenatalCard) => void;
 }
 
@@ -77,7 +77,7 @@ export function TabControlPrenatal({
         <div className="pt-2">
           <button
             type="button"
-            onClick={onOpenPrenatalModal}
+            onClick={() => onOpenPrenatalModal("basal")}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -145,6 +145,16 @@ export function TabControlPrenatal({
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <button
             type="button"
+            onClick={() => onOpenPrenatalModal("consultas")}
+            className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md active:scale-95"
+            title="Registrar los datos del control prenatal de hoy"
+          >
+            <Activity className="w-4 h-4 text-teal-100" />
+            <span>+ Registrar Control de Hoy</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => {
               const url = generatePrenatalWhatsAppUrl(patient, prenatalCard, doctorProfile);
               window.open(url, "_blank");
@@ -168,7 +178,7 @@ export function TabControlPrenatal({
 
           <button
             type="button"
-            onClick={onOpenPrenatalModal}
+            onClick={() => onOpenPrenatalModal("basal")}
             className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
           >
             <Edit2 className="w-4 h-4" />
@@ -277,10 +287,10 @@ export function TabControlPrenatal({
 
           <button
             type="button"
-            onClick={onOpenPrenatalModal}
-            className="text-xs text-primary font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+            onClick={() => onOpenPrenatalModal("consultas")}
+            className="px-3 py-1.5 rounded-lg bg-teal-50 border border-teal-200 text-xs text-teal-800 font-bold hover:bg-teal-100 flex items-center gap-1.5 cursor-pointer transition-colors"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-teal-600" />
             <span>+ Registrar Nueva Atención</span>
           </button>
         </div>
@@ -354,8 +364,8 @@ export function TabControlPrenatal({
             <p>Aún no se han registrado atenciones periódicas para esta gestante.</p>
             <button
               type="button"
-              onClick={onOpenPrenatalModal}
-              className="text-primary font-bold hover:underline"
+              onClick={() => onOpenPrenatalModal("consultas")}
+              className="text-teal-700 font-bold hover:underline"
             >
               Registrar la 1ª Atención Prenatal
             </button>
