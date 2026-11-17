@@ -6,3 +6,4 @@
 export * from "./laboratorio.types";
 export * from "./laboratorio.validator";
 export * from "./laboratorio.service";
+export * from "./labTemplatesCatalog";

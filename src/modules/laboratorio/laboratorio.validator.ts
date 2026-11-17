@@ -42,6 +42,12 @@ export const labOrderInputSchema = z.object({
   diagnosis: z.string().min(3, "El diagnóstico presuntivo es obligatorio"),
   urgency: z.enum(["Rutina", "Prioritario", "Urgente"]).default("Rutina"),
   items: z.array(labOrderItemSchema).min(1, "Debe solicitar al menos un examen de laboratorio"),
+  templateType: z.enum(["PAP", "BIOPSIA", "TRUCUT", "ITS", "PERITONEAL", "GENERAL", "CUSTOM"]).optional(),
+  templateTitle: z.string().optional(),
+  specimenDetails: z.any().optional(),
+  customTests: z.string().optional(),
+  cie10Code: z.string().optional(),
+  patientInstructions: z.string().optional(),
 });
 
 export function checkDuplicateTestInOrder(

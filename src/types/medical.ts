@@ -57,6 +57,9 @@ export type {
   CreateLabOrderInput,
   CatalogLabTest,
   LabOrderUrgency,
+  LabTemplateType,
+  LabSpecimenDetails,
+  LabOrderTemplate,
 } from "@/modules/laboratorio";
 
 // ============================================================================

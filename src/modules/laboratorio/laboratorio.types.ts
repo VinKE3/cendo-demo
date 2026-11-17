@@ -15,6 +15,49 @@ export type LabCategory =
 
 export type LabOrderUrgency = "Rutina" | "Prioritario" | "Urgente";
 
+export type LabTemplateType =
+  | "GENERAL"
+  | "PAP"
+  | "BIOPSIA"
+  | "TRUCUT"
+  | "ITS"
+  | "PERITONEAL"
+  | "CUSTOM";
+
+export interface LabSpecimenDetails {
+  anatomicalSite?: string; // ej. "Cérvix a horas 12:00 y 6:00", "Mama Izquierda CSE (hora 2:00)", "Cavidad peritoneal"
+  sampleMethod?: string; // ej. "Base líquida ThinPrep", "Convencional", "Tru-Cut 14G", "Lavado laparoscópico"
+  fixative?: string; // ej. "Formol tamponado 10%", "Medio PreservCyt", "Frasco estéril heparinado"
+  containerCount?: number; // ej. 1, 2 frascos
+  cervixAspect?: string; // ej. "Ectopia periorificial con sangrado al contacto", "Normal"
+  furDate?: string;
+  fur?: string;
+  obstetricParity?: string; // ej. "G2 P1011"
+  parity?: string;
+  contraceptiveMethod?: string;
+  mac?: string;
+  clinicalFindings?: string;
+  clinicalObservations?: string;
+  sampleObtainedAt?: string;
+  procedureOrigin?: string; // ej. "Laparoscopía ginecológica", "Biopsia ambulatoria"
+}
+
+export interface LabOrderTemplate {
+  id: string;
+  title: string;
+  category: string;
+  templateType: LabTemplateType;
+  sampleType: string;
+  fixativeTransport: string;
+  suggestedDiagnosis: string;
+  cie10Code?: string;
+  defaultTests: string[];
+  clinicalNotes: string;
+  isOfficial?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface LabOrderItem {
   id: string;
   category: LabCategory | string;
@@ -37,6 +80,9 @@ export interface LabOrder {
   customTests?: string;
   urgency: LabOrderUrgency;
   patientInstructions?: string;
+  templateType?: LabTemplateType;
+  templateTitle?: string;
+  specimenDetails?: LabSpecimenDetails;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,6 +101,9 @@ export interface CreateLabOrderInput {
   customTests?: string;
   urgency?: LabOrderUrgency;
   patientInstructions?: string;
+  templateType?: LabTemplateType;
+  templateTitle?: string;
+  specimenDetails?: LabSpecimenDetails;
 }
 
 export type UpdateLabOrderInput = Partial<CreateLabOrderInput>;

@@ -19,12 +19,28 @@ import {
   User,
   Stethoscope,
   Info,
+  Microscope,
+  Scissors,
+  Layers,
+  Activity,
+  Settings,
+  FileText,
+  FileCheck2,
 } from "lucide-react";
-import { LabOrder, LabOrderItem, LabCategory, Patient } from "@/types/medical";
+import {
+  LabOrder,
+  LabOrderItem,
+  LabCategory,
+  Patient,
+  LabOrderTemplate,
+  LabTemplateType,
+  LabSpecimenDetails,
+} from "@/types/medical";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { validateLabOrderInput } from "@/modules/laboratorio";
 import { Cie10Autocomplete } from "@/components/common/Cie10Autocomplete";
 import { getPeruDateString } from "@/lib/utils";
+import { LabTemplatesManagerModal } from "./LabTemplatesManagerModal";
 
 const labOrderSchema = z.object({
   patientId: z.string().min(1, "Debe seleccionar una paciente"),
@@ -173,6 +189,8 @@ export function LabOrderModal({
     patients,
     doctorsList,
     doctorProfile,
+    backgrounds,
+    labTemplates,
     addLabOrder,
     updateLabOrder,
   } = useMedicalStore();
@@ -180,6 +198,22 @@ export function LabOrderModal({
   const [selectedItems, setSelectedItems] = useState<LabOrderItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Todos");
+
+  // Estados para plantillas de muestra (PAP, Patología, Tru-Cut, ITS, Líquido Peritoneal)
+  const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
+  const [selectedTemplateType, setSelectedTemplateType] = useState<LabTemplateType>("GENERAL");
+  const [selectedTemplateTitle, setSelectedTemplateTitle] = useState<string>("");
+  const [specimenDetails, setSpecimenDetails] = useState<LabSpecimenDetails>({
+    sampleObtainedAt: getPeruDateString(),
+    fixative: "Formol tamponado 10%",
+    containerCount: 1,
+    anatomicalSite: "",
+    cervixAspect: "",
+    fur: "",
+    parity: "",
+    mac: "",
+    clinicalObservations: "",
+  });
 
   const todayStr = getPeruDateString();
 
@@ -226,9 +260,28 @@ export function LabOrderModal({
         patientInstructions: initialData.patientInstructions || "",
       });
       setSelectedItems(initialData.items || []);
+      setSelectedTemplateType(initialData.templateType || "GENERAL");
+      setSelectedTemplateTitle(initialData.templateTitle || "");
+      if (initialData.specimenDetails) {
+        setSpecimenDetails(initialData.specimenDetails);
+      } else {
+        setSpecimenDetails({
+          sampleObtainedAt: initialData.orderDate || todayStr,
+          fixative: "Formol tamponado 10%",
+          containerCount: 1,
+          anatomicalSite: "",
+          cervixAspect: "",
+          fur: "",
+          parity: "",
+          mac: "",
+          clinicalObservations: "",
+        });
+      }
     } else {
+      const pid = defaultPatientId || (patients.length > 0 ? patients[0].id : "");
+      const bg = pid ? backgrounds[pid] : undefined;
       reset({
-        patientId: defaultPatientId || (patients.length > 0 ? patients[0].id : ""),
+        patientId: pid,
         doctorId: defaultDoctorId,
         orderDate: todayStr,
         diagnosis: "",
@@ -239,8 +292,36 @@ export function LabOrderModal({
           "Ayuno de 8 a 10 horas. Abstinencia sexual y no aplicar óvulos vaginales 48 horas antes de la toma de muestra. Entregar primera orina de la mañana con aseo previo.",
       });
       setSelectedItems([]);
+      setSelectedTemplateType("GENERAL");
+      setSelectedTemplateTitle("");
+      setSpecimenDetails({
+        sampleObtainedAt: todayStr,
+        fixative: "Formol tamponado 10%",
+        containerCount: 1,
+        anatomicalSite: "",
+        cervixAspect: "",
+        fur: bg?.lastMenstrualPeriod || "",
+        parity: bg?.obstetricFormula || "",
+        mac: bg?.contraceptiveMethod || "",
+        clinicalObservations: "",
+      });
     }
-  }, [initialData, defaultPatientId, isOpen, defaultDoctorId, todayStr, reset, patients]);
+  }, [initialData, defaultPatientId, isOpen, defaultDoctorId, todayStr, reset, patients, backgrounds]);
+
+  // Si cambia la paciente seleccionada en modo nuevo, autocompletar antecedentes
+  useEffect(() => {
+    if (selectedPatientId && !initialData) {
+      const bg = backgrounds[selectedPatientId];
+      if (bg) {
+        setSpecimenDetails((prev) => ({
+          ...prev,
+          fur: prev.fur || bg.lastMenstrualPeriod || "",
+          parity: prev.parity || bg.obstetricFormula || "",
+          mac: prev.mac || bg.contraceptiveMethod || "",
+        }));
+      }
+    }
+  }, [selectedPatientId, backgrounds, initialData]);
 
   if (!isOpen) return null;
 
@@ -291,6 +372,56 @@ export function LabOrderModal({
     });
   };
 
+  const applyLabTemplate = (tmpl: LabOrderTemplate) => {
+    setSelectedTemplateType(tmpl.templateType);
+    setSelectedTemplateTitle(tmpl.title);
+
+    const packItems: LabOrderItem[] = (tmpl.defaultTests || []).map((tName, idx) => ({
+      id: `item-${Date.now()}-${idx}`,
+      category: (tmpl.category as LabCategory) || "Ginecología & Marcadores",
+      testName: tName,
+      sampleType: tmpl.sampleType,
+      notes: tmpl.clinicalNotes,
+    }));
+
+    setSelectedItems(packItems);
+    setValue("diagnosis", tmpl.suggestedDiagnosis);
+    if (tmpl.cie10Code) {
+      setValue("cie10Code", tmpl.cie10Code);
+    }
+    setValue("patientInstructions", tmpl.clinicalNotes);
+
+    const bg = selectedPatientId ? backgrounds[selectedPatientId] : undefined;
+
+    let defaultSite = "";
+    if (tmpl.templateType === "PAP") defaultSite = "Exocérvix y canal endocervical (cepillado)";
+    else if (tmpl.templateType === "BIOPSIA") defaultSite = "Labio anterior / posterior de cérvix o endometrio";
+    else if (tmpl.templateType === "TRUCUT") defaultSite = "Mama (indicar lado, cuadrante y radio horario)";
+    else if (tmpl.templateType === "ITS") defaultSite = "Hisopado endocervical y vaginal profundo";
+    else if (tmpl.templateType === "PERITONEAL") defaultSite = "Fondo de saco de Douglas / Corredera parietocólica";
+
+    setSpecimenDetails((prev) => ({
+      ...prev,
+      sampleObtainedAt: prev.sampleObtainedAt || todayStr,
+      fixative: tmpl.fixativeTransport || prev.fixative || "Formol tamponado 10%",
+      anatomicalSite: prev.anatomicalSite || defaultSite,
+      containerCount: prev.containerCount || 1,
+      fur: prev.fur || bg?.lastMenstrualPeriod || "",
+      parity: prev.parity || bg?.obstetricFormula || "",
+      mac: prev.mac || bg?.contraceptiveMethod || "",
+      clinicalObservations: prev.clinicalObservations || tmpl.clinicalNotes || "",
+    }));
+
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: `Formato oficial aplicado: ${tmpl.title.split("(")[0].trim()}`,
+      showConfirmButton: false,
+      timer: 2000,
+    });
+  };
+
   const removeSelectedItem = (id: string) => {
     setSelectedItems(selectedItems.filter((i) => i.id !== id));
   };
@@ -331,6 +462,9 @@ export function LabOrderModal({
       items: selectedItems,
       customTests: data.customTests || "",
       patientInstructions: data.patientInstructions || "",
+      templateType: selectedTemplateType,
+      templateTitle: selectedTemplateTitle || undefined,
+      specimenDetails: selectedTemplateType !== "GENERAL" ? specimenDetails : undefined,
     };
 
     const validation = validateLabOrderInput(payload);
@@ -351,7 +485,7 @@ export function LabOrderModal({
       Swal.fire({
         icon: "success",
         title: "Orden de Laboratorio Actualizada",
-        text: "Los análisis solicitados se guardaron correctamente.",
+        text: "Los análisis solicitados y datos de muestra se guardaron correctamente.",
         timer: 1800,
         showConfirmButton: false,
       });
@@ -489,6 +623,235 @@ export function LabOrderModal({
                 </div>
               </div>
             </div>
+
+            {/* Formatos Oficiales & Fichas de Envío de Muestras (PAP, Patología, Tru-Cut, ITS, Líquido Peritoneal) */}
+            <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 space-y-2.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-heading font-extrabold text-purple-950 flex items-center gap-1.5">
+                    <Microscope className="w-4 h-4 text-purple-600" /> Formatos Oficiales de Envío & Citología / Patología
+                  </span>
+                  <span className="text-[10px] bg-purple-200/80 text-purple-900 font-bold px-2 py-0.5 rounded-full">
+                    Dr. Patrick Jacinto
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsTemplateManagerOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-700 hover:text-purple-900 bg-white hover:bg-purple-100/50 border border-purple-300 px-2.5 py-1 rounded-lg transition-colors shadow-2xs self-start sm:self-auto"
+                >
+                  <Settings className="w-3.5 h-3.5 text-purple-600" />
+                  <span>Administrar Plantillas ({labTemplates.length})</span>
+                </button>
+              </div>
+
+              {/* Botones de Plantilla Rápida */}
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTemplateType("GENERAL");
+                    setSelectedTemplateTitle("");
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-2xs ${
+                    selectedTemplateType === "GENERAL"
+                      ? "bg-purple-700 text-white shadow-xs"
+                      : "bg-white border border-purple-200 text-slate-700 hover:bg-purple-100/40"
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Análisis Clínicos Generales</span>
+                </button>
+
+                {labTemplates.map((tmpl) => {
+                  const isSelected = selectedTemplateType === tmpl.templateType;
+                  return (
+                    <button
+                      key={tmpl.id}
+                      type="button"
+                      onClick={() => applyLabTemplate(tmpl)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-2xs ${
+                        isSelected
+                          ? "bg-purple-700 text-white shadow-xs"
+                          : "bg-white border border-purple-200 text-slate-700 hover:bg-purple-100/40"
+                      }`}
+                    >
+                      {tmpl.templateType === "PAP" && <Microscope className="w-3.5 h-3.5 text-purple-500" />}
+                      {tmpl.templateType === "BIOPSIA" && <Scissors className="w-3.5 h-3.5 text-emerald-500" />}
+                      {tmpl.templateType === "TRUCUT" && <Layers className="w-3.5 h-3.5 text-pink-500" />}
+                      {tmpl.templateType === "ITS" && <Activity className="w-3.5 h-3.5 text-amber-500" />}
+                      {tmpl.templateType === "PERITONEAL" && <FlaskConical className="w-3.5 h-3.5 text-teal-500" />}
+                      {tmpl.templateType === "CUSTOM" && <Sparkles className="w-3.5 h-3.5 text-blue-500" />}
+                      <span>{tmpl.title.split("(")[0].trim()}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Ficha de Remisión de Muestras (visible si se seleccionó formato especializado) */}
+            {selectedTemplateType !== "GENERAL" && (
+              <div className="p-4 rounded-xl bg-gradient-to-br from-slate-50 to-purple-50/40 border border-purple-300 shadow-2xs space-y-3 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between border-b border-purple-200/80 pb-2">
+                  <div className="flex items-center gap-2">
+                    <FileCheck2 className="w-4 h-4 text-purple-700" />
+                    <span className="text-xs font-heading font-extrabold text-slate-800 uppercase tracking-wide">
+                      Ficha Oficial de Remisión de Muestra a Patología / Citología
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200 font-mono">
+                    {selectedTemplateTitle || selectedTemplateType}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* Sitio Anatómico */}
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700">
+                      Sitio Anatómico Exacto / Pieza Remitida <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={specimenDetails.anatomicalSite}
+                      onChange={(e) =>
+                        setSpecimenDetails({ ...specimenDetails, anatomicalSite: e.target.value })
+                      }
+                      placeholder="Ej. Exocérvix y canal endocervical / Labio anterior radio 12h / Mama der. CSE"
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20 bg-white"
+                    />
+                  </div>
+
+                  {/* N° Frascos y Hora de Obtención */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-700">N° Frascos</label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={10}
+                        value={specimenDetails.containerCount || 1}
+                        onChange={(e) =>
+                          setSpecimenDetails({
+                            ...specimenDetails,
+                            containerCount: parseInt(e.target.value) || 1,
+                          })
+                        }
+                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20 bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-700">Fecha Toma</label>
+                      <input
+                        type="date"
+                        value={specimenDetails.sampleObtainedAt || todayStr}
+                        onChange={(e) =>
+                          setSpecimenDetails({
+                            ...specimenDetails,
+                            sampleObtainedAt: e.target.value,
+                          })
+                        }
+                        className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20 bg-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Fijador / Medio de Transporte */}
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700">
+                      Fijador / Medio de Transporte de la Muestra
+                    </label>
+                    <input
+                      type="text"
+                      value={specimenDetails.fixative}
+                      onChange={(e) =>
+                        setSpecimenDetails({ ...specimenDetails, fixative: e.target.value })
+                      }
+                      placeholder="Ej. Formol tamponado al 10% / Vial PreservCyt ThinPrep / Medio molecular PCR"
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20 bg-white"
+                    />
+                  </div>
+
+                  {/* Aspecto Macroscópico */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700">Aspecto de Lesión</label>
+                    <input
+                      type="text"
+                      value={specimenDetails.cervixAspect || ""}
+                      onChange={(e) =>
+                        setSpecimenDetails({ ...specimenDetails, cervixAspect: e.target.value })
+                      }
+                      placeholder="Ej. Ectropión sangrante, lesión exofítica friable..."
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20 bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Antecedentes Ginecológicos para Correlación Patológica */}
+                <div className="p-2.5 rounded-lg bg-white border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-slate-500">
+                      FUR (Fecha Última Regla)
+                    </label>
+                    <input
+                      type="text"
+                      value={specimenDetails.fur || ""}
+                      onChange={(e) =>
+                        setSpecimenDetails({ ...specimenDetails, fur: e.target.value })
+                      }
+                      placeholder="YYYY-MM-DD o 'Menopausia'"
+                      className="w-full px-2.5 py-1 text-xs rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-slate-500">
+                      Paridad (Fórmula Obstétrica)
+                    </label>
+                    <input
+                      type="text"
+                      value={specimenDetails.parity || ""}
+                      onChange={(e) =>
+                        setSpecimenDetails({ ...specimenDetails, parity: e.target.value })
+                      }
+                      placeholder="Ej. G0 P0000 / G2 P1011"
+                      className="w-full px-2.5 py-1 text-xs rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-slate-500">
+                      Anticonceptivo Actual (MAC)
+                    </label>
+                    <input
+                      type="text"
+                      value={specimenDetails.mac || ""}
+                      onChange={(e) =>
+                        setSpecimenDetails({ ...specimenDetails, mac: e.target.value })
+                      }
+                      placeholder="Ej. DIU Mirena / ACO / Preservativo / Ninguno"
+                      className="w-full px-2.5 py-1 text-xs rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Observaciones Clínicas para Patología */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-700">
+                    Observaciones Clínicas & Antecedentes Relevantes para el Patólogo
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={specimenDetails.clinicalObservations || ""}
+                    onChange={(e) =>
+                      setSpecimenDetails({
+                        ...specimenDetails,
+                        clinicalObservations: e.target.value,
+                      })
+                    }
+                    placeholder="Indicar sospecha clínica, colposcopía previa, biopsias anteriores, etc."
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20 bg-white"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* 2. Diagnóstico Presuntivo & CIE-10 (Feedback Dr. Patrick) */}
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
@@ -714,6 +1077,16 @@ export function LabOrderModal({
             </div>
           </div>
         </form>
+
+        {/* Modal de Administración de Plantillas */}
+        <LabTemplatesManagerModal
+          isOpen={isTemplateManagerOpen}
+          onClose={() => setIsTemplateManagerOpen(false)}
+          onSelectTemplate={(tmpl) => {
+            applyLabTemplate(tmpl);
+            setIsTemplateManagerOpen(false);
+          }}
+        />
       </div>
     </div>
   );

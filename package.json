@@ -24,6 +24,7 @@
     "test:recetas": "node scripts/test-recetas-crud.mjs",
     "seed:recetas": "node scripts/seed-recetas.mjs",
     "test:laboratorio": "node scripts/test-laboratorio-crud.mjs",
+    "test:lab-templates": "node scripts/test-lab-templates-crud.mjs",
     "seed:laboratorio": "node scripts/seed-laboratorio.mjs",
     "test:cotizaciones": "node scripts/test-cotizaciones-crud.mjs",
     "seed:cotizaciones": "node scripts/seed-cotizaciones.mjs",

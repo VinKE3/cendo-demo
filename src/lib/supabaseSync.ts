@@ -437,6 +437,17 @@ export async function syncLabOrderToSupabase(order: LabOrder): Promise<boolean> 
     const patientUuid = getPatientUuid(order.patientId);
     const orderUuid = ensureUuid(order.id);
 
+    let customTestsString = order.customTests || null;
+    if (order.templateType || order.specimenDetails || order.templateTitle) {
+      const meta = {
+        templateType: order.templateType,
+        templateTitle: order.templateTitle,
+        specimenDetails: order.specimenDetails,
+        originalCustomTests: order.customTests || null,
+      };
+      customTestsString = `__METADATA__:${JSON.stringify(meta)}`;
+    }
+
     const { error } = await supabase.from("lab_orders").upsert(
       {
         id: orderUuid,
@@ -450,7 +461,7 @@ export async function syncLabOrderToSupabase(order: LabOrder): Promise<boolean> 
         cie10_code: order.cie10Code || null,
         urgency: order.urgency,
         items: order.items,
-        custom_tests: order.customTests || null,
+        custom_tests: customTestsString,
         patient_instructions: order.patientInstructions || null,
         updated_at: new Date().toISOString(),
       },
@@ -1309,23 +1320,45 @@ export async function fetchAllDataFromSupabase(): Promise<AllSupabaseData | null
 
     // 10. Lab Orders
     if (labOrdersRes.status === "fulfilled" && labOrdersRes.value.data) {
-      result.labOrders = labOrdersRes.value.data.map((row: any) => ({
-        id: row.id,
-        patientId: row.patient_id,
-        doctorId: row.doctor_id || "doc-patrick-jacinto",
-        doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
-        doctorCmp: row.doctor_cmp || "61693",
-        doctorRne: row.doctor_rne || "",
-        orderDate: row.order_date ? String(row.order_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
-        diagnosis: row.diagnosis || "",
-        cie10Code: row.cie10_code || undefined,
-        items: Array.isArray(row.items) ? row.items : (typeof row.items === "string" ? JSON.parse(row.items) : []),
-        customTests: row.custom_tests || undefined,
-        urgency: row.urgency || "Rutina",
-        patientInstructions: row.patient_instructions || undefined,
-        createdAt: row.created_at || new Date().toISOString(),
-        updatedAt: row.updated_at || new Date().toISOString(),
-      }));
+      result.labOrders = labOrdersRes.value.data.map((row: any) => {
+        let templateType = undefined;
+        let templateTitle = undefined;
+        let specimenDetails = undefined;
+        let customTests = row.custom_tests || undefined;
+
+        if (row.custom_tests && String(row.custom_tests).startsWith("__METADATA__:")) {
+          try {
+            const parsed = JSON.parse(String(row.custom_tests).slice(13));
+            templateType = parsed.templateType;
+            templateTitle = parsed.templateTitle;
+            specimenDetails = parsed.specimenDetails;
+            customTests = parsed.originalCustomTests || undefined;
+          } catch {
+            // fallback
+          }
+        }
+
+        return {
+          id: row.id,
+          patientId: row.patient_id,
+          doctorId: row.doctor_id || "doc-patrick-jacinto",
+          doctorName: row.doctor_name || "Dr. Patrick Jacinto Gomero",
+          doctorCmp: row.doctor_cmp || "61693",
+          doctorRne: row.doctor_rne || "",
+          orderDate: row.order_date ? String(row.order_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+          diagnosis: row.diagnosis || "",
+          cie10Code: row.cie10_code || undefined,
+          items: Array.isArray(row.items) ? row.items : (typeof row.items === "string" ? JSON.parse(row.items) : []),
+          customTests,
+          urgency: row.urgency || "Rutina",
+          patientInstructions: row.patient_instructions || undefined,
+          templateType,
+          templateTitle,
+          specimenDetails,
+          createdAt: row.created_at || new Date().toISOString(),
+          updatedAt: row.updated_at || new Date().toISOString(),
+        };
+      });
     }
 
     // 11. Prenatal Cards

@@ -4,7 +4,7 @@ import React from "react";
 import { Patient, DoctorProfile, LabOrder } from "@/types/medical";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { CendoFooterWave } from "@/components/export/CendoFooterWave";
-import { FlaskConical, AlertCircle, Info, Calendar, User } from "lucide-react";
+import { FlaskConical, AlertCircle, Info, Calendar, User, Microscope, FileCheck } from "lucide-react";
 
 interface LabOrderPrintViewProps {
   labOrder: LabOrder;
@@ -49,8 +49,18 @@ export function LabOrderPrintView({
             </div>
 
             <div className="text-right border-l border-slate-200 pl-4 shrink-0">
-              <div className="inline-block px-2.5 py-1 rounded-md bg-teal-50 text-primary font-heading font-extrabold text-xs tracking-wider uppercase border border-primary/20">
-                ORDEN DE LABORATORIO
+              <div
+                className={`inline-block px-2.5 py-1 rounded-md font-heading font-extrabold text-xs tracking-wider uppercase border ${
+                  labOrder.templateType && labOrder.templateType !== "GENERAL"
+                    ? "bg-purple-50 text-purple-900 border-purple-300"
+                    : "bg-teal-50 text-primary border-primary/20"
+                }`}
+              >
+                {labOrder.templateType && labOrder.templateType !== "GENERAL"
+                  ? labOrder.templateTitle
+                    ? labOrder.templateTitle.split("(")[0].trim().toUpperCase()
+                    : "REMISIÓN A PATOLOGÍA"
+                  : "ORDEN DE LABORATORIO"}
               </div>
               <p className="text-[10px] text-slate-500 font-mono mt-1">
                 N° LAB-{labOrder.id.replace("lab-", "").slice(0, 8)}
@@ -118,6 +128,64 @@ export function LabOrderPrintView({
               </div>
             )}
           </div>
+
+          {/* 2.5 Datos Especializados de la Muestra & Remisión a Patología / Citología */}
+          {labOrder.specimenDetails && labOrder.templateType !== "GENERAL" && (
+            <div className="p-3 rounded-lg bg-purple-50/60 border border-purple-200 text-slate-800 text-xs space-y-2">
+              <div className="flex items-center justify-between border-b border-purple-200 pb-1">
+                <span className="font-heading font-extrabold text-[10.5px] text-purple-950 uppercase tracking-wide flex items-center gap-1.5">
+                  <Microscope className="w-3.5 h-3.5 text-purple-700" /> Remisión de Muestra & Estudio Patológico / Citológico
+                </span>
+                <span className="font-mono text-[9px] text-purple-800 font-bold px-1.5 py-0.5 rounded bg-purple-100">
+                  {labOrder.templateTitle || labOrder.templateType}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10.5px]">
+                <div>
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Sitio Anatómico / Toma:</span>
+                  <span className="font-semibold text-slate-900">{labOrder.specimenDetails.anatomicalSite || "No especificado"}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Fijador / Medio:</span>
+                  <span className="font-mono text-slate-800">{labOrder.specimenDetails.fixative || "Formol tamponado 10%"}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">N° Frascos:</span>
+                  <span className="font-bold text-slate-900">{labOrder.specimenDetails.containerCount || 1} frasco(s)</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Aspecto Macroscópico:</span>
+                  <span className="text-slate-800">{labOrder.specimenDetails.cervixAspect || "Sin particularidades"}</span>
+                </div>
+              </div>
+
+              {/* Correlación Gineco-Obstétrica */}
+              {(labOrder.specimenDetails.fur || labOrder.specimenDetails.parity || labOrder.specimenDetails.mac) && (
+                <div className="pt-1.5 border-t border-purple-200 grid grid-cols-3 gap-2 text-[10px]">
+                  <div>
+                    <strong className="text-slate-600">FUR: </strong>
+                    <span className="font-mono font-semibold text-slate-900">{labOrder.specimenDetails.fur || "—"}</span>
+                  </div>
+                  <div>
+                    <strong className="text-slate-600">Fórmula Obstétrica: </strong>
+                    <span className="font-mono font-semibold text-slate-900">{labOrder.specimenDetails.parity || "—"}</span>
+                  </div>
+                  <div>
+                    <strong className="text-slate-600">Método MAC: </strong>
+                    <span className="font-semibold text-slate-900">{labOrder.specimenDetails.mac || "—"}</span>
+                  </div>
+                </div>
+              )}
+
+              {labOrder.specimenDetails.clinicalObservations && (
+                <div className="pt-1 border-t border-purple-200 text-[10px]">
+                  <strong className="text-slate-600">Observaciones para el Patólogo: </strong>
+                  <span className="text-slate-800 italic">{labOrder.specimenDetails.clinicalObservations}</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 3. Tabla de Análisis Solicitados */}
           <div className="rounded-lg border border-slate-200 overflow-hidden">
@@ -193,6 +261,21 @@ export function LabOrderPrintView({
             </p>
           </div>
         </div>
+
+        {/* Talón de Recepción y Cadena de Custodia de Muestra */}
+        {labOrder.templateType && labOrder.templateType !== "GENERAL" && (
+          <div className="mx-0 my-2 p-2 rounded border border-dashed border-slate-300 bg-slate-50/80 text-[9px] text-slate-600 space-y-1">
+            <div className="flex justify-between font-bold text-slate-700">
+              <span>TALÓN DE RECEPCIÓN & CADENA DE CUSTODIA (LABORATORIO RECEPTOR)</span>
+              <span>N° REGISTRO PATOLÓGICO: ____________________</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-[8.5px]">
+              <div>Recibido por (Nombre y DNI): _________________________________</div>
+              <div>Fecha y Hora Recepción: _____/_____/202___  ____:____</div>
+              <div>Estado de Muestra / Envase: [  ] Adecuado  [  ] Observado</div>
+            </div>
+          </div>
+        )}
 
         {/* Cenefa de pie y Firma Médica */}
         <div className="shrink-0 pt-4 space-y-3">

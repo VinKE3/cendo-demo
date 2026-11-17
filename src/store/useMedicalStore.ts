@@ -22,7 +22,13 @@ import {
   MedicalAppointment,
   WordHistoryDocument,
   Cie10Item,
+  LabOrderTemplate,
 } from "@/types/medical";
+import {
+  INITIAL_LAB_TEMPLATES,
+  saveLabTemplateToSupabase,
+  deleteLabTemplateFromSupabase,
+} from "@/modules/laboratorio";
 import { CIE10_GYN_CATALOG } from "@/modules/catalogo/cie10Catalog";
 import { getPeruDateString, shiftPeruDate, calculateAge } from "@/lib/utils";
 import {
@@ -1969,6 +1975,13 @@ interface MedicalStoreState {
   deleteLabOrder: (id: string) => void;
   getLabOrdersByPatientId: (patientId: string) => LabOrder[];
 
+  // Catálogo de Plantillas y Formatos Oficiales de Envío de Laboratorio
+  labTemplates: LabOrderTemplate[];
+  addLabTemplate: (template: Omit<LabOrderTemplate, "id">) => LabOrderTemplate;
+  updateLabTemplate: (id: string, updates: Partial<LabOrderTemplate>) => void;
+  deleteLabTemplate: (id: string) => void;
+  resetLabTemplatesToOfficial: () => void;
+
   // Carnet de Control Prenatal Oficial (MINSA / CLAP)
   prenatalCards: PrenatalCard[];
   addPrenatalCard: (
@@ -2844,6 +2857,45 @@ export const useMedicalStore = create<MedicalStoreState>()(
         return list.filter((ord) => ord.patientId === patientId || getPatientUuid(ord.patientId) === targetUuid);
       },
 
+      // CATÁLOGO DE PLANTILLAS Y FORMATOS OFICIALES DE LABORATORIO
+      labTemplates: INITIAL_LAB_TEMPLATES,
+      addLabTemplate: (data) => {
+        const id = `tmpl-${Date.now()}`;
+        const newTemplate: LabOrderTemplate = {
+          ...data,
+          id,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        set((state) => ({
+          labTemplates: [newTemplate, ...(state.labTemplates || [])],
+        }));
+        saveLabTemplateToSupabase(newTemplate);
+        return newTemplate;
+      },
+      updateLabTemplate: (id, updates) => {
+        let updated: LabOrderTemplate | null = null;
+        set((state) => ({
+          labTemplates: (state.labTemplates || []).map((t) => {
+            if (t.id === id) {
+              updated = { ...t, ...updates, updatedAt: new Date().toISOString() };
+              return updated;
+            }
+            return t;
+          }),
+        }));
+        if (updated) saveLabTemplateToSupabase(updated);
+      },
+      deleteLabTemplate: (id) => {
+        set((state) => ({
+          labTemplates: (state.labTemplates || []).filter((t) => t.id !== id),
+        }));
+        deleteLabTemplateFromSupabase(id);
+      },
+      resetLabTemplatesToOfficial: () => {
+        set({ labTemplates: INITIAL_LAB_TEMPLATES });
+      },
+
       // CARNET DE CONTROL PRENATAL OFICIAL (MINSA / CLAP)
       prenatalCards: INITIAL_PRENATAL_CARDS,
       addPrenatalCard: (data) => {
@@ -3198,14 +3250,18 @@ export const useMedicalStore = create<MedicalStoreState>()(
           tariffItems: INITIAL_TARIFF,
           vademecumItems: INITIAL_VADEMECUM,
           cie10Catalog: CIE10_GYN_CATALOG,
+          labTemplates: INITIAL_LAB_TEMPLATES,
         });
       },
     }),
     {
       name: "cendo-storage",
-      version: 13,
+      version: 14,
       migrate: (persistedState: any, version: number) => {
         const state = persistedState || {};
+        if (!state.labTemplates || state.labTemplates.length === 0) {
+          state.labTemplates = INITIAL_LAB_TEMPLATES;
+        }
         if (!state.cie10Catalog || state.cie10Catalog.length === 0) {
           state.cie10Catalog = CIE10_GYN_CATALOG;
         }
@@ -3227,9 +3283,10 @@ export const useMedicalStore = create<MedicalStoreState>()(
             return p;
           });
         }
-        if (version < 13) {
+        if (version < 14) {
           return {
             ...state,
+            labTemplates: state.labTemplates || INITIAL_LAB_TEMPLATES,
             appointments: (!state.appointments || state.appointments.length === 0) ? INITIAL_APPOINTMENTS : state.appointments,
             clinicalCheckups: (!state.clinicalCheckups || state.clinicalCheckups.length === 0) ? INITIAL_CHECKUPS : state.clinicalCheckups,
             doctorsList: state.doctorsList || INITIAL_DOCTORS,
