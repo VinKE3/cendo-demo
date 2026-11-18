@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Activity,
   FileCheck2,
@@ -18,6 +18,7 @@ import {
   ColposcopyReport,
   DoctorProfile,
 } from "@/types/medical";
+import { TablePagination } from "@/components/common/TablePagination";
 
 interface TabChequeosProps {
   patient: Patient;
@@ -64,6 +65,8 @@ export function TabChequeos({
 }: TabChequeosProps) {
   const [activeFilter, setActiveFilter] = useState<ChequeoFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Compilar los estudios diagnósticos de la paciente (Ecografías y Colposcopías)
   const unifiedItems: UnifiedChequeoItem[] = useMemo(() => {
@@ -139,6 +142,18 @@ export function TabChequeos({
       return true;
     });
   }, [unifiedItems, activeFilter, searchQuery]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [filteredItems.length, pageSize, currentPage]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredItems.slice(start, start + pageSize);
+  }, [filteredItems, currentPage, pageSize]);
 
   const totalCount = unifiedItems.length;
   const ecoCount = ultrasoundReports.length;
@@ -223,7 +238,10 @@ export function TabChequeos({
         <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-border">
           <button
             type="button"
-            onClick={() => setActiveFilter("all")}
+            onClick={() => {
+              setActiveFilter("all");
+              setCurrentPage(1);
+            }}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeFilter === "all"
                 ? "bg-white text-heading shadow-xs"
@@ -235,7 +253,10 @@ export function TabChequeos({
 
           <button
             type="button"
-            onClick={() => setActiveFilter("ecografias")}
+            onClick={() => {
+              setActiveFilter("ecografias");
+              setCurrentPage(1);
+            }}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
               activeFilter === "ecografias"
                 ? "bg-white text-teal-800 shadow-xs"
@@ -248,7 +269,10 @@ export function TabChequeos({
 
           <button
             type="button"
-            onClick={() => setActiveFilter("colposcopia")}
+            onClick={() => {
+              setActiveFilter("colposcopia");
+              setCurrentPage(1);
+            }}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
               activeFilter === "colposcopia"
                 ? "bg-white text-emerald-800 shadow-xs"
@@ -266,7 +290,10 @@ export function TabChequeos({
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Buscar hallazgo, fecha..."
             className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-border bg-white text-heading focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
@@ -276,11 +303,12 @@ export function TabChequeos({
       {/* 3. Lista Unificada de Estudios */}
       <div className="space-y-3">
         {filteredItems.length > 0 ? (
-          filteredItems.map((item) => (
-            <div
-              key={`${item.type}-${item.id}`}
-              className="p-4 sm:p-5 rounded-2xl bg-white border border-border space-y-3 hover:border-slate-300 hover:shadow-2xs transition-all"
-            >
+          <>
+            {paginatedItems.map((item) => (
+              <div
+                key={`${item.type}-${item.id}`}
+                className="p-4 sm:p-5 rounded-2xl bg-white border border-border space-y-3 hover:border-slate-300 hover:shadow-2xs transition-all"
+              >
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${item.badgeColor}`}>
@@ -354,7 +382,20 @@ export function TabChequeos({
                 )}
               </div>
             </div>
-          ))
+          ))}
+
+          <div className="p-4 rounded-2xl bg-white border border-border shadow-2xs">
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={filteredItems.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 15, 25, 50]}
+              itemLabel="estudios / chequeos"
+            />
+          </div>
+        </>
         ) : (
           <div className="p-12 text-center rounded-2xl bg-white border border-border space-y-3">
             <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">

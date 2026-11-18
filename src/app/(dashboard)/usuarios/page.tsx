@@ -26,6 +26,7 @@ import {
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { DoctorProfile } from "@/modules/usuarios";
 import { DoctorModal } from "@/components/usuarios/DoctorModal";
+import { TablePagination } from "@/components/common/TablePagination";
 
 export default function UsuariosPage() {
   const {
@@ -47,6 +48,8 @@ export default function UsuariosPage() {
   const [doctorToEdit, setDoctorToEdit] = useState<DoctorProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Filtro de Médicos
   const filteredDoctors = useMemo(() => {
@@ -64,6 +67,18 @@ export default function UsuariosPage() {
       return matchesSearch && matchesRole;
     });
   }, [doctorsList, searchTerm, filterRole]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filteredDoctors.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [filteredDoctors.length, pageSize, currentPage]);
+
+  const paginatedDoctors = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredDoctors.slice(start, start + pageSize);
+  }, [filteredDoctors, currentPage, pageSize]);
 
   // Manejo de Cambio Rápido de Médico Activo
   const handleSwitchDoctor = (doc: DoctorProfile) => {
@@ -386,7 +401,10 @@ export default function UsuariosPage() {
             type="text"
             placeholder="Buscar por médico, especialidad, CMP o correo..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full pl-10 pr-4 py-2 rounded-xl border border-border bg-slate-50 hover:bg-white focus:bg-white text-sm text-heading placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
           />
         </div>
@@ -394,7 +412,10 @@ export default function UsuariosPage() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <select
             value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
+            onChange={(e) => {
+              setFilterRole(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full sm:w-auto px-3 py-2 rounded-xl border border-border bg-white text-xs font-semibold text-heading focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           >
             <option value="all">Todos los Roles</option>
@@ -407,7 +428,7 @@ export default function UsuariosPage() {
 
       {/* Grid de Tarjetas de Médicos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredDoctors.map((doc) => {
+        {paginatedDoctors.map((doc) => {
           const isActiveDoctor = doc.id === doctorProfile.id;
           return (
             <div
@@ -598,6 +619,20 @@ export default function UsuariosPage() {
           );
         })}
       </div>
+
+      {filteredDoctors.length > 0 && (
+        <div className="p-4 rounded-2xl bg-surface border border-border shadow-xs">
+          <TablePagination
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={filteredDoctors.length}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            pageSizeOptions={[10, 15, 25, 50]}
+            itemLabel="especialistas / usuarios"
+          />
+        </div>
+      )}
 
       {filteredDoctors.length === 0 && (
         <div className="text-center py-16 bg-surface rounded-2xl border border-border space-y-3">

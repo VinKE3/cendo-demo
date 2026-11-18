@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Receipt,
   Search,
@@ -17,10 +17,13 @@ import { useMedicalStore } from "@/store/useMedicalStore";
 import { formatCurrency } from "@/lib/utils";
 import { TariffModal } from "@/components/tarifario/TariffModal";
 import { ProcedureTariff } from "@/modules/tarifario";
+import { TablePagination } from "@/components/common/TablePagination";
 
 export default function TarifarioPage() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ProcedureTariff | null>(null);
 
@@ -28,16 +31,30 @@ export default function TarifarioPage() {
 
   const categories = ["all", "Consulta", "Procedimiento", "Ecografía", "Laboratorio", "Paquete"];
 
-  const filtered = tariffItems.filter((item) => {
-    const matchCat = filterCategory === "all" || item.category === filterCategory;
-    const q = search.toLowerCase().trim();
-    const matchSearch =
-      !q ||
-      item.name.toLowerCase().includes(q) ||
-      item.code.toLowerCase().includes(q) ||
-      (item.description && item.description.toLowerCase().includes(q));
-    return matchCat && matchSearch;
-  });
+  const filtered = useMemo(() => {
+    return tariffItems.filter((item) => {
+      const matchCat = filterCategory === "all" || item.category === filterCategory;
+      const q = search.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        item.name.toLowerCase().includes(q) ||
+        item.code.toLowerCase().includes(q) ||
+        (item.description && item.description.toLowerCase().includes(q));
+      return matchCat && matchSearch;
+    });
+  }, [tariffItems, filterCategory, search]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [filtered.length, pageSize, currentPage]);
+
+  const paginatedTariff = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
 
   const handleOpenCreate = () => {
     setSelectedItem(null);
@@ -112,7 +129,10 @@ export default function TarifarioPage() {
             type="text"
             placeholder="Buscar por código (ej. GIN-001) o nombre de examen..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full pl-10 pr-4 py-2 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -127,7 +147,10 @@ export default function TarifarioPage() {
             return (
               <button
                 key={cat}
-                onClick={() => setFilterCategory(cat)}
+                onClick={() => {
+                  setFilterCategory(cat);
+                  setCurrentPage(1);
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-colors flex items-center gap-1.5 ${
                   filterCategory === cat
                     ? "bg-primary text-white"
@@ -164,7 +187,7 @@ export default function TarifarioPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map((item) => (
+              {paginatedTariff.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50/70 transition-colors group">
                   {/* Código */}
                   <td className="py-3.5 px-4 font-mono font-bold text-primary whitespace-nowrap">
@@ -270,6 +293,20 @@ export default function TarifarioPage() {
             </tbody>
           </table>
         </div>
+
+        {filtered.length > 0 && (
+          <div className="p-4 border-t border-border bg-slate-50/50">
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={filtered.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 15, 25, 50]}
+              itemLabel="exámenes / procedimientos"
+            />
+          </div>
+        )}
       </div>
 
       {/* Modal de Crear / Editar Tarifa */}

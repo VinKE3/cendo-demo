@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import {
@@ -33,6 +33,7 @@ import { AppointmentModal } from "@/components/agenda/AppointmentModal";
 import { generateAppointmentReminderWhatsAppUrl } from "@/lib/whatsappShare";
 import { generateGoogleCalendarUrl, downloadIcsForAppleCalendar } from "@/lib/calendarExport";
 import { getPeruDateString, shiftPeruDate, formatPeruDateText } from "@/lib/utils";
+import { TablePagination } from "@/components/common/TablePagination";
 
 const TYPE_COLORS: Record<AppointmentType, { bg: string; text: string; border: string }> = {
   CONSULTA_PRIMERA_VEZ: { bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
@@ -70,6 +71,8 @@ export default function AgendaPage() {
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>("TODOS");
   const [selectedStatus, setSelectedStatus] = useState<string>("TODAS");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<MedicalAppointment | null>(null);
@@ -77,6 +80,7 @@ export default function AgendaPage() {
   // Navegación de fecha segura en zona horaria Perú
   const handleShiftDate = (days: number) => {
     setSelectedDate(shiftPeruDate(selectedDate, days));
+    setCurrentPage(1);
   };
 
   // Filtrado de citas
@@ -98,6 +102,19 @@ export default function AgendaPage() {
       })
       .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
   }, [appointments, selectedDate, selectedDoctorId, selectedStatus, searchQuery]);
+
+  // Si cambian los filtros o la longitud, resetear o ajustar página
+  const paginatedAppointments = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredAppointments.slice(start, start + pageSize);
+  }, [filteredAppointments, currentPage, pageSize]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filteredAppointments.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [filteredAppointments.length, pageSize, currentPage]);
 
   // Métricas del día seleccionado
   const dayStats = useMemo(() => {
@@ -301,9 +318,10 @@ export default function AgendaPage() {
       {/* 4. Lista de Citas */}
       <div className="space-y-3">
         {filteredAppointments.length > 0 ? (
-          filteredAppointments.map((appt) => {
-            const typeStyle = TYPE_COLORS[appt.appointmentType] || TYPE_COLORS.CONSULTA_PRIMERA_VEZ;
-            const statusStyle = STATUS_CONFIG[appt.status] || STATUS_CONFIG.CONFIRMADA;
+          <>
+            {paginatedAppointments.map((appt) => {
+              const typeStyle = TYPE_COLORS[appt.appointmentType] || TYPE_COLORS.CONSULTA_PRIMERA_VEZ;
+              const statusStyle = STATUS_CONFIG[appt.status] || STATUS_CONFIG.CONFIRMADA;
 
             return (
               <div
@@ -456,7 +474,20 @@ export default function AgendaPage() {
                 </div>
               </div>
             );
-          })
+          })}
+
+          <div className="p-4 rounded-2xl bg-surface border border-border shadow-xs">
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={filteredAppointments.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 15, 25, 50]}
+              itemLabel="citas"
+            />
+          </div>
+        </>
         ) : (
           <div className="p-12 text-center rounded-2xl bg-surface border border-border shadow-xs space-y-3">
             <CalendarIcon className="w-12 h-12 text-muted mx-auto" />

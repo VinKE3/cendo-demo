@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   BookOpen,
   Search,
@@ -24,11 +24,14 @@ import {
   CIE10_CATEGORY_LABELS,
 } from "@/modules/catalogo/cie10Catalog";
 import { Cie10Modal } from "@/components/cie10/Cie10Modal";
+import { TablePagination } from "@/components/common/TablePagination";
 
 export default function Cie10Page() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState<Cie10Item | null>(null);
@@ -97,22 +100,36 @@ export default function Cie10Page() {
   };
 
   // Filtrado de la lista
-  const filteredItems = (cie10Catalog || []).filter((item) => {
-    if (showOnlyFavorites && !item.isFavorite) return false;
-    if (selectedCategory !== "ALL" && item.category !== selectedCategory) return false;
+  const filteredItems = useMemo(() => {
+    return (cie10Catalog || []).filter((item) => {
+      if (showOnlyFavorites && !item.isFavorite) return false;
+      if (selectedCategory !== "ALL" && item.category !== selectedCategory) return false;
 
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
+      const q = search.trim().toLowerCase();
+      if (!q) return true;
 
-    const matchCode = item.code.toLowerCase().includes(q);
-    const matchName = item.name.toLowerCase().includes(q);
-    const matchCategory = item.category.toLowerCase().includes(q);
-    const matchKeywords = item.keywords
-      ? item.keywords.some((k) => k.toLowerCase().includes(q))
-      : false;
+      const matchCode = item.code.toLowerCase().includes(q);
+      const matchName = item.name.toLowerCase().includes(q);
+      const matchCategory = item.category.toLowerCase().includes(q);
+      const matchKeywords = item.keywords
+        ? item.keywords.some((k) => k.toLowerCase().includes(q))
+        : false;
 
-    return matchCode || matchName || matchCategory || matchKeywords;
-  });
+      return matchCode || matchName || matchCategory || matchKeywords;
+    });
+  }, [cie10Catalog, showOnlyFavorites, selectedCategory, search]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [filteredItems.length, pageSize, currentPage]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredItems.slice(start, start + pageSize);
+  }, [filteredItems, currentPage, pageSize]);
 
   const favoritesCount = (cie10Catalog || []).filter((i) => i.isFavorite).length;
 
@@ -247,13 +264,19 @@ export default function Cie10Page() {
               type="text"
               placeholder="Buscar por código CIE-10 (ej: N80.1), nombre o palabras clave..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-heading focus:bg-white focus:border-primary focus:outline-none"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => {
+                  setSearch("");
+                  setCurrentPage(1);
+                }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
               >
                 Limpiar
@@ -264,7 +287,10 @@ export default function Cie10Page() {
           {/* Toggle Solo Favoritos */}
           <button
             type="button"
-            onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+            onClick={() => {
+              setShowOnlyFavorites(!showOnlyFavorites);
+              setCurrentPage(1);
+            }}
             className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border shrink-0 ${
               showOnlyFavorites
                 ? "bg-amber-500 text-white border-amber-600 shadow-xs"
@@ -280,7 +306,10 @@ export default function Cie10Page() {
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
           <button
             type="button"
-            onClick={() => setSelectedCategory("ALL")}
+            onClick={() => {
+              setSelectedCategory("ALL");
+              setCurrentPage(1);
+            }}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
               selectedCategory === "ALL"
                 ? "bg-primary text-white"
@@ -297,7 +326,10 @@ export default function Cie10Page() {
               <button
                 key={catKey}
                 type="button"
-                onClick={() => setSelectedCategory(catKey)}
+                onClick={() => {
+                  setSelectedCategory(catKey);
+                  setCurrentPage(1);
+                }}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 ${
                   isSelected
                     ? "bg-slate-800 text-white"
@@ -329,7 +361,7 @@ export default function Cie10Page() {
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-800 text-xs">
               {filteredItems.length > 0 ? (
-                filteredItems.map((item) => (
+                paginatedItems.map((item) => (
                   <tr key={item.code} className="hover:bg-slate-50/70 transition-colors">
                     {/* Favorito */}
                     <td className="p-3 text-center">
@@ -423,6 +455,20 @@ export default function Cie10Page() {
             </tbody>
           </table>
         </div>
+
+        {filteredItems.length > 0 && (
+          <div className="p-3.5 border-t border-slate-200 bg-slate-50/60">
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={filteredItems.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 15, 25, 50]}
+              itemLabel="códigos CIE-10"
+            />
+          </div>
+        )}
       </div>
 
       {/* Modal para Crear / Editar */}

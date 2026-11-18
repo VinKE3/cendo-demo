@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Users,
@@ -20,9 +20,12 @@ import Swal from "sweetalert2";
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { PatientModal } from "@/components/pacientes/PatientModal";
 import { Patient } from "@/modules/pacientes";
+import { TablePagination } from "@/components/common/TablePagination";
 
 export default function PacientesPage() {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
@@ -65,17 +68,32 @@ export default function PacientesPage() {
     });
   };
 
-  const filtered = patients.filter((p) => {
-    const q = search.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      p.dni.toLowerCase().includes(q) ||
-      p.firstName.toLowerCase().includes(q) ||
-      p.lastName.toLowerCase().includes(q) ||
-      (p.phone && p.phone.toLowerCase().includes(q)) ||
-      (p.occupation && p.occupation.toLowerCase().includes(q))
-    );
-  });
+  const filtered = useMemo(() => {
+    return patients.filter((p) => {
+      const q = search.toLowerCase().trim();
+      if (!q) return true;
+      return (
+        p.dni.toLowerCase().includes(q) ||
+        p.firstName.toLowerCase().includes(q) ||
+        p.lastName.toLowerCase().includes(q) ||
+        (p.phone && p.phone.toLowerCase().includes(q)) ||
+        (p.occupation && p.occupation.toLowerCase().includes(q))
+      );
+    });
+  }, [patients, search]);
+
+  // Si cambia la búsqueda o la cantidad de resultados, reajustar página actual
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [filtered.length, pageSize, currentPage]);
+
+  const paginatedPatients = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
 
   const handleOpenCreate = () => {
     setSelectedPatient(null);
@@ -161,7 +179,10 @@ export default function PacientesPage() {
           type="text"
           placeholder="Buscar por DNI (ej. 72961954), apellidos (ej. Herrera), nombres o teléfono..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-2xs"
         />
       </div>
@@ -169,12 +190,13 @@ export default function PacientesPage() {
       {/* Listado de Pacientes */}
       <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
         {filtered.length > 0 ? (
-          <div className="divide-y divide-border">
-            {filtered.map((p) => (
-              <div
-                key={p.id}
-                className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 p-3 rounded-xl transition-all group"
-              >
+          <>
+            <div className="divide-y divide-border">
+              {paginatedPatients.map((p) => (
+                <div
+                  key={p.id}
+                  className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 p-3 rounded-xl transition-all group"
+                >
                 <div className="flex items-center gap-3.5">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary font-heading font-extrabold text-sm flex items-center justify-center shrink-0">
                     {p.firstName[0]}
@@ -252,6 +274,19 @@ export default function PacientesPage() {
               </div>
             ))}
           </div>
+
+          <div className="pt-4 border-t border-border">
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={filtered.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 15, 25, 50]}
+              itemLabel="pacientes"
+            />
+          </div>
+        </>
         ) : (
           <div className="py-12 text-center space-y-2">
             <Users className="w-8 h-8 text-muted mx-auto" />

@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Pill, Plus, MessageCircle, Printer } from "lucide-react";
 import Swal from "sweetalert2";
 import { Patient, MedicalPrescription, DoctorProfile } from "@/types/medical";
 import { generatePrescriptionWhatsAppUrl } from "@/lib/whatsappShare";
+import { TablePagination } from "@/components/common/TablePagination";
 
 interface TabRecetasProps {
   patient: Patient;
@@ -25,6 +26,20 @@ export function TabRecetas({
   onPrintPrescription,
   onDeletePrescription,
 }: TabRecetasProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(prescriptions.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [prescriptions.length, pageSize, currentPage]);
+
+  const paginatedPrescriptions = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return prescriptions.slice(start, start + pageSize);
+  }, [prescriptions, currentPage, pageSize]);
   return (
     <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
@@ -50,11 +65,12 @@ export function TabRecetas({
 
       <div className="space-y-3">
         {prescriptions.length > 0 ? (
-          prescriptions.map((rec) => (
-            <div
-              key={rec.id}
-              className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-emerald-300 transition-colors"
-            >
+          <>
+            {paginatedPrescriptions.map((rec) => (
+              <div
+                key={rec.id}
+                className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-emerald-300 transition-colors"
+              >
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800">
                   REC-{rec.id.replace("rec-", "").slice(0, 8)}
@@ -132,7 +148,20 @@ export function TabRecetas({
                 </button>
               </div>
             </div>
-          ))
+          ))}
+
+          <div className="pt-3 border-t border-slate-200">
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={prescriptions.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 15, 25, 50]}
+              itemLabel="recetas"
+            />
+          </div>
+        </>
         ) : (
           <div className="py-8 text-center space-y-1">
             <Pill className="w-8 h-8 text-muted mx-auto" />

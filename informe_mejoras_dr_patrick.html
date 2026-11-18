@@ -642,6 +642,48 @@
         </div>
       </article>
 
+      <!-- ITEM 11 -->
+      <article class="item-card">
+        <div class="item-header">
+          <div>
+            <span class="item-number-badge">REQUERIMIENTO #11</span>
+            <h3 class="item-title">Paginación Integral y Selector de Registros (10 - 15 - 25 - 50)</h3>
+          </div>
+          <span class="status-badge">✓ Resuelto al 100%</span>
+        </div>
+
+        <div class="quote-box">
+          <strong>Kevin / Dr. Patrick:</strong> "Quiero que revises todo el sistema y agregues paginación y ese típico selector (10 - 15 - 25 - 50) de cuántos resultados quiere el Dr. que se muestren, esto agrégalo a todo lo que haga falta, dado que si crece mucho el sistema no se sature la vista cargando varios registros."
+        </div>
+
+        <div class="solution-box">
+          <h4>✓ Solución Implementada:</h4>
+          <ul>
+            <li><strong>Componente Reutilizable CENDO (<span class="tech-pill">TablePagination.tsx</span>):</strong> Control de paginación moderno con selector de tamaño de página desplegable (<strong>10, 15, 25, 50 por página</strong>), contador dinámico (`Mostrando X - Y de Z registros`), navegación Anterior / Siguiente, botones numéricos con truncamiento inteligente (`...`) y accesos rápidos de Primera y Última página.</li>
+            <li><strong>Despliegue en Todos los Módulos Maestros:</strong>
+              <ul style="margin-top: 0.35rem; list-style-type: circle; padding-left: 1.25rem;">
+                <li><strong>Directorio de Pacientes:</strong> Listado paginado con reajuste automático al buscar por DNI o apellido.</li>
+                <li><strong>Agenda y Citas:</strong> Visualización de turnos del día paginada por bloques de pacientes.</li>
+                <li><strong>Tarifario Oficial:</strong> Catálogo de precios y procedimientos con selector de 10 a 50 ítems por página.</li>
+                <li><strong>Vademécum Farmacológico:</strong> Grilla de principios activos y marcas comerciales organizada por páginas.</li>
+                <li><strong>Catálogo Maestro CIE-10:</strong> Navegación fluida en diagnósticos ginecológicos y favoritos.</li>
+                <li><strong>Equipo Médico & Usuarios:</strong> Directorio del staff y especialistas con paginación limpia.</li>
+              </ul>
+            </li>
+            <li><strong>Despliegue en las Pestañas de la Historia Clínica:</strong>
+              <ul style="margin-top: 0.35rem; list-style-type: circle; padding-left: 1.25rem;">
+                <li><strong>Pestaña Chequeos:</strong> Historial unificado de ecografías y colposcopías con paginación.</li>
+                <li><strong>Pestaña Consultas:</strong> Historial de consultas ginecológicas con paginación.</li>
+                <li><strong>Pestaña Recetas:</strong> Archivo de recetas médicas emitidas paginado.</li>
+                <li><strong>Pestaña Laboratorio & Presupuestos:</strong> Paginación independiente para órdenes clínicas y cotizaciones.</li>
+                <li><strong>Pestaña Procedimientos:</strong> Historial de biopsias y cirugías menores en consultorio.</li>
+              </ul>
+            </li>
+            <li><strong>Optimización de Rendimiento:</strong> Previene la saturación del DOM al trabajar con bases de datos voluminosas y cientos de pacientes, manteniendo el sistema rápido, ligero y ultra-reactivo.</li>
+          </ul>
+        </div>
+      </article>
+
     </div>
 
     <!-- PIE DE PÁGINA -->

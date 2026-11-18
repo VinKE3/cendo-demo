@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Scissors, Plus, MessageCircle, Printer } from "lucide-react";
 import Swal from "sweetalert2";
 import { Patient, MinorProcedureReport, DoctorProfile } from "@/types/medical";
 import { generateMinorProcedureWhatsAppUrl } from "@/lib/whatsappShare";
+import { TablePagination } from "@/components/common/TablePagination";
 
 interface TabProcedimientosProps {
   patient: Patient;
@@ -25,6 +26,20 @@ export function TabProcedimientos({
   onPrintMinorProc,
   onDeleteMinorProc,
 }: TabProcedimientosProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(minorProcedures.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [minorProcedures.length, pageSize, currentPage]);
+
+  const paginatedProcedures = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return minorProcedures.slice(start, start + pageSize);
+  }, [minorProcedures, currentPage, pageSize]);
   return (
     <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
@@ -50,11 +65,12 @@ export function TabProcedimientos({
 
       <div className="space-y-3">
         {minorProcedures.length > 0 ? (
-          minorProcedures.map((proc) => (
-            <div
-              key={proc.id}
-              className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 hover:border-rose-400 transition-colors"
-            >
+          <>
+            {paginatedProcedures.map((proc) => (
+              <div
+                key={proc.id}
+                className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 hover:border-rose-400 transition-colors"
+              >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-100 text-rose-800">
@@ -136,7 +152,20 @@ export function TabProcedimientos({
                 </button>
               </div>
             </div>
-          ))
+          ))}
+
+          <div className="pt-3 border-t border-slate-200">
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={minorProcedures.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 15, 25, 50]}
+              itemLabel="procedimientos"
+            />
+          </div>
+        </>
         ) : (
           <div className="py-8 text-center space-y-1">
             <Scissors className="w-8 h-8 text-muted mx-auto" />

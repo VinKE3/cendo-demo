@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { FlaskConical, Receipt, Plus, MessageCircle, Printer, Upload } from "lucide-react";
 import Swal from "sweetalert2";
 import { Patient, LabOrder, ProcedureQuote, DoctorProfile } from "@/types/medical";
 import { generateLabOrderWhatsAppUrl, generateQuoteWhatsAppUrl } from "@/lib/whatsappShare";
+import { TablePagination } from "@/components/common/TablePagination";
 
 interface TabLaboratorioCotizacionesProps {
   patient: Patient;
@@ -35,6 +36,37 @@ export function TabLaboratorioCotizaciones({
   onDeleteQuote,
   onOpenUploadDocModal,
 }: TabLaboratorioCotizacionesProps) {
+  // Paginación de Órdenes
+  const [labPage, setLabPage] = useState(1);
+  const [labPageSize, setLabPageSize] = useState(10);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(labOrders.length / labPageSize));
+    if (labPage > maxPage) {
+      setLabPage(1);
+    }
+  }, [labOrders.length, labPageSize, labPage]);
+
+  const paginatedLabOrders = useMemo(() => {
+    const start = (labPage - 1) * labPageSize;
+    return labOrders.slice(start, start + labPageSize);
+  }, [labOrders, labPage, labPageSize]);
+
+  // Paginación de Cotizaciones
+  const [quotePage, setQuotePage] = useState(1);
+  const [quotePageSize, setQuotePageSize] = useState(10);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(quotes.length / quotePageSize));
+    if (quotePage > maxPage) {
+      setQuotePage(1);
+    }
+  }, [quotes.length, quotePageSize, quotePage]);
+
+  const paginatedQuotes = useMemo(() => {
+    const start = (quotePage - 1) * quotePageSize;
+    return quotes.slice(start, start + quotePageSize);
+  }, [quotes, quotePage, quotePageSize]);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Órdenes de Laboratorio Clínico */}
@@ -69,11 +101,12 @@ export function TabLaboratorioCotizaciones({
 
         <div className="space-y-3">
           {labOrders.length > 0 ? (
-            labOrders.map((ord) => (
-              <div
-                key={ord.id}
-                className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-teal-300 transition-colors"
-              >
+            <>
+              {paginatedLabOrders.map((ord) => (
+                <div
+                  key={ord.id}
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-teal-300 transition-colors"
+                >
                 <div className="flex items-center justify-between">
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-100 text-teal-800">
                     LAB-{ord.id.replace("lab-", "").slice(0, 8)}
@@ -171,7 +204,20 @@ export function TabLaboratorioCotizaciones({
                   </button>
                 </div>
               </div>
-            ))
+            ))}
+
+            <div className="pt-2 border-t border-slate-200">
+              <TablePagination
+                currentPage={labPage}
+                pageSize={labPageSize}
+                totalItems={labOrders.length}
+                onPageChange={setLabPage}
+                onPageSizeChange={setLabPageSize}
+                pageSizeOptions={[10, 15, 25, 50]}
+                itemLabel="órdenes"
+              />
+            </div>
+          </>
           ) : (
             <div className="py-8 text-center space-y-1">
               <FlaskConical className="w-8 h-8 text-muted mx-auto" />
@@ -204,7 +250,8 @@ export function TabLaboratorioCotizaciones({
 
         <div className="space-y-3">
           {quotes.length > 0 ? (
-            quotes.map((q) => (
+            <>
+              {paginatedQuotes.map((q) => (
               <div
                 key={q.id}
                 className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 hover:border-emerald-400 transition-colors"
@@ -287,7 +334,20 @@ export function TabLaboratorioCotizaciones({
                   </button>
                 </div>
               </div>
-            ))
+            ))}
+
+            <div className="pt-2 border-t border-slate-200">
+              <TablePagination
+                currentPage={quotePage}
+                pageSize={quotePageSize}
+                totalItems={quotes.length}
+                onPageChange={setQuotePage}
+                onPageSizeChange={setQuotePageSize}
+                pageSizeOptions={[10, 15, 25, 50]}
+                itemLabel="presupuestos"
+              />
+            </div>
+          </>
           ) : (
             <div className="py-8 text-center space-y-1">
               <Receipt className="w-8 h-8 text-muted mx-auto" />

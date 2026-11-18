@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Pill,
   Search,
@@ -17,28 +17,45 @@ import { useMedicalStore } from "@/store/useMedicalStore";
 import { formatCurrency } from "@/lib/utils";
 import { VademecumModal } from "@/components/vademecum/VademecumModal";
 import { MedicationVademecum } from "@/modules/vademecum";
+import { TablePagination } from "@/components/common/TablePagination";
 
 export default function VademecumPage() {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMed, setSelectedMed] = useState<MedicationVademecum | null>(null);
 
   const { vademecumItems, deleteVademecumItem } = useMedicalStore();
 
-  const filtered = vademecumItems.filter((med) => {
-    const q = search.toLowerCase().trim();
-    if (!q) return true;
-    const matchGeneric = med.genericName.toLowerCase().includes(q);
-    const matchGroup = med.therapeuticGroup.toLowerCase().includes(q);
-    const matchAtc = med.atcCode.toLowerCase().includes(q);
-    const matchBrand = med.commercialBrands.some(
-      (b) =>
-        b.brandName.toLowerCase().includes(q) ||
-        b.laboratory.toLowerCase().includes(q) ||
-        b.presentation.toLowerCase().includes(q)
-    );
-    return matchGeneric || matchGroup || matchAtc || matchBrand;
-  });
+  const filtered = useMemo(() => {
+    return vademecumItems.filter((med) => {
+      const q = search.toLowerCase().trim();
+      if (!q) return true;
+      const matchGeneric = med.genericName.toLowerCase().includes(q);
+      const matchGroup = med.therapeuticGroup.toLowerCase().includes(q);
+      const matchAtc = med.atcCode.toLowerCase().includes(q);
+      const matchBrand = med.commercialBrands.some(
+        (b) =>
+          b.brandName.toLowerCase().includes(q) ||
+          b.laboratory.toLowerCase().includes(q) ||
+          b.presentation.toLowerCase().includes(q)
+      );
+      return matchGeneric || matchGroup || matchAtc || matchBrand;
+    });
+  }, [vademecumItems, search]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(1);
+    }
+  }, [filtered.length, pageSize, currentPage]);
+
+  const paginatedVademecum = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
 
   const handleOpenCreate = () => {
     setSelectedMed(null);
@@ -108,14 +125,17 @@ export default function VademecumPage() {
           type="text"
           placeholder="Buscar por principio activo (ej. Dienogest, Mupirocina), marca (ej. Visannette, Bactroban) o laboratorio (ej. Bayer, Roemmers)..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-surface text-xs text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-2xs"
         />
       </div>
 
       {/* Grilla de Medicamentos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {filtered.map((med) => (
+        {paginatedVademecum.map((med) => (
           <div
             key={med.id}
             className="p-5 rounded-2xl bg-surface border border-border shadow-xs hover:border-indigo-300/80 transition-all flex flex-col justify-between space-y-4 group"
@@ -224,6 +244,20 @@ export default function VademecumPage() {
           </div>
         )}
       </div>
+
+      {filtered.length > 0 && (
+        <div className="p-4 rounded-2xl bg-surface border border-border shadow-xs">
+          <TablePagination
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={filtered.length}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            pageSizeOptions={[10, 15, 25, 50]}
+            itemLabel="medicamentos"
+          />
+        </div>
+      )}
 
       {/* Modal de Crear / Editar Fármaco */}
       <VademecumModal
