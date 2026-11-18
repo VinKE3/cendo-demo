@@ -105,10 +105,10 @@ export function AppointmentModal({
     return patients.find((p) => p.id === selectedPatientId) || null;
   }, [patients, selectedPatientId]);
 
-  // Filtrado de pacientes en tiempo real por Nombre, Apellido o DNI
+  // Filtrado de pacientes en tiempo real por Nombre, Apellido o DNI (solo cuando el Dr. escribe)
   const matchingPatients = useMemo(() => {
     const q = patientSearchQuery.trim().toLowerCase();
-    if (!q) return patients.slice(0, 10);
+    if (!q) return [];
     return patients.filter((p) => {
       const full = `${p.lastName} ${p.firstName}`.toLowerCase();
       const reverse = `${p.firstName} ${p.lastName}`.toLowerCase();
@@ -196,16 +196,13 @@ export function AppointmentModal({
         if (p) {
           selectPatientContinuadora(p);
         }
-      } else if (patients.length > 0) {
-        const p = patients[0];
-        selectPatientContinuadora(p);
       } else {
         setSelectedPatientId("");
         setPatientName("");
         setPatientDni("");
         setPatientPhone("");
         setPatientSearchQuery("");
-        setAppointmentType("CONSULTA_PRIMERA_VEZ");
+        setAppointmentType("CONTROL_GINECOLOGICO");
       }
     }
   }, [appointmentToEdit, defaultPatientId, isOpen, patients]);
@@ -438,8 +435,12 @@ export function AppointmentModal({
                     <button
                       type="button"
                       onClick={() => {
-                        setIsSearchOpen(true);
+                        setSelectedPatientId("");
+                        setPatientName("");
+                        setPatientDni("");
+                        setPatientPhone("");
                         setPatientSearchQuery("");
+                        setIsSearchOpen(true);
                       }}
                       className="px-2.5 py-1.5 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-100 text-emerald-900 text-[11px] font-bold transition-colors cursor-pointer shrink-0 shadow-2xs flex items-center gap-1"
                     >
@@ -451,7 +452,7 @@ export function AppointmentModal({
                   /* 2. Campo de Búsqueda Predictivo en Tiempo Real */
                   <div className="relative">
                     {/* Backdrop transparente para cerrar dropdown al dar clic fuera */}
-                    {isSearchOpen && (
+                    {isSearchOpen && patientSearchQuery.trim().length > 0 && (
                       <div
                         className="fixed inset-0 z-20"
                         onClick={() => setIsSearchOpen(false)}
@@ -477,7 +478,7 @@ export function AppointmentModal({
                           type="button"
                           onClick={() => {
                             setPatientSearchQuery("");
-                            setIsSearchOpen(true);
+                            setIsSearchOpen(false);
                           }}
                           className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer p-1"
                         >
@@ -486,14 +487,14 @@ export function AppointmentModal({
                       )}
                     </div>
 
-                    {/* Menú Flotante Predictivo */}
-                    {isSearchOpen && (
+                    {/* Menú Flotante Predictivo (Solo aparece cuando el doctor escribe) */}
+                    {isSearchOpen && patientSearchQuery.trim().length > 0 && (
                       <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-2xl z-30 max-h-60 overflow-y-auto divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100">
                         <div className="p-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                           <span className="font-bold uppercase tracking-wider text-[10px] text-slate-600">
-                            Pacientes Continuadoras ({matchingPatients.length})
+                            Coincidencias Encontradas ({matchingPatients.length})
                           </span>
-                          <span className="text-[10px]">Escriba para filtrar</span>
+                          <span className="text-[10px]">Filtrando por "{patientSearchQuery}"</span>
                         </div>
 
                         {matchingPatients.length > 0 ? (
