@@ -46,7 +46,6 @@ import { printHtmlElement } from "@/lib/pdfGenerator";
 import {
   generatePrescriptionWhatsAppUrl,
   generateLabOrderWhatsAppUrl,
-  generatePrenatalWhatsAppUrl,
   generateConsultationWhatsAppUrl,
   generateUltrasoundWhatsAppUrl,
   generateMinorProcedureWhatsAppUrl,
@@ -517,17 +516,6 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const url = generatePrenatalWhatsAppUrl(patient, viewingPrenatalCard, activeDoctor);
-                    window.open(url, "_blank");
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Enviar WhatsApp</span>
-                </button>
                 <button
                   type="button"
                   onClick={() => printHtmlElement("prenatal-print-sheet", `Carnet_Prenatal_${patient.lastName}_${patient.firstName}`)}

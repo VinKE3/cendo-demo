@@ -16,7 +16,6 @@ import {
   Printer,
 } from "lucide-react";
 import { Patient, PatientBackground, PrenatalCard, DoctorProfile } from "@/types/medical";
-import { generatePrenatalWhatsAppUrl } from "@/lib/whatsappShare";
 import { calculateAge } from "@/lib/utils";
 
 interface TabResumenProps {
@@ -27,7 +26,7 @@ interface TabResumenProps {
   doctorProfile?: DoctorProfile | null;
   onOpenEditPatient: () => void;
   onOpenEditBackground: () => void;
-  onOpenPrenatalModal: () => void;
+  onOpenPrenatalModal: (tab?: "basal" | "consultas" | "aro") => void;
   onOpenPrenatalPrint: (card: PrenatalCard) => void;
 }
 
@@ -274,19 +273,16 @@ export function TabResumen({
             </div>
 
             <div className="flex items-center gap-1.5 self-end sm:self-auto">
-              {prenatalCard && (
+              {prenatalCard ? (
                 <>
                   <button
                     type="button"
-                    onClick={() => {
-                      const url = generatePrenatalWhatsAppUrl(patient, prenatalCard, doctorProfile);
-                      window.open(url, "_blank");
-                    }}
-                    className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
-                    title="Enviar resumen prenatal por WhatsApp"
+                    onClick={() => onOpenPrenatalModal("consultas")}
+                    className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                    title="Registrar atención prenatal de hoy"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    <span>WhatsApp</span>
+                    <Activity className="w-3.5 h-3.5" />
+                    <span>+ Registrar Control</span>
                   </button>
                   <button
                     type="button"
@@ -294,18 +290,27 @@ export function TabResumen({
                     className="px-2.5 py-1.5 rounded-lg bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" />
-                    <span>Imprimir</span>
+                    <span>Imprimir Carnet</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onOpenPrenatalModal("basal")}
+                    className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    <Baby className="w-3.5 h-3.5" />
+                    <span>Ficha Basal</span>
                   </button>
                 </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenPrenatalModal("basal")}
+                  className="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                >
+                  <Baby className="w-3.5 h-3.5" />
+                  <span>+ Iniciar Carnet CPN</span>
+                </button>
               )}
-              <button
-                type="button"
-                onClick={onOpenPrenatalModal}
-                className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
-              >
-                <Baby className="w-3.5 h-3.5" />
-                <span>{prenatalCard ? "Abrir Carnet" : "+ Iniciar Carnet"}</span>
-              </button>
             </div>
           </div>
         </div>

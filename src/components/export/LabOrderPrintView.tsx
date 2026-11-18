@@ -289,7 +289,7 @@ export function LabOrderPrintView({
 
             <div className="text-center space-y-0.5 min-w-[200px]">
               <div className="h-8 border-b border-slate-400 flex items-center justify-center">
-                <span className="font-serif italic text-primary/70 text-xs select-none">
+                <span className="font-sans italic font-bold text-primary/70 text-xs select-none">
                   {titlePrefix} {doctorDisplayName}
                 </span>
               </div>

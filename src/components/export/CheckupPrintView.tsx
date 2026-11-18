@@ -251,7 +251,7 @@ export function CheckupPrintView({
 
           <div className="text-center space-y-0.5 min-w-[220px]">
             <div className="h-7 border-b border-slate-400 flex items-center justify-center">
-              <span className="font-serif italic text-primary/70 text-sm select-none">
+              <span className="font-sans italic font-bold text-primary/70 text-sm select-none">
                 {doctor.doctorTitle || "Dr."} {doctorDisplayName}
               </span>
             </div>

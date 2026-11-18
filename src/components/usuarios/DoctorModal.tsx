@@ -483,7 +483,7 @@ export function DoctorModal({ isOpen, onClose, doctorToEdit }: DoctorModalProps)
 
             <div className="p-3 bg-white rounded-lg border border-slate-200 flex items-center justify-between gap-4">
               <div className="space-y-0.5 text-left">
-                <p className="font-serif italic text-primary font-bold text-sm">
+                <p className="font-sans italic text-primary font-bold text-sm">
                   {watchedDoctorTitle} {watchedFullName || "Nombre del Profesional"}
                 </p>
                 <p className="font-heading font-extrabold text-[11px] text-slate-800 tracking-wide uppercase">

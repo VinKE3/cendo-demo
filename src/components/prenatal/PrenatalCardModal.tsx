@@ -173,13 +173,16 @@ export function PrenatalCardModal({
     dentalExam: "Normal",
     dentalExamDetail: "",
 
-    // EXÁMENES DE LABORATORIO
+    // EXÁMENES DE LABORATORIO (3 TRIMESTRES)
     hemoglobin1: 12.4,
     hemoglobin1Date: "2026-10-15",
     hemoglobin1NotDone: false,
     hemoglobin2: 12.2,
     hemoglobin2Date: "2027-01-15",
     hemoglobin2NotDone: false,
+    hemoglobin3: 12.0,
+    hemoglobin3Date: "",
+    hemoglobin3NotDone: false,
     hemoglobinDischarge: 12.0,
     hemoglobinDischargeDate: "",
     hemoglobinDischargeNotDone: true,
@@ -192,6 +195,9 @@ export function PrenatalCardModal({
     glucose2Result: "Normal",
     glucose2Date: "2027-01-15",
     glucose2Value: 86,
+    glucose3Result: "Normal",
+    glucose3Date: "",
+    glucose3Value: 88,
     glucoseToleranceResult: "No se Aplica",
     glucoseToleranceDate: "",
     glucoseToleranceValue: undefined,
@@ -201,6 +207,8 @@ export function PrenatalCardModal({
     vdrlRpr1Result: "No reactivo",
     vdrlRpr2Result: "No se Aplica",
     vdrlRpr2Date: "",
+    vdrlRpr3Result: "No se Aplica",
+    vdrlRpr3Date: "",
     ftaAbsResult: "No se Aplica",
     ftaAbsDate: "",
     tphaResult: "No se Aplica",
@@ -213,6 +221,8 @@ export function PrenatalCardModal({
     hivRapid1Date: "2026-10-15",
     hivRapid2Result: "No se Aplica",
     hivRapid2Date: "",
+    hivRapid3Result: "No se Aplica",
+    hivRapid3Date: "",
     hivElisaResult: "No se Aplica",
     hivElisaDate: "",
 
@@ -232,12 +242,20 @@ export function PrenatalCardModal({
     completeUrineExam: "Normal",
     completeUrineExamDate: "2026-10-15",
     completeUrineExamResult: "Negativo",
+    completeUrineExam2Date: "",
+    completeUrineExam2Result: "Negativo",
+    completeUrineExam3Date: "",
+    completeUrineExam3Result: "Negativo",
     leukocyturiaResult: "Negativo",
     nitritesResult: "Negativo",
     nitritesDate: "2026-10-15",
     urineCulture: "Negativo",
     urineCultureResult: "Negativo",
     urineCultureDate: "2026-10-15",
+    urineCulture2Date: "",
+    urineCulture2Result: "No se Aplica",
+    urineCulture3Date: "",
+    urineCulture3Result: "No se Aplica",
     bkSputumResult: "No se Aplica",
     bkSputumDate: "",
     listeriaResult: "No se Aplica",
@@ -345,8 +363,10 @@ export function PrenatalCardModal({
     }
   };
 
-  // Tab principal activa: "basal" | "consultas" | "aro"
-  const [activeMainTab, setActiveMainTab] = useState<"basal" | "consultas" | "aro">(initialTab);
+  // Tab principal activa: "consultas" (predeterminada si ya existe carnet) | "basal" | "aro"
+  const [activeMainTab, setActiveMainTab] = useState<"basal" | "consultas" | "aro">(
+    initialTab || (existingCard ? "consultas" : "basal")
+  );
 
   // Carga inicial al abrir modal
   useEffect(() => {
@@ -354,6 +374,10 @@ export function PrenatalCardModal({
 
     if (initialTab) {
       setActiveMainTab(initialTab);
+    } else if (existingCard) {
+      setActiveMainTab("consultas");
+    } else {
+      setActiveMainTab("basal");
     }
 
     if (existingCard) {
@@ -640,6 +664,86 @@ export function PrenatalCardModal({
         )}
 
         {/* =========================================================================
+            BARRA DE PESTAÑAS SUPERIORES FIJAS (SIEMPRE VISIBLE EN EL MODAL)
+            Pestaña 1: CONTROLES PRENATALES (CONSULTAS 1-9)
+            Pestaña 2: FICHA BASAL & ANTECEDENTES (CARA 1)
+            Pestaña 3: RIESGO OBSTÉTRICO ARO
+            ========================================================================= */}
+        <div className="px-4 sm:px-6 py-2.5 bg-slate-100/90 border-b border-border flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-2xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveMainTab("consultas")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "consultas"
+                ? "bg-teal-700 text-white shadow-xs ring-1 ring-teal-600"
+                : "bg-white text-slate-700 hover:text-slate-900 border border-slate-300 hover:bg-slate-50"
+                }`}
+            >
+              <Activity className={`w-4 h-4 ${activeMainTab === "consultas" ? "text-teal-200" : "text-teal-600"}`} />
+              <span>🩺 CONTROLES PRENATALES (VISITAS 1-9)</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeMainTab === "consultas" ? "bg-white/20 text-white" : "bg-teal-100 text-teal-800"
+                }`}>
+                {visitsList.length}/9
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveMainTab("basal")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "basal"
+                ? "bg-purple-700 text-white shadow-xs ring-1 ring-purple-600"
+                : "bg-white text-slate-700 hover:text-slate-900 border border-slate-300 hover:bg-slate-50"
+                }`}
+            >
+              <FileText className={`w-4 h-4 ${activeMainTab === "basal" ? "text-purple-200" : "text-purple-600"}`} />
+              <span>📋 FICHA BASAL & ANTECEDENTES (CARA 1)</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeMainTab === "basal" ? "bg-white/20 text-white" : "bg-purple-100 text-purple-800"
+                }`}>
+                9 Secciones
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveMainTab("aro")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "aro"
+                ? risksReport.isHighRisk
+                  ? "bg-red-700 text-white shadow-xs ring-1 ring-red-600"
+                  : "bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-600"
+                : "bg-white text-slate-700 hover:text-slate-900 border border-slate-300 hover:bg-slate-50"
+                }`}
+            >
+              <AlertTriangle className={`w-4 h-4 ${activeMainTab === "aro"
+                ? "text-white"
+                : risksReport.isHighRisk ? "text-red-600" : "text-emerald-600"
+                }`} />
+              <span>RIESGO ARO</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeMainTab === "aro"
+                ? "bg-white/20 text-white"
+                : risksReport.isHighRisk ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
+                }`}>
+                {risksReport.isHighRisk ? "ALTO RIESGO" : "BAJO RIESGO"}
+              </span>
+            </button>
+          </div>
+
+          {/* Botón Acción Inmediata: + Registrar Control de Hoy */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMainTab("consultas");
+              handleAddQuickVisit();
+            }}
+            disabled={visitsList.length >= 9}
+            className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            title="Registrar los datos de la consulta de hoy (Peso, PA, AU, FCF, Semanas)"
+          >
+            <Activity className="w-4 h-4 text-teal-100" />
+            <span>+ Registrar Control de Hoy (Atención N° {visitsList.length + 1})</span>
+          </button>
+        </div>
+
+        {/* =========================================================================
             2. CONTENIDO PRINCIPAL CON SCROLL
             ========================================================================= */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/30">
@@ -714,66 +818,7 @@ export function PrenatalCardModal({
             </div>
           </div>
 
-          {/* =========================================================================
-              BARRA DE PESTAÑAS SUPERIORES (SOLICITADAS POR KEVIN)
-              Pestaña 1: Ficha Basal (Acordeones 1 al 9)
-              Pestaña 2: Matriz de 9 Consultas
-              Pestaña 3: Riesgo ARO
-              ========================================================================= */}
-          <div className="bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/90 flex flex-wrap items-center gap-2 shadow-2xs">
-            <button
-              type="button"
-              onClick={() => setActiveMainTab("basal")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "basal"
-                ? "bg-white text-purple-900 shadow-xs border border-purple-200/80"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-                }`}
-            >
-              <FileText className={`w-4 h-4 ${activeMainTab === "basal" ? "text-purple-600" : "text-slate-500"}`} />
-              <span>📋 CARA 1: FICHA BASAL & ANTECEDENTES</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeMainTab === "basal" ? "bg-purple-100 text-purple-800" : "bg-slate-200/70 text-slate-700"
-                }`}>
-                9 Acordeones
-              </span>
-            </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveMainTab("consultas")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "consultas"
-                ? "bg-white text-teal-900 shadow-xs border border-teal-200/80"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-                }`}
-            >
-              <Activity className={`w-4 h-4 ${activeMainTab === "consultas" ? "text-teal-600" : "text-slate-500"}`} />
-              <span>🩺 CARA 2: CONTROLES PRENATALES</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeMainTab === "consultas" ? "bg-teal-100 text-teal-800" : "bg-slate-200/70 text-slate-700"
-                }`}>
-                {visitsList.length}/9
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveMainTab("aro")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold transition-all flex items-center gap-2 cursor-pointer ${activeMainTab === "aro"
-                ? risksReport.isHighRisk
-                  ? "bg-white text-red-900 shadow-xs border border-red-300"
-                  : "bg-white text-emerald-900 shadow-xs border border-emerald-300"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-                }`}
-            >
-              <AlertTriangle className={`w-4 h-4 ${activeMainTab === "aro"
-                ? risksReport.isHighRisk ? "text-red-600" : "text-emerald-600"
-                : "text-amber-500"
-                }`} />
-              <span>Pestaña 3: Riesgo ARO</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${risksReport.isHighRisk ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
-                }`}>
-                {risksReport.isHighRisk ? "ALTO RIESGO" : "BAJO RIESGO"}
-              </span>
-            </button>
-          </div>
 
           {/* =========================================================================
               PESTAÑA 1: FICHA BASAL (ACORDEONES 1 AL 9)

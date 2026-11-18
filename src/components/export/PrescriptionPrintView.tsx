@@ -111,7 +111,7 @@ export function PrescriptionPrintView({
           {/* 3. Cuerpo de la Prescripción Médica (RP/) */}
           <div className="space-y-3 pt-1">
             <div className="flex items-center gap-2 border-b border-primary/30 pb-1">
-              <span className="font-serif italic font-extrabold text-2xl text-primary select-none">
+              <span className="font-sans italic font-extrabold text-2xl text-primary select-none">
                 Rp/
               </span>
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
@@ -201,7 +201,7 @@ export function PrescriptionPrintView({
 
             <div className="text-center space-y-0.5 min-w-[240px]">
               <div className="h-10 border-b border-slate-400 flex items-center justify-center">
-                <span className="font-serif italic text-primary/80 text-base select-none">
+                <span className="font-sans italic font-bold text-primary/80 text-base select-none">
                   {titlePrefix} {doctorDisplayName}
                 </span>
               </div>

@@ -47,58 +47,84 @@ export function TabConsultasMatriz({
               </div>
 
               {/* Indicadores KPI de Control Prenatal */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Atenciones Realizadas</span>
-                  <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="text-xl font-heading font-black text-heading">{visitsList.length}</span>
-                    <span className="text-xs font-bold text-muted">/ 9 normadas</span>
+              {visitsList.length === 0 ? (
+                <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-300 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-200/80 text-amber-900 flex items-center justify-center shrink-0">
+                      <Activity className="w-5 h-5 text-amber-800" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-amber-950">
+                        Aún no se ha registrado la consulta prenatal de hoy para esta paciente
+                      </p>
+                      <p className="text-[11px] text-amber-800">
+                        Presione el botón verde para crear la columna de atención e ingresar Peso materno, Presión arterial (PA), Altura uterina (AU), FCF y Semanas de gestación.
+                      </p>
+                    </div>
                   </div>
-                  <div className="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className="bg-teal-600 h-full rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min((visitsList.length / 9) * 100, 100)}%` }}
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddQuickVisit}
+                    className="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center gap-2 shrink-0 shadow-xs cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Registrar Atención N° 1</span>
+                  </button>
                 </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Atenciones Realizadas</span>
+                    <div className="mt-1 flex items-baseline gap-1.5">
+                      <span className="text-xl font-heading font-black text-heading">{visitsList.length}</span>
+                      <span className="text-xs font-bold text-muted">/ 9 normadas</span>
+                    </div>
+                    <div className="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-teal-600 h-full rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min((visitsList.length / 9) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
 
-                <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Última Presión Arterial</span>
-                  <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="text-lg font-heading font-bold text-heading">
-                      {visitsList[visitsList.length - 1]?.bloodPressure || "—"}
+                  <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Última Presión Arterial</span>
+                    <div className="mt-1 flex items-baseline gap-1.5">
+                      <span className="text-lg font-heading font-bold text-heading">
+                        {visitsList[visitsList.length - 1]?.bloodPressure || "—"}
+                      </span>
+                      <span className="text-[10px] text-muted">mmHg</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 block mt-1">
+                      Meta: &lt; 140/90 mmHg
                     </span>
-                    <span className="text-[10px] text-muted">mmHg</span>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-500 block mt-1">
-                    Meta: &lt; 140/90 mmHg
-                  </span>
-                </div>
 
-                <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Última F.C.F. Fetal</span>
-                  <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="text-lg font-heading font-bold text-heading">
-                      {visitsList[visitsList.length - 1]?.fetalHeartRate ? `${visitsList[visitsList.length - 1].fetalHeartRate} lpm` : "—"}
+                  <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Última F.C.F. Fetal</span>
+                    <div className="mt-1 flex items-baseline gap-1.5">
+                      <span className="text-lg font-heading font-bold text-heading">
+                        {visitsList[visitsList.length - 1]?.fetalHeartRate ? `${visitsList[visitsList.length - 1].fetalHeartRate} lpm` : "—"}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 block mt-1">
+                      Rango normal: 120 - 160 lpm
                     </span>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-500 block mt-1">
-                    Rango normal: 120 - 160 lpm
-                  </span>
-                </div>
 
-                <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Próxima Cita Prevista</span>
-                  <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="text-sm font-heading font-bold text-primary truncate">
-                      {visitsList[visitsList.length - 1]?.nextAppointmentDate || "Pendiente"}
+                  <div className="p-3.5 rounded-xl border border-border bg-white shadow-2xs">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Próxima Cita Prevista</span>
+                    <div className="mt-1 flex items-baseline gap-1.5">
+                      <span className="text-sm font-heading font-bold text-primary truncate">
+                        {visitsList[visitsList.length - 1]?.nextAppointmentDate || "Pendiente"}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 block mt-1">
+                      Control cada 4 sem (&lt; 28s)
                     </span>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-500 block mt-1">
-                    Control cada 4 sem (&lt; 28s)
-                  </span>
                 </div>
-              </div>
+              )}
 
               {/* Tabla de Matriz Longitudinal Oficial */}
               <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">

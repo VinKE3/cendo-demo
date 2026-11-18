@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,11 +7,12 @@
 /* ==========================================================================
    === CENDO DESIGN TOKENS (CAMBIAR COLORES AQUÍ) ===
    Sistema Semántico de Tokens Clínicos - Dr. Patrick Jacinto (CENDO)
+   Tipografía Estandarizada Unificada: Inter
    ========================================================================== */
 :root {
-  /* Tipografía Semántica */
+  /* Tipografía Semántica Estandarizada (Unificada en Inter para máxima legibilidad clínica) */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Identidad Primaria (Azul Petróleo Quirúrgico CENDO) */

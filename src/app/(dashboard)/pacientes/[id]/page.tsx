@@ -294,7 +294,10 @@ export default function FichaPacientePage() {
             doctorProfile={doctorProfile}
             onOpenEditPatient={() => setIsPatientModalOpen(true)}
             onOpenEditBackground={() => setIsBgModalOpen(true)}
-            onOpenPrenatalModal={() => setIsPrenatalModalOpen(true)}
+            onOpenPrenatalModal={(tab) => {
+              setPrenatalInitialTab(tab || (prenatalCard ? "consultas" : "basal"));
+              setIsPrenatalModalOpen(true);
+            }}
             onOpenPrenatalPrint={(card) => {
               setViewingPrenatalCard(card);
               setIsPrenatalPrintModalOpen(true);

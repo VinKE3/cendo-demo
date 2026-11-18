@@ -233,32 +233,77 @@ export function PrenatalPrintView({
             </div>
           </div>
 
-          {/* 5. Sección III: Antecedentes Familiares, Personales & Vacunas */}
+          {/* 5. Sección III: Antecedentes Familiares, Personales & Vacunas (Formato Completo con Casillas Normales Visibles) */}
           <div className="grid grid-cols-12 gap-1.5 text-[8px]">
-            <div className="col-span-4 border border-slate-300 rounded p-1.5 bg-slate-50/50">
-              <span className="font-bold text-slate-700 uppercase block mb-0.5 text-[7.5px]">Antecedentes Familiares:</span>
-              <p className="text-slate-800 leading-tight">
-                {baseline.familyHistory && baseline.familyHistory.length > 0
-                  ? baseline.familyHistory.join(", ")
-                  : "Sin antecedentes familiares de relevancia"}
-              </p>
-            </div>
-            <div className="col-span-5 border border-slate-300 rounded p-1.5 bg-slate-50/50">
-              <span className="font-bold text-slate-700 uppercase block mb-0.5 text-[7.5px]">Antecedentes Personales:</span>
-              <p className="text-slate-800 leading-tight">
-                {baseline.personalHistory && baseline.personalHistory.length > 0
-                  ? baseline.personalHistory.join(", ")
-                  : "Niega patologías médicas previas"}
-              </p>
-            </div>
-            <div className="col-span-3 border border-slate-300 rounded p-1.5 bg-slate-50/50">
-              <span className="font-bold text-slate-700 uppercase block mb-0.5 text-[7.5px]">Vacunas Previas:</span>
-              <div className="grid grid-cols-2 gap-0.5 text-[7.5px]">
-                <span>Rubeola: <strong>{baseline.previousVaccines?.rubella ? "✓ SÍ" : "NO"}</strong></span>
-                <span>Hepatitis B: <strong>{baseline.previousVaccines?.hepatitisB ? "✓ SÍ" : "NO"}</strong></span>
-                <span>Papiloma: <strong>{baseline.previousVaccines?.hpv ? "✓ SÍ" : "NO"}</strong></span>
-                <span>F. Amarilla: <strong>{baseline.previousVaccines?.yellowFever ? "✓ SÍ" : "NO"}</strong></span>
+            <div className="col-span-4 border border-slate-300 rounded p-1.5 bg-slate-50/50 space-y-1">
+              <span className="font-bold text-slate-700 uppercase block text-[7.5px] border-b border-slate-200 pb-0.5">
+                Antecedentes Familiares:
+              </span>
+              <div className="grid grid-cols-2 gap-0.5 text-[7px] text-slate-700">
+                <span className={baseline.familyHistory?.includes("Tuberculosis") ? "font-bold text-amber-900" : ""}>
+                  {baseline.familyHistory?.includes("Tuberculosis") ? "[🟨] TBC" : "[✓] TBC: No"}
+                </span>
+                <span className={baseline.familyHistory?.includes("Diabetes") ? "font-bold text-amber-900" : ""}>
+                  {baseline.familyHistory?.includes("Diabetes") ? "[🟨] Diabetes" : "[✓] Diabetes: No"}
+                </span>
+                <span className={baseline.familyHistory?.includes("Hipertensión Arterial") || baseline.familyHistory?.includes("Hipertención Arterial") ? "font-bold text-amber-900" : ""}>
+                  {baseline.familyHistory?.includes("Hipertensión Arterial") || baseline.familyHistory?.includes("Hipertención Arterial") ? "[🟨] HTA" : "[✓] HTA: No"}
+                </span>
+                <span className={baseline.familyHistory?.includes("Preeclampsia / Eclampsia") ? "font-bold text-amber-900" : ""}>
+                  {baseline.familyHistory?.includes("Preeclampsia / Eclampsia") ? "[🟨] Preecl." : "[✓] Preecl: No"}
+                </span>
               </div>
+              {baseline.familyHistoryOther && (
+                <p className="text-[7px] text-slate-600 truncate border-t border-slate-200 pt-0.5">
+                  Otros: {baseline.familyHistoryOther}
+                </p>
+              )}
+            </div>
+
+            <div className="col-span-5 border border-slate-300 rounded p-1.5 bg-slate-50/50 space-y-1">
+              <span className="font-bold text-slate-700 uppercase block text-[7.5px] border-b border-slate-200 pb-0.5">
+                Antecedentes Personales:
+              </span>
+              <div className="grid grid-cols-3 gap-0.5 text-[7px] text-slate-700">
+                <span className={baseline.personalHistory?.includes("Tuberculosis") ? "font-bold text-amber-900" : ""}>
+                  {baseline.personalHistory?.includes("Tuberculosis") ? "[🟨] TBC" : "[✓] TBC: No"}
+                </span>
+                <span className={baseline.personalHistory?.includes("Diabetes") ? "font-bold text-amber-900" : ""}>
+                  {baseline.personalHistory?.includes("Diabetes") ? "[🟨] Diabetes" : "[✓] Diab: No"}
+                </span>
+                <span className={baseline.personalHistory?.includes("Hipertensión Arterial") ? "font-bold text-amber-900" : ""}>
+                  {baseline.personalHistory?.includes("Hipertensión Arterial") ? "[🟨] HTA" : "[✓] HTA: No"}
+                </span>
+                <span className={baseline.personalHistory?.includes("Preeclampsia / Eclampsia") ? "font-bold text-amber-900" : ""}>
+                  {baseline.personalHistory?.includes("Preeclampsia / Eclampsia") ? "[🟨] Preecl." : "[✓] Preecl: No"}
+                </span>
+                <span className={baseline.personalHistory?.includes("Cirugía pélvica previa") ? "font-bold text-amber-900" : ""}>
+                  {baseline.personalHistory?.includes("Cirugía pélvica previa") ? "[🟨] Cir. Pélv." : "[✓] Cirug: No"}
+                </span>
+                <span className={baseline.personalHistory?.includes("Infertilidad") ? "font-bold text-amber-900" : ""}>
+                  {baseline.personalHistory?.includes("Infertilidad") ? "[🟨] Infertil." : "[✓] Infert: No"}
+                </span>
+              </div>
+              <p className="text-[7px] text-slate-600 truncate border-t border-slate-200 pt-0.5">
+                {baseline.personalHistoryDetails && Object.keys(baseline.personalHistoryDetails).length > 0
+                  ? Object.entries(baseline.personalHistoryDetails).map(([k, v]) => `${k}: ${v}`).join(", ")
+                  : "Niega patologías crónicas o alergias medicamentosas de relevancia"}
+              </p>
+            </div>
+
+            <div className="col-span-3 border border-slate-300 rounded p-1.5 bg-slate-50/50 space-y-1">
+              <span className="font-bold text-slate-700 uppercase block text-[7.5px] border-b border-slate-200 pb-0.5">
+                Inmunizaciones:
+              </span>
+              <div className="grid grid-cols-2 gap-0.5 text-[7px]">
+                <span>Rubeola: <strong>{baseline.previousVaccines?.rubella ? "✓ SÍ" : "[ ] NO"}</strong></span>
+                <span>Hepatitis B: <strong>{baseline.previousVaccines?.hepatitisB ? "✓ SÍ" : "[ ] NO"}</strong></span>
+                <span>Papiloma: <strong>{baseline.previousVaccines?.hpv ? "✓ SÍ" : "[ ] NO"}</strong></span>
+                <span>F. Amarilla: <strong>{baseline.previousVaccines?.yellowFever ? "✓ SÍ" : "[ ] NO"}</strong></span>
+              </div>
+              <p className="text-[7px] text-slate-700 border-t border-slate-200 pt-0.5">
+                dT Adulto: <strong>{baseline.antitetanicaStatus || "Vacunada"}</strong> ({baseline.antitetanicaDosis || "2da"})
+              </p>
             </div>
           </div>
 
@@ -307,53 +352,102 @@ export function PrenatalPrintView({
             )}
           </div>
 
-          {/* 7. Sección V: Examen Físico Basal & Laboratorios de Tamizaje */}
+          {/* 7. Sección V: Examen Físico Basal & Laboratorios de Tamizaje (Formato 3 Trimestres & Normales Visibles) */}
           <div className="grid grid-cols-12 gap-1.5 text-[8px]">
             {/* Examen Físico */}
             <div className="col-span-4 border border-slate-300 rounded p-1.5 bg-white space-y-0.5">
               <span className="font-bold uppercase tracking-wider text-primary text-[7.5px] block border-b border-slate-200 pb-0.5">
-                Examen Físico Basal
+                Examen Físico Basal (Normado MINSA)
               </span>
-              <div className="space-y-0.5 text-[8px]">
-                <div className="flex justify-between"><span>Ex. Clínico:</span><strong>{baseline.clinicalExam}</strong></div>
-                <div className="flex justify-between"><span>Mamas:</span><strong>{baseline.breastsExam}</strong></div>
-                <div className="flex justify-between"><span>Cérvix:</span><strong>{baseline.cervixExam}</strong></div>
-                <div className="flex justify-between"><span>Pelvis:</span><strong>{baseline.pelvisExam}</strong></div>
-                <div className="flex justify-between"><span>Odontológico:</span><strong>{baseline.dentalExam}</strong></div>
+              <div className="space-y-0.5 text-[7.5px]">
+                <div className="flex justify-between items-center py-0.2 border-b border-slate-100">
+                  <span className="text-slate-600">Ex. Clínico:</span>
+                  <strong className={baseline.clinicalExam === "Patológico" ? "text-amber-800 font-bold" : "text-slate-900"}>
+                    {baseline.clinicalExam === "Patológico" ? "[🟨] Patológico" : "[✓] Normal"}
+                  </strong>
+                </div>
+                <div className="flex justify-between items-center py-0.2 border-b border-slate-100">
+                  <span className="text-slate-600">Mamas:</span>
+                  <strong className={baseline.breastsExam === "Patológico" ? "text-amber-800 font-bold" : "text-slate-900"}>
+                    {baseline.breastsExam === "Patológico" ? "[🟨] Patológico" : "[✓] Normal"}
+                  </strong>
+                </div>
+                <div className="flex justify-between items-center py-0.2 border-b border-slate-100">
+                  <span className="text-slate-600">Cérvix / PAP:</span>
+                  <strong className={baseline.cervixExam === "Patológico" ? "text-amber-800 font-bold" : "text-slate-900"}>
+                    {baseline.cervixExam === "Patológico" ? "[🟨] Patológico" : "[✓] Normal"}
+                  </strong>
+                </div>
+                <div className="flex justify-between items-center py-0.2 border-b border-slate-100">
+                  <span className="text-slate-600">Pelvis:</span>
+                  <strong className={baseline.pelvisExam === "Patológico" ? "text-amber-800 font-bold" : "text-slate-900"}>
+                    {baseline.pelvisExam === "Patológico" ? "[🟨] Patológico" : "[✓] Normal"}
+                  </strong>
+                </div>
+                <div className="flex justify-between items-center py-0.2">
+                  <span className="text-slate-600">Odontológico:</span>
+                  <strong className={baseline.dentalExam === "Patológico" ? "text-amber-800 font-bold" : "text-slate-900"}>
+                    {baseline.dentalExam === "Patológico" ? "[🟨] Patológico" : "[✓] Normal"}
+                  </strong>
+                </div>
               </div>
             </div>
 
-            {/* Laboratorios de Tamizaje MINSA */}
+            {/* Laboratorios de Tamizaje MINSA (3 Trimestres) */}
             <div className="col-span-8 border border-slate-300 rounded p-1.5 bg-white space-y-0.5">
-              <span className="font-bold uppercase tracking-wider text-primary text-[7.5px] block border-b border-slate-200 pb-0.5">
-                Exámenes de Laboratorio Basales (Tamizaje MINSA)
-              </span>
-              <div className="grid grid-cols-3 gap-1 text-[7.5px]">
-                <div className={`p-1 rounded border ${baseline.hemoglobin1 && baseline.hemoglobin1 < 11 ? "bg-amber-100 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
-                  <span className="block text-slate-500 font-bold">Hemoglobina 1:</span>
-                  <strong className="font-mono text-slate-900">{baseline.hemoglobin1 ? `${baseline.hemoglobin1} g/dL` : "—"}</strong>
-                  {baseline.hemoglobin1 && baseline.hemoglobin1 < 11 && <span className="text-[6px] font-bold text-amber-800 block">ANEMIA (ALERTA)</span>}
+              <div className="flex items-center justify-between border-b border-slate-200 pb-0.5">
+                <span className="font-bold uppercase tracking-wider text-primary text-[7.5px]">
+                  Exámenes de Laboratorio Basales (Tamizaje MINSA &bull; 3 Trimestres)
+                </span>
+                <span className="text-[7px] text-slate-500 font-mono">1° &bull; 2° &bull; 3° Trimestre</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1 text-[7px]">
+                {/* Hemoglobina */}
+                <div className="p-1 rounded border bg-slate-50 border-slate-200 space-y-0.5">
+                  <span className="block text-slate-700 font-bold">Hemoglobina Hg(%):</span>
+                  <div>1°: <strong className="font-mono">{baseline.hemoglobin1 ? `${baseline.hemoglobin1} g/dL` : "—"}</strong> {baseline.hemoglobin1 && baseline.hemoglobin1 < 11 ? <span className="text-amber-800 font-bold">[🟨]</span> : <span className="text-emerald-700 font-bold">[✓]</span>}</div>
+                  <div>2°: <strong className="font-mono">{baseline.hemoglobin2 ? `${baseline.hemoglobin2} g/dL` : "—"}</strong> {baseline.hemoglobin2 && baseline.hemoglobin2 < 11 ? <span className="text-amber-800 font-bold">[🟨]</span> : <span className="text-emerald-700 font-bold">[✓]</span>}</div>
+                  <div>3°: <strong className="font-mono">{baseline.hemoglobin3 ? `${baseline.hemoglobin3} g/dL` : (baseline.hemoglobinDischarge ? `${baseline.hemoglobinDischarge} g/dL` : "—")}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
                 </div>
-                <div className={`p-1 rounded border ${baseline.bloodGlucose1 && baseline.bloodGlucose1 >= 92 ? "bg-amber-100 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
-                  <span className="block text-slate-500 font-bold">Glicemia 1:</span>
-                  <strong className="font-mono text-slate-900">{baseline.bloodGlucose1 ? `${baseline.bloodGlucose1} mg/dL` : "—"}</strong>
-                  {baseline.bloodGlucose1 && baseline.bloodGlucose1 >= 92 && <span className="text-[6px] font-bold text-amber-800 block">DG (ALERTA)</span>}
+
+                {/* Glicemia */}
+                <div className="p-1 rounded border bg-slate-50 border-slate-200 space-y-0.5">
+                  <span className="block text-slate-700 font-bold">Glicemia (mg/dL):</span>
+                  <div>1°: <strong className="font-mono">{baseline.glucose1Value || baseline.bloodGlucose1 ? `${baseline.glucose1Value || baseline.bloodGlucose1} mg/dL` : (baseline.glucose1Result || "—")}</strong> {baseline.glucose1Result === "Anormal" ? <span className="text-amber-800 font-bold">[🟨]</span> : <span className="text-emerald-700 font-bold">[✓]</span>}</div>
+                  <div>2°: <strong className="font-mono">{baseline.glucose2Value ? `${baseline.glucose2Value} mg/dL` : (baseline.glucose2Result || "—")}</strong> {baseline.glucose2Result === "Anormal" ? <span className="text-amber-800 font-bold">[🟨]</span> : <span className="text-emerald-700 font-bold">[✓]</span>}</div>
+                  <div>3°: <strong className="font-mono">{baseline.glucose3Value ? `${baseline.glucose3Value} mg/dL` : (baseline.glucose3Result || "—")}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
                 </div>
-                <div className={`p-1 rounded border ${baseline.vdrlRpr1 === "Reactivo" ? "bg-red-100 border-red-300 text-red-900" : "bg-slate-50 border-slate-200"}`}>
-                  <span className="block text-slate-500 font-bold">VDRL / RPR:</span>
-                  <strong className="text-slate-900">{baseline.vdrlRpr1 || "No reactivo"}</strong>
+
+                {/* VDRL / RPR */}
+                <div className="p-1 rounded border bg-slate-50 border-slate-200 space-y-0.5">
+                  <span className="block text-slate-700 font-bold">VDRL / RPR (Sífilis):</span>
+                  <div>1°: <strong className="font-mono">{baseline.vdrlRpr1Result || baseline.vdrlRpr1 || "No reactivo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
+                  <div>2°: <strong className="font-mono">{baseline.vdrlRpr2Result || "No reactivo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
+                  <div>3°: <strong className="font-mono">{baseline.vdrlRpr3Result || "No reactivo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
                 </div>
-                <div className={`p-1 rounded border ${baseline.hivScreening1 === "Positivo" ? "bg-red-100 border-red-300 text-red-900" : "bg-slate-50 border-slate-200"}`}>
-                  <span className="block text-slate-500 font-bold">Tamizaje VIH:</span>
-                  <strong className="text-slate-900">{baseline.hivScreening1 || "Negativo"}</strong>
+
+                {/* VIH */}
+                <div className="p-1 rounded border bg-slate-50 border-slate-200 space-y-0.5">
+                  <span className="block text-slate-700 font-bold">Tamizaje VIH:</span>
+                  <div>1°: <strong className="font-mono">{baseline.hivRapid1Result || baseline.hivScreening1 || "Negativo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
+                  <div>2°: <strong className="font-mono">{baseline.hivRapid2Result || "No reactivo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
+                  <div>3°: <strong className="font-mono">{baseline.hivRapid3Result || "No reactivo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
                 </div>
-                <div className={`p-1 rounded border ${baseline.hepatitisBScreening === "Positivo" ? "bg-red-100 border-red-300 text-red-900" : "bg-slate-50 border-slate-200"}`}>
-                  <span className="block text-slate-500 font-bold">Hepatitis B:</span>
-                  <strong className="text-slate-900">{baseline.hepatitisBScreening || "Negativo"}</strong>
+
+                {/* Orina y Urocultivo */}
+                <div className="p-1 rounded border bg-slate-50 border-slate-200 space-y-0.5">
+                  <span className="block text-slate-700 font-bold">Orina & Urocultivo:</span>
+                  <div>Orina 1°: <strong>{baseline.completeUrineExamResult || baseline.completeUrineExam || "Negativo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
+                  <div>Urocultivo 1°: <strong>{baseline.urineCultureResult || baseline.urineCulture || "Negativo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
+                  <div>Orina 2°/3°: <strong>{baseline.completeUrineExam2Result || "Negativo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
                 </div>
-                <div className={`p-1 rounded border ${baseline.completeUrineExam === "Patológico" ? "bg-amber-100 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
-                  <span className="block text-slate-500 font-bold">Ex. Orina / Urocultivo:</span>
-                  <strong className="text-slate-900">{baseline.completeUrineExam || "Normal"}</strong>
+
+                {/* Otras Pruebas */}
+                <div className="p-1 rounded border bg-slate-50 border-slate-200 space-y-0.5">
+                  <span className="block text-slate-700 font-bold">Otras Pruebas MINSA:</span>
+                  <div>Hepatitis B: <strong>{baseline.hepatitisBResult || baseline.hepatitisBScreening || "Negativo"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
+                  <div>PAP Cervical: <strong>{baseline.papTestResult || "Normal"}</strong> <span className="text-emerald-700 font-bold">[✓]</span></div>
+                  <div>Tolerancia Glucosa: <strong>{baseline.glucoseToleranceResult || "No se Aplica"}</strong></div>
                 </div>
               </div>
             </div>
@@ -382,7 +476,7 @@ export function PrenatalPrintView({
 
             <div className="text-center min-w-[180px]">
               <div className="h-6 border-b border-slate-400 flex items-center justify-center">
-                <span className="font-serif italic text-primary/70 text-xs select-none">
+                <span className="font-sans italic font-bold text-primary/70 text-xs select-none">
                   Dr. {doctorDisplayName}
                 </span>
               </div>
@@ -672,7 +766,7 @@ export function PrenatalPrintView({
 
             <div className="text-center space-y-0.5 min-w-[210px]">
               <div className="h-8 border-b border-slate-400 flex items-center justify-center">
-                <span className="font-serif italic text-primary/70 text-sm select-none">
+                <span className="font-sans italic font-bold text-primary/70 text-sm select-none">
                   {doctor.doctorTitle || "Dr."} {doctorDisplayName}
                 </span>
               </div>

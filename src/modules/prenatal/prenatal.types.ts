@@ -121,18 +121,21 @@ export interface PrenatalBaselineData {
   // ==========================================
   // EXÁMENES DE LABORATORIO (MINSA / CLAP)
   // ==========================================
-  // Hemoglobina
+  // Hemoglobina (3 Trimestres + Alta)
   hemoglobin1?: number;
   hemoglobin1Date?: string;
   hemoglobin1NotDone?: boolean;
   hemoglobin2?: number;
   hemoglobin2Date?: string;
   hemoglobin2NotDone?: boolean;
+  hemoglobin3?: number;
+  hemoglobin3Date?: string;
+  hemoglobin3NotDone?: boolean;
   hemoglobinDischarge?: number;
   hemoglobinDischargeDate?: string;
   hemoglobinDischargeNotDone?: boolean;
 
-  // Glicemia & Tolerancia
+  // Glicemia & Tolerancia (3 Trimestres)
   bloodGlucose1?: number;
   bloodGlucose1Date?: string;
   glucose1Result?: "Normal" | "Anormal" | "No se Hizo" | string;
@@ -141,16 +144,21 @@ export interface PrenatalBaselineData {
   glucose2Result?: "Normal" | "Anormal" | "No se Hizo" | string;
   glucose2Date?: string;
   glucose2Value?: number;
+  glucose3Result?: "Normal" | "Anormal" | "No se Hizo" | string;
+  glucose3Date?: string;
+  glucose3Value?: number;
   glucoseToleranceResult?: "Normal" | "Anormal" | "No se Hizo" | "No se Aplica" | string;
   glucoseToleranceDate?: string;
   glucoseToleranceValue?: number;
 
-  // Sífilis & Infecciones de Transmisión Sexual
+  // Sífilis & Infecciones de Transmisión Sexual (3 Trimestres)
   vdrlRpr1?: "No reactivo" | "Reactivo" | "No se hizo" | string;
   vdrlRpr1Date?: string;
   vdrlRpr1Result?: "No reactivo" | "Reactivo" | "No se Hizo" | string;
   vdrlRpr2Result?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
   vdrlRpr2Date?: string;
+  vdrlRpr3Result?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
+  vdrlRpr3Date?: string;
   ftaAbsResult?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
   ftaAbsDate?: string;
   tphaResult?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
@@ -163,6 +171,8 @@ export interface PrenatalBaselineData {
   hivRapid1Date?: string;
   hivRapid2Result?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
   hivRapid2Date?: string;
+  hivRapid3Result?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
+  hivRapid3Date?: string;
   hivElisaResult?: "No reactivo" | "Reactivo" | "No se Hizo" | "No se Aplica" | string;
   hivElisaDate?: string;
 
@@ -180,16 +190,24 @@ export interface PrenatalBaselineData {
   malariaFluorescenceResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
   malariaFluorescenceDate?: string;
 
-  // Orina & Infecciones
+  // Orina & Infecciones (3 Trimestres)
   completeUrineExam?: "Normal" | "Patológico" | "No se hizo" | string;
   completeUrineExamDate?: string;
   completeUrineExamResult?: "Negativo" | "Positivo" | "No se Hizo" | string;
+  completeUrineExam2Date?: string;
+  completeUrineExam2Result?: "Negativo" | "Positivo" | "No se Hizo" | string;
+  completeUrineExam3Date?: string;
+  completeUrineExam3Result?: "Negativo" | "Positivo" | "No se Hizo" | string;
   leukocyturiaResult?: "Negativo" | "Positivo" | "No se Hizo" | string;
   nitritesResult?: "Negativo" | "Positivo" | "No se Hizo" | string;
   nitritesDate?: string;
   urineCulture?: "Negativo" | "Positivo" | "Pendiente" | "No se hizo" | string;
   urineCultureResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
   urineCultureDate?: string;
+  urineCulture2Date?: string;
+  urineCulture2Result?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
+  urineCulture3Date?: string;
+  urineCulture3Result?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
   bkSputumResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;
   bkSputumDate?: string;
   listeriaResult?: "Negativo" | "Positivo" | "No se Hizo" | "No se Aplica" | string;

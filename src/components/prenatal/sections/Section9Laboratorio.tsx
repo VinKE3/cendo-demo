@@ -22,22 +22,27 @@ export function Section9Laboratorio({
 
   const isHb1Anemia = !baselineData.hemoglobin1NotDone && typeof baselineData.hemoglobin1 === "number" && baselineData.hemoglobin1 < 11.0;
   const isHb2Anemia = !baselineData.hemoglobin2NotDone && typeof baselineData.hemoglobin2 === "number" && baselineData.hemoglobin2 < 11.0;
+  const isHb3Anemia = !baselineData.hemoglobin3NotDone && typeof baselineData.hemoglobin3 === "number" && baselineData.hemoglobin3 < 11.0;
   const isHbDischargeAnemia = !baselineData.hemoglobinDischargeNotDone && typeof baselineData.hemoglobinDischarge === "number" && baselineData.hemoglobinDischarge < 11.0;
 
   const labPathologicalAlerts: string[] = [];
   if (isHb1Anemia) labPathologicalAlerts.push(`Hb 1: ${baselineData.hemoglobin1} g/dL (Anemia)`);
   if (isHb2Anemia) labPathologicalAlerts.push(`Hb 2: ${baselineData.hemoglobin2} g/dL (Anemia)`);
+  if (isHb3Anemia) labPathologicalAlerts.push(`Hb 3: ${baselineData.hemoglobin3} g/dL (Anemia)`);
   if (isHbDischargeAnemia) labPathologicalAlerts.push(`Hb Alta: ${baselineData.hemoglobinDischarge} g/dL (Anemia)`);
   if (baselineData.glucose1Result === "Anormal") labPathologicalAlerts.push("Glicemia 1 Anormal");
   if (baselineData.glucose2Result === "Anormal") labPathologicalAlerts.push("Glicemia 2 Anormal");
+  if (baselineData.glucose3Result === "Anormal") labPathologicalAlerts.push("Glicemia 3 Anormal");
   if (baselineData.glucoseToleranceResult === "Anormal") labPathologicalAlerts.push("Tolerancia a Glucosa Anormal");
   if (baselineData.vdrlRpr1Result === "Reactivo") labPathologicalAlerts.push("VDRL/RPR 1 Reactivo");
   if (baselineData.vdrlRpr2Result === "Reactivo") labPathologicalAlerts.push("VDRL/RPR 2 Reactivo");
+  if (baselineData.vdrlRpr3Result === "Reactivo") labPathologicalAlerts.push("VDRL/RPR 3 Reactivo");
   if (baselineData.ftaAbsResult === "Reactivo") labPathologicalAlerts.push("FTA Abs. Reactivo");
   if (baselineData.tphaResult === "Reactivo") labPathologicalAlerts.push("TPHA Reactivo");
   if (baselineData.rapidSyphilisResult === "Reactivo") labPathologicalAlerts.push("Prueba Rápida Sífilis Reactiva");
   if (baselineData.hivRapid1Result === "Reactivo") labPathologicalAlerts.push("VIH Prueba Rápida 1 Reactiva");
   if (baselineData.hivRapid2Result === "Reactivo") labPathologicalAlerts.push("VIH Prueba Rápida 2 Reactiva");
+  if (baselineData.hivRapid3Result === "Reactivo") labPathologicalAlerts.push("VIH Prueba Rápida 3 Reactiva");
   if (baselineData.hivElisaResult === "Reactivo") labPathologicalAlerts.push("VIH ELISA Reactivo");
   if (baselineData.westernBlotResult === "Positivo") labPathologicalAlerts.push("Western Blot Positivo");
   if (baselineData.htlv1Result === "Positivo") labPathologicalAlerts.push("HTLV-I Positivo");
@@ -97,6 +102,9 @@ export function Section9Laboratorio({
       hemoglobin2: 12.2,
       hemoglobin2Date: todayStr,
       hemoglobin2NotDone: false,
+      hemoglobin3: 12.0,
+      hemoglobin3Date: todayStr,
+      hemoglobin3NotDone: false,
       hemoglobinDischarge: 12.0,
       hemoglobinDischargeDate: "",
       hemoglobinDischargeNotDone: true,
@@ -108,12 +116,18 @@ export function Section9Laboratorio({
       glucose2Result: "Normal",
       glucose2Date: todayStr,
       glucose2Value: 86,
+      glucose3Result: "Normal",
+      glucose3Date: todayStr,
+      glucose3Value: 88,
       glucoseToleranceResult: "No se Aplica",
       glucoseToleranceDate: "",
       vdrlRpr1: "No reactivo",
       vdrlRpr1Date: todayStr,
       vdrlRpr1Result: "No reactivo",
-      vdrlRpr2Result: "No se Aplica",
+      vdrlRpr2Result: "No reactivo",
+      vdrlRpr2Date: todayStr,
+      vdrlRpr3Result: "No reactivo",
+      vdrlRpr3Date: todayStr,
       ftaAbsResult: "No se Aplica",
       tphaResult: "No se Aplica",
       rapidSyphilisResult: "No reactivo",
@@ -122,7 +136,10 @@ export function Section9Laboratorio({
       hivScreening1Date: todayStr,
       hivRapid1Result: "No reactivo",
       hivRapid1Date: todayStr,
-      hivRapid2Result: "No se Aplica",
+      hivRapid2Result: "No reactivo",
+      hivRapid2Date: todayStr,
+      hivRapid3Result: "No reactivo",
+      hivRapid3Date: todayStr,
       hivElisaResult: "No se Aplica",
       westernBlotResult: "No se Aplica",
       htlv1Result: "Negativo",
@@ -134,12 +151,20 @@ export function Section9Laboratorio({
       completeUrineExam: "Normal",
       completeUrineExamDate: todayStr,
       completeUrineExamResult: "Negativo",
+      completeUrineExam2Date: todayStr,
+      completeUrineExam2Result: "Negativo",
+      completeUrineExam3Date: todayStr,
+      completeUrineExam3Result: "Negativo",
       leukocyturiaResult: "Negativo",
       nitritesResult: "Negativo",
       nitritesDate: todayStr,
       urineCulture: "Negativo",
       urineCultureResult: "Negativo",
       urineCultureDate: todayStr,
+      urineCulture2Date: todayStr,
+      urineCulture2Result: "Negativo",
+      urineCulture3Date: todayStr,
+      urineCulture3Result: "Negativo",
       bkSputumResult: "No se Aplica",
       listeriaResult: "No se Aplica",
       hepatitisBScreening: "Negativo",
@@ -158,17 +183,21 @@ export function Section9Laboratorio({
       ...prev,
       hemoglobin1NotDone: true,
       hemoglobin2NotDone: true,
+      hemoglobin3NotDone: true,
       hemoglobinDischargeNotDone: true,
       glucose1Result: "No se Hizo",
       glucose2Result: "No se Hizo",
+      glucose3Result: "No se Hizo",
       glucoseToleranceResult: "No se Hizo",
       vdrlRpr1Result: "No se Hizo",
       vdrlRpr2Result: "No se Hizo",
+      vdrlRpr3Result: "No se Hizo",
       ftaAbsResult: "No se Hizo",
       tphaResult: "No se Hizo",
       rapidSyphilisResult: "No se Hizo",
       hivRapid1Result: "No se Hizo",
       hivRapid2Result: "No se Hizo",
+      hivRapid3Result: "No se Hizo",
       hivElisaResult: "No se Hizo",
       westernBlotResult: "No se Hizo",
       htlv1Result: "No se Hizo",
@@ -177,9 +206,13 @@ export function Section9Laboratorio({
       malariaRapidResult: "No se Hizo",
       malariaFluorescenceResult: "No se Hizo",
       completeUrineExamResult: "No se Hizo",
+      completeUrineExam2Result: "No se Hizo",
+      completeUrineExam3Result: "No se Hizo",
       leukocyturiaResult: "No se Hizo",
       nitritesResult: "No se Hizo",
       urineCultureResult: "No se Hizo",
+      urineCulture2Result: "No se Hizo",
+      urineCulture3Result: "No se Hizo",
       bkSputumResult: "No se Hizo",
       listeriaResult: "No se Hizo",
       hepatitisBResult: "No se Hizo",
@@ -541,7 +574,7 @@ export function Section9Laboratorio({
 
               <div className="space-y-2">
                 {renderHemoglobinRow({
-                  label: "Hemoglobina 1:",
+                  label: "Hemoglobina 1 (1er Trimestre):",
                   val: baselineData.hemoglobin1,
                   onValChange: (v) => setBaselineData({ ...baselineData, hemoglobin1: v }),
                   notDone: baselineData.hemoglobin1NotDone,
@@ -551,7 +584,7 @@ export function Section9Laboratorio({
                 })}
 
                 {renderHemoglobinRow({
-                  label: "Hemoglobina 2:",
+                  label: "Hemoglobina 2 (2do Trimestre):",
                   val: baselineData.hemoglobin2,
                   onValChange: (v) => setBaselineData({ ...baselineData, hemoglobin2: v }),
                   notDone: baselineData.hemoglobin2NotDone,
@@ -561,7 +594,17 @@ export function Section9Laboratorio({
                 })}
 
                 {renderHemoglobinRow({
-                  label: "Hemogl. al Alta :",
+                  label: "Hemoglobina 3 (3er Trimestre):",
+                  val: baselineData.hemoglobin3,
+                  onValChange: (v) => setBaselineData({ ...baselineData, hemoglobin3: v }),
+                  notDone: baselineData.hemoglobin3NotDone,
+                  onNotDoneChange: (nd) => setBaselineData({ ...baselineData, hemoglobin3NotDone: nd }),
+                  dateVal: baselineData.hemoglobin3Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hemoglobin3Date: d }),
+                })}
+
+                {renderHemoglobinRow({
+                  label: "Hemogl. al Alta / Parto:",
                   val: baselineData.hemoglobinDischarge,
                   onValChange: (v) => setBaselineData({ ...baselineData, hemoglobinDischarge: v }),
                   notDone: baselineData.hemoglobinDischargeNotDone,
@@ -577,14 +620,14 @@ export function Section9Laboratorio({
               <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
                   <FlaskConical className="w-3.5 h-3.5 text-cyan-600" />
-                  Glicemia & Tolerancia a la Glucosa
+                  Glicemia & Tolerancia a la Glucosa (3 Trimestres)
                 </span>
                 <span className="text-[10px] text-slate-500 font-mono">Descarte Diabetes Gestacional</span>
               </div>
 
               <div className="space-y-2">
                 {renderLabRow({
-                  label: "Glicemia 1:",
+                  label: "Glicemia 1 (1er Trimestre):",
                   value: baselineData.glucose1Result || "Normal",
                   onChange: (val) => setBaselineData({ ...baselineData, glucose1Result: val }),
                   dateValue: baselineData.glucose1Date,
@@ -597,13 +640,26 @@ export function Section9Laboratorio({
                 })}
 
                 {renderLabRow({
-                  label: "Glicemia 2:",
+                  label: "Glicemia 2 (2do Trimestre):",
                   value: baselineData.glucose2Result || "Normal",
                   onChange: (val) => setBaselineData({ ...baselineData, glucose2Result: val }),
                   dateValue: baselineData.glucose2Date,
                   onDateChange: (d) => setBaselineData({ ...baselineData, glucose2Date: d }),
                   numericVal: baselineData.glucose2Value,
                   onNumericChange: (v) => setBaselineData({ ...baselineData, glucose2Value: v }),
+                  numericUnit: "mg/dL",
+                  safeText: "Normal",
+                  alertText: "Anormal",
+                })}
+
+                {renderLabRow({
+                  label: "Glicemia 3 (3er Trimestre):",
+                  value: baselineData.glucose3Result || "Normal",
+                  onChange: (val) => setBaselineData({ ...baselineData, glucose3Result: val }),
+                  dateValue: baselineData.glucose3Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, glucose3Date: d }),
+                  numericVal: baselineData.glucose3Value,
+                  onNumericChange: (v) => setBaselineData({ ...baselineData, glucose3Value: v }),
                   numericUnit: "mg/dL",
                   safeText: "Normal",
                   alertText: "Anormal",
@@ -631,14 +687,14 @@ export function Section9Laboratorio({
               <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
                 <span className="text-xs font-heading font-extrabold text-heading uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldAlert className="w-3.5 h-3.5 text-cyan-600" />
-                  Sífilis & Tamizaje VIH (Prevención Transmisión Vertical)
+                  Sífilis & Tamizaje VIH (3 Trimestres &bull; Prevención Transmisión Vertical)
                 </span>
                 <span className="text-[10px] text-slate-500 font-mono">Serología Obligatoria</span>
               </div>
 
               <div className="space-y-2">
                 {renderLabRow({
-                  label: "VDRL/RPR 1 :",
+                  label: "VDRL/RPR 1 (1er Trim.):",
                   value: baselineData.vdrlRpr1Result || "No reactivo",
                   onChange: (val) => setBaselineData({ ...baselineData, vdrlRpr1Result: val, vdrlRpr1: val }),
                   dateValue: baselineData.vdrlRpr1Date,
@@ -648,11 +704,22 @@ export function Section9Laboratorio({
                 })}
 
                 {renderLabRow({
-                  label: "VDRL/RPR 2 :",
+                  label: "VDRL/RPR 2 (2do Trim.):",
                   value: baselineData.vdrlRpr2Result || "No se Aplica",
                   onChange: (val) => setBaselineData({ ...baselineData, vdrlRpr2Result: val }),
                   dateValue: baselineData.vdrlRpr2Date,
                   onDateChange: (d) => setBaselineData({ ...baselineData, vdrlRpr2Date: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "VDRL/RPR 3 (3er Trim.):",
+                  value: baselineData.vdrlRpr3Result || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, vdrlRpr3Result: val }),
+                  dateValue: baselineData.vdrlRpr3Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, vdrlRpr3Date: d }),
                   safeText: "No reactivo",
                   alertText: "Reactivo",
                   hasNoApplies: true,
@@ -693,7 +760,7 @@ export function Section9Laboratorio({
                 })}
 
                 {renderLabRow({
-                  label: "VIH Prueba Rap. 1 :",
+                  label: "VIH Prueba Rap. 1 (1er Trim.):",
                   value: baselineData.hivRapid1Result || "No reactivo",
                   onChange: (val) => setBaselineData({ ...baselineData, hivRapid1Result: val }),
                   dateValue: baselineData.hivRapid1Date,
@@ -703,12 +770,24 @@ export function Section9Laboratorio({
                 })}
 
                 {renderLabRow({
-                  label: "Prueba Rap. 2 :",
-                  badge: "VIH 3er Trim.",
+                  label: "VIH Prueba Rap. 2 (2do Trim.):",
+                  badge: "VIH 2do Trim.",
                   value: baselineData.hivRapid2Result || "No se Aplica",
                   onChange: (val) => setBaselineData({ ...baselineData, hivRapid2Result: val }),
                   dateValue: baselineData.hivRapid2Date,
                   onDateChange: (d) => setBaselineData({ ...baselineData, hivRapid2Date: d }),
+                  safeText: "No reactivo",
+                  alertText: "Reactivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "VIH Prueba Rap. 3 (3er Trim.):",
+                  badge: "VIH 3er Trim.",
+                  value: baselineData.hivRapid3Result || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, hivRapid3Result: val }),
+                  dateValue: baselineData.hivRapid3Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, hivRapid3Date: d }),
                   safeText: "No reactivo",
                   alertText: "Reactivo",
                   hasNoApplies: true,
@@ -822,11 +901,31 @@ export function Section9Laboratorio({
 
               <div className="space-y-2">
                 {renderLabRow({
-                  label: "Ex. Comp. Orina:",
+                  label: "Ex. Comp. Orina 1 (1er Trim.):",
                   value: baselineData.completeUrineExamResult || "Negativo",
                   onChange: (val) => setBaselineData({ ...baselineData, completeUrineExamResult: val }),
                   dateValue: baselineData.completeUrineExamDate,
                   onDateChange: (d) => setBaselineData({ ...baselineData, completeUrineExamDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                })}
+
+                {renderLabRow({
+                  label: "Ex. Comp. Orina 2 (2do Trim.):",
+                  value: baselineData.completeUrineExam2Result || "Negativo",
+                  onChange: (val) => setBaselineData({ ...baselineData, completeUrineExam2Result: val }),
+                  dateValue: baselineData.completeUrineExam2Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, completeUrineExam2Date: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                })}
+
+                {renderLabRow({
+                  label: "Ex. Comp. Orina 3 (3er Trim.):",
+                  value: baselineData.completeUrineExam3Result || "Negativo",
+                  onChange: (val) => setBaselineData({ ...baselineData, completeUrineExam3Result: val }),
+                  dateValue: baselineData.completeUrineExam3Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, completeUrineExam3Date: d }),
                   safeText: "Negativo",
                   alertText: "Positivo",
                 })}
@@ -850,12 +949,34 @@ export function Section9Laboratorio({
                 })}
 
                 {renderLabRow({
-                  label: "Urocultivo:",
+                  label: "Urocultivo 1 (1er Trim.):",
                   badge: "Bacteriuria Asintomática",
                   value: baselineData.urineCultureResult || "Negativo",
                   onChange: (val) => setBaselineData({ ...baselineData, urineCultureResult: val }),
                   dateValue: baselineData.urineCultureDate,
                   onDateChange: (d) => setBaselineData({ ...baselineData, urineCultureDate: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Urocultivo 2 (2do Trim.):",
+                  value: baselineData.urineCulture2Result || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, urineCulture2Result: val }),
+                  dateValue: baselineData.urineCulture2Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, urineCulture2Date: d }),
+                  safeText: "Negativo",
+                  alertText: "Positivo",
+                  hasNoApplies: true,
+                })}
+
+                {renderLabRow({
+                  label: "Urocultivo 3 (3er Trim.):",
+                  value: baselineData.urineCulture3Result || "No se Aplica",
+                  onChange: (val) => setBaselineData({ ...baselineData, urineCulture3Result: val }),
+                  dateValue: baselineData.urineCulture3Date,
+                  onDateChange: (d) => setBaselineData({ ...baselineData, urineCulture3Date: d }),
                   safeText: "Negativo",
                   alertText: "Positivo",
                   hasNoApplies: true,

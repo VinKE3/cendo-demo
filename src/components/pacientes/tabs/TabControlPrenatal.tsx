@@ -19,7 +19,6 @@ import {
   Info,
 } from "lucide-react";
 import { Patient, PrenatalCard, PrenatalVisitItem, DoctorProfile } from "@/types/medical";
-import { generatePrenatalWhatsAppUrl } from "@/lib/whatsappShare";
 import { calculateGestationalAge, evaluatePrenatalRisks } from "@/lib/prenatalCalculators";
 
 interface TabControlPrenatalProps {
@@ -151,19 +150,6 @@ export function TabControlPrenatal({
           >
             <Activity className="w-4 h-4 text-teal-100" />
             <span>+ Registrar Control de Hoy</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              const url = generatePrenatalWhatsAppUrl(patient, prenatalCard, doctorProfile);
-              window.open(url, "_blank");
-            }}
-            className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-            title="Enviar resumen prenatal por WhatsApp"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span>WhatsApp</span>
           </button>
 
           <button
