@@ -13,6 +13,8 @@ import {
   Image as ImageIcon,
   Plus,
   Trash2,
+  Camera,
+  Upload,
 } from "lucide-react";
 import {
   Patient,
@@ -24,6 +26,8 @@ import {
 import { useMedicalStore } from "@/store/useMedicalStore";
 import { generateUltrasoundWhatsAppUrl } from "@/lib/whatsappShare";
 import { getPeruDateString } from "@/lib/utils";
+import { compressImageFile } from "@/lib/imageCompressor";
+import { uploadClinicalImageToSupabase } from "@/lib/supabaseStorage";
 
 interface UltrasoundModalProps {
   isOpen: boolean;
@@ -84,10 +88,8 @@ export function UltrasoundModal({
   const [conclusion, setConclusion] = useState("");
   const [recommendations, setRecommendations] = useState("");
 
-  // Galería de fotos
+  // Galería de fotos ecográficas
   const [images, setImages] = useState<{ url: string; caption: string }[]>([]);
-  const [newImageUrl, setNewImageUrl] = useState("");
-  const [newImageCaption, setNewImageCaption] = useState("");
 
   useEffect(() => {
     if (reportToEdit) {
@@ -129,11 +131,129 @@ export function UltrasoundModal({
 
   if (!isOpen) return null;
 
-  const handleAddImage = () => {
-    if (!newImageUrl.trim()) return;
-    setImages([...images, { url: newImageUrl.trim(), caption: newImageCaption.trim() }]);
-    setNewImageUrl("");
-    setNewImageCaption("");
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleMultipleFilesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const newUploads: { url: string; caption: string }[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith("image/")) continue;
+
+        // 1. Compresión inteligente en el navegador (reduce archivos de ~6 MB a ~180 KB)
+        const compressed = await compressImageFile(file, {
+          maxWidth: 1280,
+          maxHeight: 960,
+          quality: 0.82,
+        });
+
+        // 2. Almacenamiento seguro en Supabase con fallback a dataUrl
+        const storageResult = await uploadClinicalImageToSupabase(compressed.dataUrl, {
+          folder: "ecografias",
+          prefix: `echo_${patient?.id || "paciente"}`,
+        });
+
+        const finalUrl = storageResult.isRemote ? storageResult.url : compressed.dataUrl;
+
+        // Limpiar el nombre del archivo para epígrafe sugerido
+        const rawName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").trim();
+        const autoCaption = rawName.length > 2 ? rawName : `Captura ecográfica ${images.length + newUploads.length + 1}`;
+
+        newUploads.push({
+          url: finalUrl,
+          caption: autoCaption,
+        });
+      }
+
+      setImages((prev) => [...prev, ...newUploads]);
+
+      Swal.fire({
+        icon: "success",
+        title: "Capturas Procesadas",
+        text: `Se agregaron ${newUploads.length} imágenes ecográficas optimizadas.`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Error al procesar fotos",
+        text: "No se pudieron optimizar o subir las fotos seleccionadas.",
+        confirmButtonColor: "#0A4D68",
+      });
+    } finally {
+      setIsUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleSingleImageReplace = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const compressed = await compressImageFile(file, {
+        maxWidth: 1280,
+        maxHeight: 960,
+        quality: 0.82,
+      });
+
+      const storageResult = await uploadClinicalImageToSupabase(compressed.dataUrl, {
+        folder: "ecografias",
+        prefix: `echo_${patient?.id || "paciente"}`,
+      });
+
+      const finalUrl = storageResult.isRemote ? storageResult.url : compressed.dataUrl;
+
+      setImages((prev) => {
+        const updated = [...prev];
+        updated[index] = {
+          ...updated[index],
+          url: finalUrl,
+        };
+        return updated;
+      });
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo actualizar la imagen.",
+        confirmButtonColor: "#0A4D68",
+      });
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  const handleCaptionChange = (index: number, newCaption: string) => {
+    setImages((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], caption: newCaption };
+      return updated;
+    });
+  };
+
+  const handleLoadSampleImages = () => {
+    const samplePhotos = [
+      {
+        url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=500&auto=format&fit=crop",
+        caption: "Corte longitudinal uterino: Miometrio homogéneo",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?q=80&w=500&auto=format&fit=crop",
+        caption: "Endometrio trilaminar fase proliferativa avanzada",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?q=80&w=500&auto=format&fit=crop",
+        caption: "Ovario izquierdo con patrón folicular normal",
+      },
+    ];
+    setImages((prev) => [...prev, ...samplePhotos]);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -562,53 +682,127 @@ export function UltrasoundModal({
             </div>
           </div>
 
-          {/* Imágenes Adjuntas */}
+          {/* Imágenes y Capturas Ecográficas */}
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-            <h3 className="font-heading font-bold text-sm text-heading flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-teal-600" />
-              Imágenes y Capturas Ecográficas ({images.length})
-            </h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+              <div>
+                <h3 className="font-heading font-bold text-sm text-heading flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-teal-600" />
+                  Capturas e Imágenes Ecográficas ({images.length})
+                </h3>
+                <p className="text-[11px] text-muted mt-0.5">
+                  Suba capturas directas del ecógrafo desde su PC o dispositivo (JPEG, PNG). Se optimizan automáticamente para no saturar el informe.
+                </p>
+              </div>
 
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                placeholder="URL de imagen (ej. Unsplash o Supabase Storage)..."
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-teal-600"
-              />
-              <input
-                type="text"
-                placeholder="Pie de foto (ej. Ovario izq. endometrioma 3.8cm)..."
-                value={newImageCaption}
-                onChange={(e) => setNewImageCaption(e.target.value)}
-                className="sm:w-64 px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-teal-600"
-              />
-              <button
-                type="button"
-                onClick={handleAddImage}
-                className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Agregar Foto</span>
-              </button>
+              {/* Botones de acción */}
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                {images.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={handleLoadSampleImages}
+                    className="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                    title="Cargar imágenes ecográficas de muestra"
+                  >
+                    <span>Cargar Muestras</span>
+                  </button>
+                )}
+
+                <label className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 shrink-0">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{isUploading ? "Procesando..." : "+ Subir Fotos desde PC"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={isUploading}
+                    onChange={handleMultipleFilesUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             </div>
 
+            {/* Zona de Drop / Carga Rápida si no hay imágenes */}
+            {images.length === 0 && (
+              <label className="p-8 border-2 border-dashed border-teal-300 hover:border-teal-500 rounded-2xl bg-teal-50/30 hover:bg-teal-50/50 flex flex-col items-center justify-center text-center transition-all cursor-pointer group">
+                <div className="w-12 h-12 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                  <Camera className="w-6 h-6" />
+                </div>
+                <p className="text-xs font-heading font-bold text-teal-900">
+                  Haga clic para seleccionar fotos o capturas del ecógrafo
+                </p>
+                <p className="text-[11px] text-muted mt-1">
+                  Puede seleccionar varios archivos a la vez (JPG, PNG, WebP). Optimización automática instantánea.
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  disabled={isUploading}
+                  onChange={handleMultipleFilesUpload}
+                  className="hidden"
+                />
+              </label>
+            )}
+
+            {/* Grid de Imágenes Cargadas */}
             {images.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">
                 {images.map((img, idx) => (
-                  <div key={idx} className="relative rounded-lg overflow-hidden border border-slate-200 bg-slate-900 group">
-                    <img src={img.url} alt={img.caption} className="w-full h-24 object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(idx)}
-                      className="absolute top-1 right-1 p-1 rounded bg-rose-600 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                    {img.caption && (
-                      <p className="text-[10px] text-white p-1 bg-black/60 truncate font-mono">{img.caption}</p>
-                    )}
+                  <div
+                    key={idx}
+                    className="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-2xs hover:border-teal-400 transition-all flex flex-col justify-between"
+                  >
+                    <div className="relative aspect-4/3 bg-slate-900 overflow-hidden group">
+                      <img
+                        src={img.url}
+                        alt={img.caption || `Captura ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+
+                      <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/70 text-white font-mono text-[10px] font-bold">
+                        Foto #{idx + 1}
+                      </div>
+
+                      {/* Botones Flotantes en Hover */}
+                      <div className="absolute top-1.5 right-1.5 flex items-center gap-1 opacity-90 group-hover:opacity-100 transition-opacity">
+                        <label
+                          className="p-1.5 rounded-lg bg-black/60 hover:bg-black/90 text-white transition-colors cursor-pointer"
+                          title="Reemplazar esta captura con otra imagen"
+                        >
+                          <Camera className="w-3.5 h-3.5" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleSingleImageReplace(idx, e)}
+                            className="hidden"
+                          />
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(idx)}
+                          className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer"
+                          title="Eliminar captura"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 bg-white space-y-1 border-t border-slate-100">
+                      <label className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider block">
+                        Pie de Foto / Hallazgo:
+                      </label>
+                      <input
+                        type="text"
+                        value={img.caption}
+                        onChange={(e) => handleCaptionChange(idx, e.target.value)}
+                        placeholder="ej. Útero en AVF, Endometrio trilaminar..."
+                        className="w-full text-xs font-medium px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:bg-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
