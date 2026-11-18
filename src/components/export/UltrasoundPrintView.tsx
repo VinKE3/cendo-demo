@@ -4,11 +4,13 @@ import React from "react";
 import { Patient, DoctorProfile, UltrasoundReport } from "@/types/medical";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { CendoFooterWave } from "@/components/export/CendoFooterWave";
+import { CendoCoverPage } from "@/components/export/CendoCoverPage";
 
 interface UltrasoundPrintViewProps {
   report: UltrasoundReport;
   patient: Patient;
   doctor: DoctorProfile;
+  showCoverPage?: boolean;
 }
 
 const TYPE_NAMES: Record<string, string> = {
@@ -24,6 +26,7 @@ export function UltrasoundPrintView({
   report,
   patient,
   doctor,
+  showCoverPage = true,
 }: UltrasoundPrintViewProps) {
   const doctorDisplayName = (report.doctorName || doctor.fullName)
     .replace(/^dr\.?\s+/i, "")
@@ -32,11 +35,27 @@ export function UltrasoundPrintView({
   const titlePrefix = doctor.doctorTitle || "Dr.";
   const f = report.findings;
 
+  let coverTitle = "ECOGRAFÍA ESPECIALIZADA";
+  if (report.ultrasoundType === "TRANSVAGINAL") coverTitle = "ECOGRAFÍA TRANSVAGINAL DOPPLER";
+  else if (report.ultrasoundType === "MAMA_BILATERAL") coverTitle = "ECOGRAFÍA MAMARIA BILATERAL";
+  else if (report.ultrasoundType === "PELVICA") coverTitle = "ECOGRAFÍA PÉLVICA GINECOLÓGICA";
+  else if (report.ultrasoundType === "OBSTETRICA_1T") coverTitle = "ECOGRAFÍA OBSTÉTRICA 1ER TRIMESTRE";
+  else if (report.ultrasoundType === "OBSTETRICA_2T_3T") coverTitle = "ECOGRAFÍA OBSTÉTRICA MORFOLÓGICA";
+  else if (report.ultrasoundType === "DOPPLER") coverTitle = "ECOGRAFÍA DOPPLER COLOR GINECOLÓGICO";
+
   return (
     <div
       id="ultrasound-print-sheet"
-      className="max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs"
+      className="space-y-6 max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs print:space-y-0"
     >
+      {/* PÁGINA 1: Carátula Oficial CENDO */}
+      {showCoverPage && (
+        <CendoCoverPage
+          patient={patient}
+          doctor={doctor}
+          documentTitle={coverTitle}
+        />
+      )}
       <div className="page-sheet w-[210mm] min-h-[297mm] max-h-[297mm] p-[10mm_14mm_6mm_14mm] flex flex-col justify-between border border-slate-200 shadow-sm rounded-xl print:border-none print:shadow-none print:rounded-none overflow-hidden box-border">
         {/* Contenido Superior */}
         <div className="space-y-3.5 flex-1">

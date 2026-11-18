@@ -102,8 +102,8 @@ export function printHtmlElement(elementId: string, documentTitle: string) {
             width: 210mm !important;
             min-height: 297mm !important;
             box-sizing: border-box !important;
-            page-break-after: auto !important;
-            break-after: auto !important;
+            page-break-after: always !important;
+            break-after: page !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }

@@ -4,6 +4,7 @@ import React from "react";
 import { Patient, DoctorProfile, LabOrder } from "@/types/medical";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { CendoFooterWave } from "@/components/export/CendoFooterWave";
+import { CendoCoverPage } from "@/components/export/CendoCoverPage";
 import { FlaskConical, AlertCircle, Info, Calendar, User, Microscope, FileCheck } from "lucide-react";
 import { formatPeruDateDisplay } from "@/lib/utils";
 
@@ -11,12 +12,14 @@ interface LabOrderPrintViewProps {
   labOrder: LabOrder;
   patient: Patient;
   doctor: DoctorProfile;
+  showCoverPage?: boolean;
 }
 
 export function LabOrderPrintView({
   labOrder,
   patient,
   doctor,
+  showCoverPage = true,
 }: LabOrderPrintViewProps) {
   const doctorDisplayName = (labOrder.doctorName || doctor.fullName)
     .replace(/^dr\.?\s+/i, "")
@@ -27,8 +30,16 @@ export function LabOrderPrintView({
   return (
     <div
       id="lab-order-print-sheet"
-      className="max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs"
+      className="space-y-6 max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs print:space-y-0"
     >
+      {/* PÁGINA 1: Carátula Oficial CENDO */}
+      {showCoverPage && (
+        <CendoCoverPage
+          patient={patient}
+          doctor={doctor}
+          documentTitle="ORDEN DE LABORATORIO CLÍNICO"
+        />
+      )}
       <div className="page-sheet w-[210mm] min-h-[297mm] p-[8mm_12mm_5mm_12mm] flex flex-col justify-between border border-slate-200 shadow-sm rounded-xl print:border-none print:shadow-none print:rounded-none box-border">
         {/* Contenido Superior */}
         <div className="space-y-2 flex-1">

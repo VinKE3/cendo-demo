@@ -234,6 +234,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
 
   const patientFullName = `${patient.lastName}, ${patient.firstName}`;
   const activeDoctor = doctorProfile || INITIAL_DOCTOR;
+  const [includeCover, setIncludeCover] = React.useState(true);
 
   return (
     <>
@@ -280,6 +281,15 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                   <MessageCircle className="w-4 h-4" />
                   <span>WhatsApp</span>
                 </button>
+                <label className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/15 px-2.5 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-white transition-colors" title="Incluir Carátula Oficial CENDO con membrete institucional como Página 1">
+                  <input
+                    type="checkbox"
+                    checked={includeCover}
+                    onChange={(e) => setIncludeCover(e.target.checked)}
+                    className="rounded text-primary focus:ring-0 cursor-pointer w-3.5 h-3.5"
+                  />
+                  <span className="select-none">Carátula CENDO</span>
+                </label>
                 <button
                   type="button"
                   onClick={() => printHtmlElement("colposcopy-print-sheet", "Colposcopia_" + patient.lastName + "_" + patient.firstName)}
@@ -302,6 +312,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                 report={viewingColpo}
                 patient={patient}
                 doctor={activeDoctor}
+                showCoverPage={includeCover}
               />
             </div>
           </div>
@@ -460,6 +471,15 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                   <MessageCircle className="w-4 h-4" />
                   <span>Enviar WhatsApp</span>
                 </button>
+                <label className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/15 px-2.5 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-white transition-colors" title="Incluir Carátula Oficial CENDO con membrete institucional como Página 1">
+                  <input
+                    type="checkbox"
+                    checked={includeCover}
+                    onChange={(e) => setIncludeCover(e.target.checked)}
+                    className="rounded text-primary focus:ring-0 cursor-pointer w-3.5 h-3.5"
+                  />
+                  <span className="select-none">Carátula CENDO</span>
+                </label>
                 <button
                   type="button"
                   onClick={() => printHtmlElement("lab-order-print-sheet", `OrdenLab_${patient.lastName}_${patient.firstName}`)}
@@ -483,6 +503,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                 labOrder={viewingLabOrder}
                 patient={patient}
                 doctor={activeDoctor}
+                showCoverPage={includeCover}
               />
             </div>
           </div>
@@ -585,6 +606,15 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                   <MessageCircle className="w-4 h-4" />
                   <span>WhatsApp</span>
                 </button>
+                <label className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/15 px-2.5 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-white transition-colors" title="Incluir Carátula Oficial CENDO con membrete institucional como Página 1">
+                  <input
+                    type="checkbox"
+                    checked={includeCover}
+                    onChange={(e) => setIncludeCover(e.target.checked)}
+                    className="rounded text-primary focus:ring-0 cursor-pointer w-3.5 h-3.5"
+                  />
+                  <span className="select-none">Carátula CENDO</span>
+                </label>
                 <button
                   type="button"
                   onClick={() => printHtmlElement("consultation-print-sheet", "Consulta_" + patient.lastName + "_" + patient.firstName)}
@@ -607,6 +637,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                 consultation={viewingConsultation}
                 patient={patient}
                 doctor={activeDoctor}
+                showCoverPage={includeCover}
               />
             </div>
           </div>
@@ -646,6 +677,15 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                   <MessageCircle className="w-4 h-4" />
                   <span>WhatsApp</span>
                 </button>
+                <label className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/15 px-2.5 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-white transition-colors" title="Incluir Carátula Oficial CENDO con membrete institucional como Página 1">
+                  <input
+                    type="checkbox"
+                    checked={includeCover}
+                    onChange={(e) => setIncludeCover(e.target.checked)}
+                    className="rounded text-primary focus:ring-0 cursor-pointer w-3.5 h-3.5"
+                  />
+                  <span className="select-none">Carátula CENDO</span>
+                </label>
                 <button
                   type="button"
                   onClick={() => printHtmlElement("ultrasound-print-sheet", "Ecografia_" + patient.lastName + "_" + patient.firstName)}
@@ -668,6 +708,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                 report={viewingUltrasound}
                 patient={patient}
                 doctor={activeDoctor}
+                showCoverPage={includeCover}
               />
             </div>
           </div>
@@ -707,6 +748,15 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                   <MessageCircle className="w-4 h-4" />
                   <span>WhatsApp</span>
                 </button>
+                <label className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/15 px-2.5 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-white transition-colors" title="Incluir Carátula Oficial CENDO con membrete institucional como Página 1">
+                  <input
+                    type="checkbox"
+                    checked={includeCover}
+                    onChange={(e) => setIncludeCover(e.target.checked)}
+                    className="rounded text-primary focus:ring-0 cursor-pointer w-3.5 h-3.5"
+                  />
+                  <span className="select-none">Carátula CENDO</span>
+                </label>
                 <button
                   type="button"
                   onClick={() => printHtmlElement("minor-proc-print-sheet", "Procedimiento_" + patient.lastName + "_" + patient.firstName)}
@@ -729,6 +779,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                 procedure={viewingMinorProc}
                 patient={patient}
                 doctor={activeDoctor}
+                showCoverPage={includeCover}
               />
             </div>
           </div>
@@ -805,6 +856,15 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
+                <label className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/15 px-2.5 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-white transition-colors" title="Incluir Carátula Oficial CENDO con membrete institucional como Página 1">
+                  <input
+                    type="checkbox"
+                    checked={includeCover}
+                    onChange={(e) => setIncludeCover(e.target.checked)}
+                    className="rounded text-primary focus:ring-0 cursor-pointer w-3.5 h-3.5"
+                  />
+                  <span className="select-none">Carátula CENDO</span>
+                </label>
                 <button
                   type="button"
                   onClick={() => printHtmlElement("complete-history-print-sheet", "Historia_Clinica_" + patient.lastName + "_" + patient.firstName)}
@@ -828,6 +888,7 @@ export function PatientDetailModals(props: PatientDetailModalsProps) {
                 background={bg}
                 consultations={consultations}
                 doctor={activeDoctor}
+                showCoverPage={includeCover}
               />
             </div>
           </div>

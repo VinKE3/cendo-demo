@@ -5,11 +5,13 @@ import { ColposcopyReport, Patient, DoctorProfile } from "@/types/medical";
 import { CervicalClock } from "@/components/colposcopia/CervicalClock";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { CendoFooterWave } from "./CendoFooterWave";
+import { CendoCoverPage } from "./CendoCoverPage";
 
 interface ColposcopyPrintViewProps {
   report: ColposcopyReport;
   patient: Patient;
   doctor: DoctorProfile;
+  showCoverPage?: boolean;
 }
 
 // Micro-fila para la matriz IFCPC 2011 Exhaustiva (Zero-Whitespace)
@@ -61,13 +63,25 @@ export function ColposcopyPrintView({
   report,
   patient,
   doctor,
+  showCoverPage = true,
 }: ColposcopyPrintViewProps) {
   const evaluatedDoctorName = formatDoctorDisplay(report.doctorName, doctor.fullName);
 
   return (
-    <div id="colposcopy-print-sheet" className="max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs">
+    <div id="colposcopy-print-sheet" className="space-y-6 max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs print:space-y-0">
       {/* =========================================================================
-          PÁGINA 1: Criterios IFCPC, Hallazgos Normales & Anormales (Pág. 9 en Dossier)
+          PÁGINA 1: Carátula Oficial CENDO (Portada Institucional del Informe)
+          ========================================================================= */}
+      {showCoverPage && (
+        <CendoCoverPage
+          patient={patient}
+          doctor={doctor}
+          documentTitle="COLPOSCOPÍA ESPECIALIZADA"
+        />
+      )}
+
+      {/* =========================================================================
+          PÁGINA 2: Criterios IFCPC, Hallazgos Normales & Anormales (Pág. 9 en Dossier)
           ========================================================================= */}
       <div className="page-sheet w-[210mm] h-[297mm] max-h-[297mm] p-[10mm_14mm_6mm_14mm] flex flex-col justify-between border border-slate-200 shadow-sm rounded-xl print:border-none print:shadow-none print:rounded-none overflow-hidden box-border">
         {/* Contenido Superior de Página 1 */}

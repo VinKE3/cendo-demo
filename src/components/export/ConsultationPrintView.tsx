@@ -4,17 +4,20 @@ import React from "react";
 import { Patient, DoctorProfile, MedicalConsultation } from "@/types/medical";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { CendoFooterWave } from "@/components/export/CendoFooterWave";
+import { CendoCoverPage } from "@/components/export/CendoCoverPage";
 
 interface ConsultationPrintViewProps {
   consultation: MedicalConsultation;
   patient: Patient;
   doctor: DoctorProfile;
+  showCoverPage?: boolean;
 }
 
 export function ConsultationPrintView({
   consultation,
   patient,
   doctor,
+  showCoverPage = true,
 }: ConsultationPrintViewProps) {
   const doctorDisplayName = (consultation.doctorName || doctor.fullName)
     .replace(/^dr\.?\s+/i, "")
@@ -25,8 +28,16 @@ export function ConsultationPrintView({
   return (
     <div
       id="consultation-print-sheet"
-      className="max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs"
+      className="space-y-6 max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs print:space-y-0"
     >
+      {/* PÁGINA 1: Carátula Oficial CENDO */}
+      {showCoverPage && (
+        <CendoCoverPage
+          patient={patient}
+          doctor={doctor}
+          documentTitle="CONSULTA MÉDICA GINECOLÓGICA"
+        />
+      )}
       <div className="page-sheet w-[210mm] min-h-[297mm] max-h-[297mm] p-[10mm_14mm_6mm_14mm] flex flex-col justify-between border border-slate-200 shadow-sm rounded-xl print:border-none print:shadow-none print:rounded-none overflow-hidden box-border">
         {/* Contenido Superior */}
         <div className="space-y-3.5 flex-1">

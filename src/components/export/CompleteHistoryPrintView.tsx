@@ -4,12 +4,14 @@ import React from "react";
 import { Patient, DoctorProfile, PatientBackground, MedicalConsultation } from "@/types/medical";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { CendoFooterWave } from "@/components/export/CendoFooterWave";
+import { CendoCoverPage } from "@/components/export/CendoCoverPage";
 
 interface CompleteHistoryPrintViewProps {
   patient: Patient;
   background?: PatientBackground;
   consultations: MedicalConsultation[];
   doctor: DoctorProfile;
+  showCoverPage?: boolean;
 }
 
 export function CompleteHistoryPrintView({
@@ -17,6 +19,7 @@ export function CompleteHistoryPrintView({
   background,
   consultations,
   doctor,
+  showCoverPage = true,
 }: CompleteHistoryPrintViewProps) {
   const doctorDisplayName = (doctor.fullName || "Patrick José Jacinto Gomero")
     .replace(/^dr\.?\s+/i, "")
@@ -27,8 +30,16 @@ export function CompleteHistoryPrintView({
   return (
     <div
       id="complete-history-print-sheet"
-      className="max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs print:p-0"
+      className="space-y-6 max-w-[210mm] mx-auto text-slate-900 bg-white font-sans text-xs print:space-y-0 print:p-0"
     >
+      {/* PÁGINA 1: Carátula Oficial CENDO */}
+      {showCoverPage && (
+        <CendoCoverPage
+          patient={patient}
+          doctor={doctor}
+          documentTitle="HISTORIA CLÍNICA INTEGRAL"
+        />
+      )}
       <div className="page-sheet w-[210mm] min-h-[297mm] p-[10mm_14mm_10mm_14mm] flex flex-col justify-between border border-slate-200 shadow-sm rounded-xl print:border-none print:shadow-none print:rounded-none box-border">
         <div className="space-y-4">
           {/* 1. Membrete Institucional CENDO */}
