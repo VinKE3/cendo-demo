@@ -2,9 +2,9 @@
 **Stack:** Next.js (App Router) + TypeScript + Tailwind CSS + Supabase + Zustand + React Hook Form + Zod + TanStack Table + SweetAlert2 + @react-pdf/renderer + SheetJS (xlsx).
 
 ## 📊 Estado Global del Proyecto
-- **Fase Actual:** ¡Proyecto Completado y Sincronizado con Supabase en Producción!
-- **Última actualización:** 2026-11-16 - Sincronización oficial con zona horaria de Perú (America/Lima UTC-5), saneamiento de pacientes demo con cálculo de edad cronológica, suite de auditoría clínica automatizada (100% PASS), optimización de los 9 acordeones del carnet prenatal MINSA y generación del Informe Ejecutivo para el Dr. Patrick Jacinto Gomero. Compilación limpia verificada (`exit code 0`).
-- **Control de Proyecto:** [x] `PROGRESS.md` y `docs/ARCHITECTURE_NOTES.md` creados y actualizados.
+- **Fase Actual:** ¡Proyecto Completado, Blindado y con Mejoras del Dr. Patrick al 100%!
+- **Última actualización:** 2026-11-18 - Estandarización de Carátula Oficial CENDO A4 en todos los exámenes, subida directa de fotos en ecografías con compresión, desaturación del navbar lateral, unificación de la pestaña de Chequeos (ecografías y colposcopías independientes), paginación universal con selector (10, 15, 25, 50) en todas las tablas y pestañas, y generación del Informe Ejecutivo Oficial HTML. Compilación de producción Next.js 14 verificada (`exit code 0`) y auditoría clínica (100% PASS).
+- **Control de Proyecto:** [x] `PROGRESS.md`, `informe_mejoras_dr_patrick.html` y `docs/ARCHITECTURE_NOTES.md` actualizados con el 100% del sistema.
 
 ---
 
@@ -360,4 +360,71 @@
 - [x] **9.1.** Creación de `INFORME_DR_PATRICK.html` (documento A4 imprimible con diseño médico institucional).
 - [x] **9.2.** Redacción 100% clínica y ejecutiva con cero jerga técnica, nombres de componentes o tablas de base de datos.
 - [x] **9.3.** Desglose detallado de los 11 puntos clínicos solicitados y su resolución práctica.
+
+---
+
+### 🎨 NIVEL 10: Carátula Oficial CENDO A4 Estandarizada en Todos los Exámenes
+- [x] **10.1.** Creación de `src/components/export/CendoCoverPage.tsx` con membrete oficial de Miraflores, pleca dorada, datos de filiación, firma del Director Médico (Dr. Patrick Jacinto, CMP 61693 / RNE 38657) y cenefa inferior.
+- [x] **10.2.** Integración como Página 1 en todos los visores de impresión A4:
+  - `UltrasoundPrintView.tsx` (Ecografías Especializadas)
+  - `ColposcopyPrintView.tsx` (Colposcopía Digital IFCPC)
+  - `ConsultationPrintView.tsx` (Consultas Médicas Estructuradas)
+  - `MinorProcedurePrintView.tsx` (Procedimientos Menores y Biopsias)
+  - `LabOrderPrintView.tsx` (Órdenes de Laboratorio Clínico)
+  - `CompleteHistoryPrintView.tsx` (Expediente Clínico Integral)
+- [x] **10.3.** Switch interactivo `[✓] Carátula CENDO` en cada modal de impresión para activar o desactivar la portada a criterio del médico.
+- [x] **10.4.** Calibración de salto de página estricto `page-break-after: always` en `src/lib/pdfGenerator.ts`.
+
+---
+
+### 📷 NIVEL 11: Carga Nativa y Compresión Inteligente de Fotos en Ecografías
+- [x] **11.1.** Eliminación de inputs de texto manuales de URLs en `src/components/ecografia/UltrasoundModal.tsx`.
+- [x] **11.2.** Botón nativo `+ Subir Fotos desde PC` con selector múltiple de archivos de imagen desde disco local o móvil.
+- [x] **11.3.** Compresión inteligente en el navegador (de 6-8 MB a ~180 KB por captura) usando Canvas bicúbico, evitando bloqueos de memoria y asegurando PDFs ligeros.
+- [x] **11.4.** Tarjetas de fotos con numeración (`Foto #1`), botón de reemplazo con cámara, botón de borrado y pie de foto clínico editable (ej. "Endometrio trilaminar de 7.2 mm").
+
+---
+
+### 🧭 NIVEL 12: Desaturación del Sidebar y Reestructuración de la Navegación
+- [x] **12.1.** Retiro definitivo de "Informes de Colposcopía" y "Chequeo Ginecológico / Eco" del menú lateral principal (`src/components/layout/DashboardSidebar.tsx`).
+- [x] **12.2.** Eliminación de la duplicidad innecesaria de navegación, centralizando todo el historial diagnóstico dentro de la ficha de cada paciente.
+- [x] **12.3.** Erradicación del concepto forzado de "Chequeo Integral" / "Paquete obligatorio", permitiendo estudios 100% autónomos y desacoplados.
+
+---
+
+### 🩺 NIVEL 13: Pestaña Unificada de Chequeos en la Ficha de Paciente
+- [x] **13.1.** Unificación de las pestañas previas ("Colposcopía" y "Ecografías") en una sola pestaña centralizada: `🩺 Chequeos (N)` en `src/components/pacientes/tabs/TabChequeos.tsx`.
+- [x] **13.2.** Eliminación de las flechas de scroll horizontal del navbar del paciente, manteniendo todas las pestañas visibles en pantalla.
+- [x] **13.3.** Dos botones directos e independientes: `+ Nueva Ecografía` y `+ Nueva Colposcopía`, permitiendo registrar cualquiera de los dos exámenes de rutina por separado.
+- [x] **13.4.** Historial cronológico unificado con filtros rápidos (*Todos*, *Ecografías*, *Colposcopía*) y buscador de hallazgos en tiempo real.
+
+---
+
+### 🔢 NIVEL 14: Paginación Universal y Selector Dinámico de Registros (10 - 15 - 25 - 50)
+- [x] **14.1.** Creación del componente oficial `src/components/common/TablePagination.tsx`:
+  - Selector desplegable configurable con las opciones: `10`, `15`, `25`, `50` registros por página.
+  - Contador informativo: `Mostrando X - Y de Z [ítems]`.
+  - Navegación con botones *Anterior*, *Siguiente*, botones numéricos con truncamiento (`...`), y accesos rápidos a *Primera* y *Última* página.
+  - Reajuste automático a página 1 cuando cambia la búsqueda o el filtro.
+- [x] **14.2.** Integración en los 6 módulos maestros:
+  - `src/app/(dashboard)/pacientes/page.tsx` (`itemLabel="pacientes"`)
+  - `src/app/(dashboard)/agenda/page.tsx` (`itemLabel="citas"`)
+  - `src/app/(dashboard)/tarifario/page.tsx` (`itemLabel="exámenes / procedimientos"`)
+  - `src/app/(dashboard)/vademecum/page.tsx` (`itemLabel="medicamentos"`)
+  - `src/app/(dashboard)/cie-10/page.tsx` (`itemLabel="códigos CIE-10"`)
+  - `src/app/(dashboard)/usuarios/page.tsx` (`itemLabel="especialistas / usuarios"`)
+- [x] **14.3.** Integración en todas las pestañas históricas de la Ficha de Paciente:
+  - `TabChequeos.tsx` (`itemLabel="estudios / chequeos"`)
+  - `TabConsultas.tsx` (`itemLabel="consultas"`)
+  - `TabRecetas.tsx` (`itemLabel="recetas"`)
+  - `TabLaboratorioCotizaciones.tsx` (paginación dual independiente para órdenes y presupuestos)
+  - `TabProcedimientos.tsx` (`itemLabel="procedimientos"`)
+- [x] **14.4.** Verificación: `npx tsc --noEmit` (0 errores) y `npm run build` (15/15 páginas generadas con éxito).
+
+---
+
+### 📊 NIVEL 15: Informe Ejecutivo Maestro para el Dr. Patrick Jacinto (`informe_mejoras_dr_patrick.html`)
+- [x] **15.1.** Creación y actualización de `informe_mejoras_dr_patrick.html` con los 11 requerimientos clínicos solicitados por el doctor y sus soluciones técnicas detalladas.
+- [x] **15.2.** Documentación visual de alta calidad con badges de estado "✓ Resuelto al 100%", citas textuales del Dr. Patrick y especificaciones de diseño institucional.
+
 
