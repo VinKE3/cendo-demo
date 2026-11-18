@@ -20,6 +20,7 @@ import {
 } from "@/types/medical";
 import { INITIAL_DOCTOR } from "@/store/useMedicalStore";
 import { generateGoogleCalendarUrl } from "./calendarExport";
+import { formatPeruDateDisplay } from "./utils";
 
 export function cleanPhoneForWhatsApp(phone: string): string {
   // Quitar espacios, guiones y caracteres no numéricos
@@ -433,39 +434,53 @@ export function generateAppointmentReminderWhatsAppUrl(
 ): string {
   const doc = doctor || INITIAL_DOCTOR;
   const targetPhone = cleanPhoneForWhatsApp(appt.patientPhone);
+  const formattedDate = formatPeruDateDisplay(appt.appointmentDate);
 
   const typeLabels: Record<string, string> = {
     CONSULTA_PRIMERA_VEZ: "Consulta Ginecológica (Primera Vez)",
-    CONTROL_GINECOLOGICO: "Control Ginecológico Periódico",
+    CONTROL_GINECOLOGICO: "Control Ginecológico Especializado",
     CHEQUEO_INTEGRAL: "Chequeo Preventivo Integral CENDO",
     CONTROL_PRENATAL: "Control Prenatal (MINSA/CLAP)",
-    COLPOSCOPIA: "Colposcopía Especializada",
+    COLPOSCOPIA: "Colposcopía Especializada Digital",
     ECOGRAFIA: "Ecografía Especializada",
     PROCEDIMIENTO_MENOR: "Procedimiento Menor en Consultorio",
   };
 
+  const reasonLabel = typeLabels[appt.appointmentType] || appt.reason || "Consulta Ginecológica Especializada";
+
+  // 1. Enlace ultra-resumido de Google Calendar (sin código basura ni texto repetitivo)
+  const shortCalendarUrl = generateGoogleCalendarUrl(appt, doc, { compact: true });
+
+  // 2. Dirección exacta y enlace de ubicación en Google Maps
+  const clinicAddress = doc.clinicAddress || "Av. Alfredo Benavides N° 2975, Of. 405, Miraflores - Lima";
+  const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(clinicAddress)}`;
+
   const message = [
-    `👋 *Recordatorio de Cita Médica en CENDO*`,
+    `👋 *Recordatorio de Cita Médica • CENDO*`,
     ``,
-    `Estimada *${appt.patientName}*, le recordamos su próxima cita médica con el *${doc.doctorTitle} ${doc.fullName}*:`,
+    `Estimada *${appt.patientName}*, le recordamos su próxima cita con el *${doc.doctorTitle} ${doc.fullName}*:`,
     ``,
-    `🗓 *Fecha:* *${appt.appointmentDate}*`,
+    `🗓 *Fecha:* *${formattedDate}*`,
     `⏰ *Hora:* *${appt.appointmentTime}* (Duración aprox: ${appt.durationMinutes} min)`,
-    `🩺 *Motivo / Especialidad:* ${typeLabels[appt.appointmentType] || appt.reason}`,
-    `🏥 *Sede:* ${doc.clinicAddress}`,
+    `🩺 *Motivo:* ${reasonLabel}`,
     ``,
-    `📅 *Añadir a su Calendario (Google / iPhone):*`,
-    generateGoogleCalendarUrl(appt, doc),
+    `📍 *Dirección de Atención:*`,
+    `${clinicAddress}`,
+    `🗺️ *Ver ubicación en Google Maps:*`,
+    mapsUrl,
+    ``,
+    `📅 *Añadir a Google Calendar:*`,
+    shortCalendarUrl,
     ``,
     `💡 *Recomendaciones para su atención:*`,
     `• Llegar con 10 minutos de anticipación.`,
-    `• Portar DNI físico y exámenes médicos previos.`,
+    `• Portar DNI físico y exámenes previos si dispone de ellos.`,
     `• Si no puede asistir, por favor avisar con 24h de anticipación.`,
     ``,
-    `📞 *Confirmación o cambios:* ${doc.phone}`,
+    `📞 *Consultas o reprogramación:* ${doc.phone}`,
     ``,
-    `_¡Le esperamos en CENDO para brindarle la mejor atención!_`,
-  ].filter(Boolean).join("\n");
+    `_¡Le esperamos en CENDO para brindarle una atención médica de excelencia!_`,
+  ].join("\n");
 
   return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
 }

@@ -45,7 +45,8 @@ function formatToCompactDateTime(dateStr: string, timeStr: string, addMinutes = 
  */
 export function generateGoogleCalendarUrl(
   appointment: CalendarExportAppointment,
-  doctor?: DoctorProfile | null
+  doctor?: DoctorProfile | null,
+  options?: { compact?: boolean }
 ): string {
   const doc = doctor || INITIAL_DOCTOR;
   const duration = appointment.durationMinutes || 30;
@@ -53,27 +54,31 @@ export function generateGoogleCalendarUrl(
   const startIso = formatToCompactDateTime(appointment.appointmentDate, appointment.appointmentTime, 0);
   const endIso = formatToCompactDateTime(appointment.appointmentDate, appointment.appointmentTime, duration);
 
-  const title = encodeURIComponent(
-    `Cita CENDO: ${appointment.patientName} (${appointment.appointmentType.replace(/_/g, " ")})`
-  );
+  const cleanTitle = `Cita CENDO: ${appointment.patientName}`;
+  const title = encodeURIComponent(cleanTitle);
 
-  const detailsText = [
-    `🩺 CITA MÉDICA GINECOLÓGICA - CENDO`,
-    ``,
-    `👤 Paciente: ${appointment.patientName}`,
-    `🆔 DNI: ${appointment.patientDni}`,
-    `📞 Celular: ${appointment.patientPhone}`,
-    `👨‍⚕️ Médico Tratante: ${appointment.doctorName}`,
-    `📋 Motivo: ${appointment.reason}`,
-    appointment.notes ? `📝 Notas: ${appointment.notes}` : "",
-    ``,
-    `🏥 Sede: ${doc.clinicAddress}`,
-    `📞 Central de Citas: ${doc.phone}`,
-    ``,
-    `💡 Llegar con 10 minutos de anticipación y portar DNI físico.`,
-  ]
-    .filter(Boolean)
-    .join("\n");
+  let detailsText = "";
+  if (options?.compact) {
+    detailsText = `Cita médica con ${appointment.doctorName} en CENDO. Tel: ${doc.phone}`;
+  } else {
+    detailsText = [
+      `🩺 CITA MÉDICA GINECOLÓGICA - CENDO`,
+      ``,
+      `👤 Paciente: ${appointment.patientName}`,
+      `🆔 DNI: ${appointment.patientDni}`,
+      `📞 Celular: ${appointment.patientPhone}`,
+      `👨‍⚕️ Médico Tratante: ${appointment.doctorName}`,
+      `📋 Motivo: ${appointment.reason}`,
+      appointment.notes ? `📝 Notas: ${appointment.notes}` : "",
+      ``,
+      `🏥 Sede: ${doc.clinicAddress}`,
+      `📞 Central de Citas: ${doc.phone}`,
+      ``,
+      `💡 Llegar con 10 minutos de anticipación y portar DNI físico.`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
 
   const details = encodeURIComponent(detailsText);
   const location = encodeURIComponent(doc.clinicAddress);
