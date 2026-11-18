@@ -1,5 +1,6 @@
 export { TabResumen } from "./TabResumen";
 export { TabConsultas } from "./TabConsultas";
+export { TabChequeos } from "./TabChequeos";
 export { TabColposcopia } from "./TabColposcopia";
 export { TabEcografias } from "./TabEcografias";
 export { TabProcedimientos } from "./TabProcedimientos";

@@ -36,6 +36,7 @@ import {
 import {
   TabResumen,
   TabConsultas,
+  TabChequeos,
   TabColposcopia,
   TabEcografias,
   TabProcedimientos,
@@ -50,6 +51,7 @@ import { calculateAge } from "@/lib/utils";
 type PatientTab =
   | "resumen"
   | "consultas"
+  | "chequeos"
   | "colposcopia"
   | "ecografias"
   | "procedimientos"
@@ -113,6 +115,8 @@ export default function FichaPacientePage() {
     getBackground,
     getColposcopyByPatientId,
     getCheckupsByPatientId,
+    deleteColposcopyReport,
+    deleteClinicalCheckup,
     getPrescriptionsByPatientId,
     deletePrescription,
     getLabOrdersByPatientId,
@@ -192,8 +196,12 @@ export default function FichaPacientePage() {
   const tabList: { id: PatientTab; label: string; icon: React.ReactNode; count?: number }[] = [
     { id: "resumen", label: "Resumen & Antecedentes", icon: <User className="w-4 h-4" /> },
     { id: "consultas", label: "Consultas", icon: <Stethoscope className="w-4 h-4" />, count: consultations.length },
-    { id: "colposcopia", label: "Colposcopía", icon: <FileCheck2 className="w-4 h-4" />, count: colpos.length },
-    { id: "ecografias", label: "Ecografías", icon: <Activity className="w-4 h-4" />, count: ultrasoundReports.length },
+    {
+      id: "chequeos",
+      label: "Chequeos",
+      icon: <Activity className="w-4 h-4" />,
+      count: colpos.length + ultrasoundReports.length + checkups.length,
+    },
     { id: "procedimientos", label: "Procedimientos", icon: <Scissors className="w-4 h-4" />, count: minorProcedures.length },
     { id: "prenatal", label: "Control Prenatal", icon: <Baby className="w-4 h-4" />, count: prenatalCard ? (prenatalCard.visits?.length || 1) : 0 },
     { id: "recetas", label: "Recetas", icon: <Pill className="w-4 h-4" />, count: prescriptions.length },
@@ -326,43 +334,12 @@ export default function FichaPacientePage() {
           />
         )}
 
-        {activeTab === "colposcopia" && (
-          <TabColposcopia
+        {(activeTab === "chequeos" || (activeTab as string) === "colposcopia" || (activeTab as string) === "ecografias") && (
+          <TabChequeos
             patient={patient}
             colpos={colpos}
-            checkups={checkups}
-            doctorProfile={doctorProfile}
-            onOpenNewColpo={() => {
-              setEditingColpo(null);
-              setIsColpoModalOpen(true);
-            }}
-            onEditColpo={(colpo) => {
-              setEditingColpo(colpo);
-              setIsColpoModalOpen(true);
-            }}
-            onPrintColpo={(colpo) => {
-              setViewingColpo(colpo);
-              setIsColpoPrintOpen(true);
-            }}
-            onOpenNewCheckup={() => {
-              setEditingCheckup(null);
-              setIsCheckupModalOpen(true);
-            }}
-            onEditCheckup={(chk) => {
-              setEditingCheckup(chk);
-              setIsCheckupModalOpen(true);
-            }}
-            onPrintCheckup={(chk) => {
-              setViewingCheckup(chk);
-              setIsCheckupPrintOpen(true);
-            }}
-          />
-        )}
-
-        {activeTab === "ecografias" && (
-          <TabEcografias
-            patient={patient}
             ultrasoundReports={ultrasoundReports}
+            checkups={checkups}
             doctorProfile={doctorProfile}
             onOpenNewUltrasound={() => {
               setEditingUltrasound(null);
@@ -377,6 +354,32 @@ export default function FichaPacientePage() {
               setIsUltrasoundPrintOpen(true);
             }}
             onDeleteUltrasound={(id) => deleteUltrasoundReport(id)}
+            onOpenNewColpo={() => {
+              setEditingColpo(null);
+              setIsColpoModalOpen(true);
+            }}
+            onEditColpo={(colpo) => {
+              setEditingColpo(colpo);
+              setIsColpoModalOpen(true);
+            }}
+            onPrintColpo={(colpo) => {
+              setViewingColpo(colpo);
+              setIsColpoPrintOpen(true);
+            }}
+            onDeleteColpo={(id) => deleteColposcopyReport(id)}
+            onOpenNewCheckup={() => {
+              setEditingCheckup(null);
+              setIsCheckupModalOpen(true);
+            }}
+            onEditCheckup={(chk) => {
+              setEditingCheckup(chk);
+              setIsCheckupModalOpen(true);
+            }}
+            onPrintCheckup={(chk) => {
+              setViewingCheckup(chk);
+              setIsCheckupPrintOpen(true);
+            }}
+            onDeleteCheckup={(id) => deleteClinicalCheckup(id)}
           />
         )}
 

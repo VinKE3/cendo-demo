@@ -97,13 +97,7 @@ export function DashboardSidebar({
       badge: "Hoy",
     },
     {
-      name: "Informes de Colposcopía",
-      href: "/colposcopia",
-      icon: FileText,
-      badge: "IFCPC",
-    },
-    {
-      name: "Chequeo Ginecológico / Eco",
+      name: "Chequeos & Estudios",
       href: "/chequeos",
       icon: Activity,
       badge: null,

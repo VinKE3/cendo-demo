@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Stethoscope,
   FileText,
+  FileCheck2,
   Layers,
   Pill,
   Sparkles,
@@ -31,7 +32,7 @@ import { printHtmlElement } from "@/lib/pdfGenerator";
 import { generateCheckupWhatsAppUrl } from "@/lib/whatsappShare";
 
 export default function ChequeosPage() {
-  const { clinicalCheckups, patients, doctorProfile, deleteClinicalCheckup } = useMedicalStore();
+  const { clinicalCheckups, colposcopyReports, ultrasoundReports, patients, doctorProfile, deleteClinicalCheckup } = useMedicalStore();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCheckupId, setSelectedCheckupId] = useState<string | null>(null);
@@ -138,21 +139,32 @@ export default function ChequeosPage() {
               <Activity className="w-6 h-6" />
             </span>
             <h1 className="text-2xl font-heading font-extrabold text-heading">
-              Chequeo Integral Ginecológico y Ecografías
+              Chequeos & Estudios Diagnósticos
             </h1>
           </div>
           <p className="text-xs text-muted mt-1">
-            Evaluación pélvica, ecografía transvaginal Doppler, ecografía mamaria bilateral y colposcopía
+            Evaluación integral ginecológica: Ecografía transvaginal Doppler, ecografía mamaria y colposcopía IFCPC
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-xs shadow-xs hover:bg-primary-hover active:scale-[0.98] transition-all cursor-pointer self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nuevo Chequeo / Ecografía</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <Link
+            href="/colposcopia"
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-border bg-white text-xs font-semibold text-heading hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+            title="Ir al módulo independiente de colposcopías digitales IFCPC"
+          >
+            <FileCheck2 className="w-4 h-4 text-emerald-600" />
+            <span>Colposcopías IFCPC ({colposcopyReports.length})</span>
+          </Link>
+
+          <button
+            onClick={handleOpenCreate}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-xs shadow-xs hover:bg-primary-hover active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Chequeo Integral</span>
+          </button>
+        </div>
       </div>
 
       {/* Barra de Filtros y Búsqueda */}

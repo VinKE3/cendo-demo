@@ -5,6 +5,7 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import {
   FileCheck2,
+  Activity,
   Plus,
   Search,
   Calendar,
@@ -124,13 +125,24 @@ export default function ColposcopiaPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-xs shadow-xs hover:bg-primary-hover active:scale-[0.98] transition-all cursor-pointer self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nueva Colposcopía</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <Link
+            href="/chequeos"
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-border bg-white text-xs font-semibold text-heading hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+            title="Ir a Chequeos & Estudios Diagnósticos"
+          >
+            <Activity className="w-4 h-4 text-teal-600" />
+            <span>Chequeos & Estudios</span>
+          </Link>
+
+          <button
+            onClick={handleOpenCreate}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-xs shadow-xs hover:bg-primary-hover active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nueva Colposcopía</span>
+          </button>
+        </div>
       </div>
 
       {/* Barra de Filtros y Búsqueda */}
