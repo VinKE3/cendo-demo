@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import {
   X,
@@ -12,6 +12,12 @@ import {
   Stethoscope,
   Sparkles,
   Plus,
+  Search,
+  UserCheck,
+  AlertTriangle,
+  Phone,
+  ArrowRight,
+  SearchX,
 } from "lucide-react";
 import {
   Patient,
@@ -74,6 +80,10 @@ export function AppointmentModal({
   const [patientDni, setPatientDni] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
 
+  // Estado de búsqueda y autocompletado en tiempo real para continuadoras
+  const [patientSearchQuery, setPatientSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   // Modo Paciente Nueva
   const [isNewPatientMode, setIsNewPatientMode] = useState(false);
   const [newFirstName, setNewFirstName] = useState("");
@@ -90,12 +100,75 @@ export function AppointmentModal({
   const [status, setStatus] = useState<AppointmentStatus>("CONFIRMADA");
   const [notes, setNotes] = useState("");
 
+  // Paciente continuadora actualmente seleccionada
+  const currentSelectedPatient = useMemo(() => {
+    return patients.find((p) => p.id === selectedPatientId) || null;
+  }, [patients, selectedPatientId]);
+
+  // Filtrado de pacientes en tiempo real por Nombre, Apellido o DNI
+  const matchingPatients = useMemo(() => {
+    const q = patientSearchQuery.trim().toLowerCase();
+    if (!q) return patients.slice(0, 10);
+    return patients.filter((p) => {
+      const full = `${p.lastName} ${p.firstName}`.toLowerCase();
+      const reverse = `${p.firstName} ${p.lastName}`.toLowerCase();
+      const dni = (p.dni || "").toLowerCase();
+      const phone = (p.phone || "").replace(/\s+/g, "");
+      const cleanQ = q.replace(/\s+/g, "");
+      return (
+        full.includes(q) ||
+        reverse.includes(q) ||
+        dni.includes(q) ||
+        phone.includes(cleanQ)
+      );
+    });
+  }, [patients, patientSearchQuery]);
+
+  // Función para autocompletar instantáneamente todos los datos de la paciente continuadora
+  const selectPatientContinuadora = (p: Patient) => {
+    setSelectedPatientId(p.id);
+    const fullName = `${p.lastName}, ${p.firstName}`;
+    setPatientName(fullName);
+    setPatientDni(p.dni);
+    setPatientPhone(p.phone || "");
+    setPatientSearchQuery(fullName);
+    setIsSearchOpen(false);
+    setIsNewPatientMode(false);
+
+    // Si la cita estaba en Consulta Primera Vez, actualizar a Control Ginecológico Continuadora
+    setAppointmentType((prev) =>
+      prev === "CONSULTA_PRIMERA_VEZ" ? "CONTROL_GINECOLOGICO" : prev
+    );
+  };
+
+  // Detección reactiva en caso de que escriba en "+ Nueva Paciente" pero la paciente ya existe en CENDO
+  const detectedExistingPatient = useMemo(() => {
+    if (!isNewPatientMode) return null;
+    const cleanDni = newDni.trim();
+    if (cleanDni.length >= 7) {
+      const byDni = patients.find((p) => p.dni === cleanDni);
+      if (byDni) return byDni;
+    }
+    const cleanFull = `${newLastName} ${newFirstName}`.trim().toLowerCase();
+    if (cleanFull.length >= 6) {
+      const byName = patients.find((p) => {
+        const pFull = `${p.lastName} ${p.firstName}`.toLowerCase();
+        return pFull.includes(cleanFull);
+      });
+      if (byName) return byName;
+    }
+    return null;
+  }, [isNewPatientMode, newDni, newFirstName, newLastName, patients]);
+
   useEffect(() => {
     if (appointmentToEdit) {
       setSelectedPatientId(appointmentToEdit.patientId);
       setPatientName(appointmentToEdit.patientName);
       setPatientDni(appointmentToEdit.patientDni);
       setPatientPhone(appointmentToEdit.patientPhone);
+      setPatientSearchQuery(appointmentToEdit.patientName);
+      setIsSearchOpen(false);
+      setIsNewPatientMode(false);
       setSelectedDoctorId(appointmentToEdit.doctorId);
       setAppointmentDate(appointmentToEdit.appointmentDate);
       setAppointmentTime(appointmentToEdit.appointmentTime);
@@ -106,6 +179,7 @@ export function AppointmentModal({
       setNotes(appointmentToEdit.notes || "");
     } else {
       setIsNewPatientMode(false);
+      setIsSearchOpen(false);
       setNewFirstName("");
       setNewLastName("");
       setNewDni("");
@@ -114,38 +188,27 @@ export function AppointmentModal({
       setAppointmentDate(today);
       setAppointmentTime("10:00");
       setDurationMinutes(30);
-      setAppointmentType("CONSULTA_PRIMERA_VEZ");
       setStatus("CONFIRMADA");
       setNotes("Llegar con 10 minutos de anticipación.");
 
       if (defaultPatientId) {
         const p = patients.find((pat) => pat.id === defaultPatientId);
         if (p) {
-          setSelectedPatientId(p.id);
-          setPatientName(`${p.lastName}, ${p.firstName}`);
-          setPatientDni(p.dni);
-          setPatientPhone(p.phone);
+          selectPatientContinuadora(p);
         }
       } else if (patients.length > 0) {
         const p = patients[0];
-        setSelectedPatientId(p.id);
-        setPatientName(`${p.lastName}, ${p.firstName}`);
-        setPatientDni(p.dni);
-        setPatientPhone(p.phone);
+        selectPatientContinuadora(p);
+      } else {
+        setSelectedPatientId("");
+        setPatientName("");
+        setPatientDni("");
+        setPatientPhone("");
+        setPatientSearchQuery("");
+        setAppointmentType("CONSULTA_PRIMERA_VEZ");
       }
     }
   }, [appointmentToEdit, defaultPatientId, isOpen, patients]);
-
-  const handlePatientSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const pId = e.target.value;
-    setSelectedPatientId(pId);
-    const p = patients.find((pat) => pat.id === pId);
-    if (p) {
-      setPatientName(`${p.lastName}, ${p.firstName}`);
-      setPatientDni(p.dni);
-      setPatientPhone(p.phone);
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -348,20 +411,177 @@ export function AppointmentModal({
             </div>
 
             {!isNewPatientMode ? (
-              <select
-                value={selectedPatientId}
-                onChange={handlePatientSelectChange}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold focus:border-primary focus:bg-white focus:outline-none"
-              >
-                <option value="" disabled>Seleccione una paciente registrada...</option>
-                {patients.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.lastName}, {p.firstName} — DNI {p.dni} ({p.phone})
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-2">
+                {/* 1. Tarjeta de Paciente Continuadora Seleccionada (si ya está seleccionada y no se está buscando) */}
+                {currentSelectedPatient && !isSearchOpen ? (
+                  <div className="p-3 rounded-xl border border-emerald-300 bg-emerald-50/70 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                        <UserCheck className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-heading font-extrabold text-xs text-emerald-950 truncate">
+                            {patientName}
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-emerald-200 text-emerald-900 border border-emerald-300 uppercase shrink-0">
+                            CONTINUADORA
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-emerald-800 font-mono truncate">
+                          DNI: <strong>{patientDni}</strong> &bull; Cel: <strong>{patientPhone || "Sin teléfono"}</strong>
+                          {currentSelectedPatient?.age ? ` • ${currentSelectedPatient.age} años` : ""}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSearchOpen(true);
+                        setPatientSearchQuery("");
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-100 text-emerald-900 text-[11px] font-bold transition-colors cursor-pointer shrink-0 shadow-2xs flex items-center gap-1"
+                    >
+                      <Search className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>Cambiar Paciente</span>
+                    </button>
+                  </div>
+                ) : (
+                  /* 2. Campo de Búsqueda Predictivo en Tiempo Real */
+                  <div className="relative">
+                    {/* Backdrop transparente para cerrar dropdown al dar clic fuera */}
+                    {isSearchOpen && (
+                      <div
+                        className="fixed inset-0 z-20"
+                        onClick={() => setIsSearchOpen(false)}
+                      />
+                    )}
+
+                    <div className="relative z-30">
+                      <Search className="w-4 h-4 text-primary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        autoFocus={isSearchOpen}
+                        placeholder="Escriba el nombre, apellido o DNI de la paciente continuadora..."
+                        value={patientSearchQuery}
+                        onChange={(e) => {
+                          setPatientSearchQuery(e.target.value);
+                          setIsSearchOpen(true);
+                        }}
+                        onFocus={() => setIsSearchOpen(true)}
+                        className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-white border-2 border-primary/50 text-xs font-bold text-heading placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none shadow-sm"
+                      />
+                      {patientSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPatientSearchQuery("");
+                            setIsSearchOpen(true);
+                          }}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer p-1"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Menú Flotante Predictivo */}
+                    {isSearchOpen && (
+                      <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-2xl z-30 max-h-60 overflow-y-auto divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100">
+                        <div className="p-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                          <span className="font-bold uppercase tracking-wider text-[10px] text-slate-600">
+                            Pacientes Continuadoras ({matchingPatients.length})
+                          </span>
+                          <span className="text-[10px]">Escriba para filtrar</span>
+                        </div>
+
+                        {matchingPatients.length > 0 ? (
+                          matchingPatients.map((p) => {
+                            const isCurrent = p.id === selectedPatientId;
+                            return (
+                              <div
+                                key={p.id}
+                                onClick={() => selectPatientContinuadora(p)}
+                                className={`p-2.5 hover:bg-emerald-50/70 cursor-pointer transition-colors flex items-center justify-between gap-2.5 ${
+                                  isCurrent ? "bg-primary/5 border-l-4 border-primary" : ""
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary font-extrabold text-xs flex items-center justify-center shrink-0">
+                                    {p.firstName.charAt(0)}{p.lastName.charAt(0)}
+                                  </span>
+                                  <div className="min-w-0">
+                                    <p className="font-extrabold text-slate-900 text-xs truncate">
+                                      {p.lastName}, {p.firstName}
+                                    </p>
+                                    <p className="text-[11px] text-slate-500 font-mono">
+                                      DNI: <strong className="text-slate-800">{p.dni}</strong> &bull; Cel: {p.phone || "—"} {p.age ? `• ${p.age} años` : ""}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="shrink-0 flex items-center gap-1">
+                                  <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-primary text-white flex items-center gap-1 shadow-2xs">
+                                    <span>Cargar Datos</span>
+                                    <ArrowRight className="w-3 h-3" />
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="p-4 text-center space-y-2">
+                            <SearchX className="w-6 h-6 text-slate-400 mx-auto" />
+                            <p className="text-xs text-slate-600">
+                              No se encontró paciente registrada que coincida con <strong>"{patientSearchQuery}"</strong>
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsNewPatientMode(true);
+                                setNewFirstName(patientSearchQuery.toUpperCase());
+                                setIsSearchOpen(false);
+                              }}
+                              className="px-3.5 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Registrar como Nueva Paciente</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="space-y-2.5 pt-1">
+                {/* Banner si detecta paciente ya existente */}
+                {detectedExistingPatient && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 border-2 border-amber-300 text-amber-950 flex items-center justify-between gap-2 shadow-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <div className="text-[11px] leading-tight min-w-0">
+                        <p className="font-extrabold text-amber-900 truncate">
+                          ¡Paciente Continuadora Detectada en CENDO!
+                        </p>
+                        <p className="text-amber-800 font-mono text-[10.5px] truncate">
+                          {detectedExistingPatient.lastName}, {detectedExistingPatient.firstName} (DNI {detectedExistingPatient.dni})
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => selectPatientContinuadora(detectedExistingPatient)}
+                      className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10.5px] shrink-0 transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                    >
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>Cargar Datos</span>
+                    </button>
+                  </div>
+                )}
+
                 <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-900 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>
