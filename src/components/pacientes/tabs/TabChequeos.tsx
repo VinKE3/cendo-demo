@@ -4,23 +4,18 @@ import React, { useState, useMemo } from "react";
 import {
   Activity,
   FileCheck2,
-  Sparkles,
   Plus,
   Printer,
   Trash2,
   Edit2,
   Search,
-  Filter,
-  Layers,
   Calendar,
-  CheckCircle2,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import {
   Patient,
   UltrasoundReport,
   ColposcopyReport,
-  ClinicalCheckup,
   DoctorProfile,
 } from "@/types/medical";
 
@@ -28,7 +23,6 @@ interface TabChequeosProps {
   patient: Patient;
   colpos: ColposcopyReport[];
   ultrasoundReports: UltrasoundReport[];
-  checkups: ClinicalCheckup[];
   doctorProfile?: DoctorProfile | null;
   onOpenNewUltrasound: () => void;
   onEditUltrasound: (echo: UltrasoundReport) => void;
@@ -38,31 +32,26 @@ interface TabChequeosProps {
   onEditColpo: (colpo: ColposcopyReport) => void;
   onPrintColpo: (colpo: ColposcopyReport) => void;
   onDeleteColpo: (id: string) => void;
-  onOpenNewCheckup: () => void;
-  onEditCheckup: (chk: ClinicalCheckup) => void;
-  onPrintCheckup: (chk: ClinicalCheckup) => void;
-  onDeleteCheckup: (id: string) => void;
 }
 
-type ChequeoFilter = "all" | "ecografias" | "colposcopia" | "integrales";
+type ChequeoFilter = "all" | "ecografias" | "colposcopia";
 
 interface UnifiedChequeoItem {
   id: string;
-  type: "ECOGRAFIA" | "COLPOSCOPIA" | "INTEGRAL";
+  type: "ECOGRAFIA" | "COLPOSCOPIA";
   date: string;
   title: string;
   badge: string;
   badgeColor: string;
   summary: string;
   details: string[];
-  rawItem: UltrasoundReport | ColposcopyReport | ClinicalCheckup;
+  rawItem: UltrasoundReport | ColposcopyReport;
 }
 
 export function TabChequeos({
   patient,
   colpos,
   ultrasoundReports,
-  checkups,
   doctorProfile,
   onOpenNewUltrasound,
   onEditUltrasound,
@@ -72,15 +61,11 @@ export function TabChequeos({
   onEditColpo,
   onPrintColpo,
   onDeleteColpo,
-  onOpenNewCheckup,
-  onEditCheckup,
-  onPrintCheckup,
-  onDeleteCheckup,
 }: TabChequeosProps) {
   const [activeFilter, setActiveFilter] = useState<ChequeoFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Compilar todos los estudios diagnósticos en una sola línea de tiempo
+  // Compilar los estudios diagnósticos de la paciente (Ecografías y Colposcopías)
   const unifiedItems: UnifiedChequeoItem[] = useMemo(() => {
     const list: UnifiedChequeoItem[] = [];
 
@@ -133,36 +118,15 @@ export function TabChequeos({
       });
     });
 
-    // 3. Chequeos Integrales (Sábana)
-    checkups.forEach((chk) => {
-      const details: string[] = [];
-      if (chk.breastUltrasoundBirads) details.push(`Mama: ${chk.breastUltrasoundBirads}`);
-      if (chk.endometriumThicknessMm) details.push(`Endometrio: ${chk.endometriumThicknessMm} mm`);
-      if (chk.colposcopyResult) details.push(`Cérvix: ${chk.colposcopyResult}`);
-
-      list.push({
-        id: chk.id,
-        type: "INTEGRAL",
-        date: chk.checkupDate,
-        title: "Chequeo Ginecológico Preventivo Integral",
-        badge: "SÁBANA INTEGRAL",
-        badgeColor: "bg-purple-100 text-purple-900 border-purple-200",
-        summary: chk.conclusions || "Chequeo preventivo completo dentro de parámetros habituales.",
-        details,
-        rawItem: chk,
-      });
-    });
-
     // Ordenar de más reciente a más antiguo
     return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [ultrasoundReports, colpos, checkups]);
+  }, [ultrasoundReports, colpos]);
 
   // Filtrado reactivo
   const filteredItems = useMemo(() => {
     return unifiedItems.filter((item) => {
       if (activeFilter === "ecografias" && item.type !== "ECOGRAFIA") return false;
       if (activeFilter === "colposcopia" && item.type !== "COLPOSCOPIA") return false;
-      if (activeFilter === "integrales" && item.type !== "INTEGRAL") return false;
 
       if (searchQuery.trim().length > 0) {
         const q = searchQuery.toLowerCase();
@@ -179,7 +143,6 @@ export function TabChequeos({
   const totalCount = unifiedItems.length;
   const ecoCount = ultrasoundReports.length;
   const colpoCount = colpos.length;
-  const checkupCount = checkups.length;
 
   const handleDeleteItem = (item: UnifiedChequeoItem) => {
     Swal.fire({
@@ -194,8 +157,7 @@ export function TabChequeos({
     }).then((res) => {
       if (res.isConfirmed) {
         if (item.type === "ECOGRAFIA") onDeleteUltrasound(item.id);
-        else if (item.type === "COLPOSCOPIA") onDeleteColpo(item.id);
-        else onDeleteCheckup(item.id);
+        else onDeleteColpo(item.id);
 
         Swal.fire({
           icon: "success",
@@ -210,7 +172,7 @@ export function TabChequeos({
 
   return (
     <div className="space-y-6">
-      {/* 1. Header con Acciones Rápidas Unificadas */}
+      {/* 1. Header con Acciones Rápidas */}
       <div className="p-5 rounded-2xl bg-surface border border-border shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 border border-teal-200 flex items-center justify-center shrink-0 shadow-2xs">
@@ -226,12 +188,12 @@ export function TabChequeos({
               </span>
             </div>
             <p className="text-xs text-muted mt-0.5">
-              Historial unificado de la paciente: Ecografías (TV / Mama), Colposcopía Digital y Chequeo Integral.
+              Historial de estudios diagnósticos de la paciente: Ecografías especializadas y Colposcopía digital IFCPC.
             </p>
           </div>
         </div>
 
-        {/* Botones de Acción Inmediata */}
+        {/* Botones de Acción Inmediata: Ecografía y Colposcopía */}
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <button
             type="button"
@@ -247,20 +209,10 @@ export function TabChequeos({
             type="button"
             onClick={onOpenNewColpo}
             className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
-            title="Registrar colposcopía digital IFCPC"
+            title="Registrar colposcopía digital IFCPC con reloj cervical"
           >
             <FileCheck2 className="w-4 h-4 text-emerald-100" />
             <span>+ Nueva Colposcopía</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenNewCheckup}
-            className="px-3.5 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
-            title="Registrar chequeo ginecológico integral que une todos los estudios"
-          >
-            <Sparkles className="w-4 h-4 text-amber-300" />
-            <span>+ Chequeo Integral</span>
           </button>
         </div>
       </div>
@@ -306,19 +258,6 @@ export function TabChequeos({
             <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
             <span>Colposcopía ({colpoCount})</span>
           </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveFilter("integrales")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
-              activeFilter === "integrales"
-                ? "bg-white text-purple-900 shadow-xs"
-                : "text-muted hover:text-purple-800"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-            <span>Chequeos Integrales ({checkupCount})</span>
-          </button>
         </div>
 
         {/* Input Buscador Rápido */}
@@ -334,7 +273,7 @@ export function TabChequeos({
         </div>
       </div>
 
-      {/* 3. Lista Unificada de Chequeos y Evaluaciones */}
+      {/* 3. Lista Unificada de Estudios */}
       <div className="space-y-3">
         {filteredItems.length > 0 ? (
           filteredItems.map((item) => (
@@ -362,8 +301,7 @@ export function TabChequeos({
                     type="button"
                     onClick={() => {
                       if (item.type === "ECOGRAFIA") onPrintUltrasound(item.rawItem as UltrasoundReport);
-                      else if (item.type === "COLPOSCOPIA") onPrintColpo(item.rawItem as ColposcopyReport);
-                      else onPrintCheckup(item.rawItem as ClinicalCheckup);
+                      else onPrintColpo(item.rawItem as ColposcopyReport);
                     }}
                     className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
                     title="Ver informe oficial A4 e imprimir"
@@ -376,8 +314,7 @@ export function TabChequeos({
                     type="button"
                     onClick={() => {
                       if (item.type === "ECOGRAFIA") onEditUltrasound(item.rawItem as UltrasoundReport);
-                      else if (item.type === "COLPOSCOPIA") onEditColpo(item.rawItem as ColposcopyReport);
-                      else onEditCheckup(item.rawItem as ClinicalCheckup);
+                      else onEditColpo(item.rawItem as ColposcopyReport);
                     }}
                     className="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
                     title="Editar datos de este estudio"
@@ -425,10 +362,10 @@ export function TabChequeos({
             </div>
             <div>
               <h4 className="text-sm font-heading font-bold text-heading">
-                {searchQuery ? "No se encontraron estudios con ese criterio" : "Esta paciente no tiene estudios ni chequeos registrados"}
+                {searchQuery ? "No se encontraron estudios con ese criterio" : "Esta paciente no tiene estudios ecográficos ni colposcópicos registrados"}
               </h4>
               <p className="text-xs text-muted mt-1 max-w-md mx-auto">
-                Registre una nueva ecografía de rutina, una colposcopía digital o el chequeo preventivo integral para generar su expediente diagnóstico.
+                Registre una nueva ecografía de rutina (transvaginal, mamaria) o una colposcopía digital IFCPC.
               </p>
             </div>
             <div className="flex items-center justify-center gap-2 pt-2">

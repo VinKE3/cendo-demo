@@ -200,7 +200,7 @@ export default function FichaPacientePage() {
       id: "chequeos",
       label: "Chequeos",
       icon: <Activity className="w-4 h-4" />,
-      count: colpos.length + ultrasoundReports.length + checkups.length,
+      count: colpos.length + ultrasoundReports.length,
     },
     { id: "procedimientos", label: "Procedimientos", icon: <Scissors className="w-4 h-4" />, count: minorProcedures.length },
     { id: "prenatal", label: "Control Prenatal", icon: <Baby className="w-4 h-4" />, count: prenatalCard ? (prenatalCard.visits?.length || 1) : 0 },
@@ -339,7 +339,6 @@ export default function FichaPacientePage() {
             patient={patient}
             colpos={colpos}
             ultrasoundReports={ultrasoundReports}
-            checkups={checkups}
             doctorProfile={doctorProfile}
             onOpenNewUltrasound={() => {
               setEditingUltrasound(null);
@@ -367,19 +366,6 @@ export default function FichaPacientePage() {
               setIsColpoPrintOpen(true);
             }}
             onDeleteColpo={(id) => deleteColposcopyReport(id)}
-            onOpenNewCheckup={() => {
-              setEditingCheckup(null);
-              setIsCheckupModalOpen(true);
-            }}
-            onEditCheckup={(chk) => {
-              setEditingCheckup(chk);
-              setIsCheckupModalOpen(true);
-            }}
-            onPrintCheckup={(chk) => {
-              setViewingCheckup(chk);
-              setIsCheckupPrintOpen(true);
-            }}
-            onDeleteCheckup={(id) => deleteClinicalCheckup(id)}
           />
         )}
 

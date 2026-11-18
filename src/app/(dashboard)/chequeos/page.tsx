@@ -162,7 +162,7 @@ export default function ChequeosPage() {
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-xs shadow-xs hover:bg-primary-hover active:scale-[0.98] transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Chequeo Integral</span>
+            <span>+ Nueva Evaluación</span>
           </button>
         </div>
       </div>
