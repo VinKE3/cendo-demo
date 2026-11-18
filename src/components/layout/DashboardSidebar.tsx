@@ -97,12 +97,6 @@ export function DashboardSidebar({
       badge: "Hoy",
     },
     {
-      name: "Chequeos & Estudios",
-      href: "/chequeos",
-      icon: Activity,
-      badge: null,
-    },
-    {
       name: "Tarifario de Exámenes",
       href: "/tarifario",
       icon: Receipt,
